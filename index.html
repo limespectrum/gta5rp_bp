@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ФАРМ BP</title>
+<link rel="icon" type="image/png" href="https://psv4.userapi.com/s/v1/d2/OS1XuRQbrcwb45XOpQZ3lzZEOnFKmLQhQ-QIga0mxOtLC5nKBS-kWnJ4x13j3wIbtya2vNiAuhxKZg_F5n4RcOzLh3SCJCCNgw4scYil3cy3L8SN2IfuZDqEepVggECnhAAh-t7wuWh8/LIME_COIN.png">
+<style>
+  :root{
+    --easy-bg: #e9f7ef;
+    --easy-border: #b7e0c9;
+    --medium-bg: #fff9e6;
+    --medium-border: #f1e0a8;
+    --joint-bg: #eef5ff;
+    --joint-border: #c6dbff;
+    --avoid-bg: #f5f5f5;
+    --avoid-border: #dddddd;
+    --fraction-bg: #f6f0ff;
+    --fraction-border: #e1d6ff;
+    --online-bg: #fff7e6;
+    --online-border: #f2d9a8;
+    --card-shadow: 0 6px 18px rgba(12,20,36,0.06);
+    --done-bg: rgba(76,175,80,0.12);
+    --done-border: rgba(76,175,80,0.18);
+  }
+
+  body { font-family: system-ui, -apple-system, Roboto, Arial, sans-serif; padding: 18px 24px; color:#e5e7eb; background:#0b1220; margin:0; }
+  .layout{ max-width:1800px; margin:0 auto; }
+  h1 { display: none; }
+  .title-capsule {
+    text-align: center;
+    margin: 0 0 18px 0;
+  }
+  .title-capsule-inner {
+    display: inline-block;
+    position: relative;
+    padding: 18px 52px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, rgba(0,20,50,0.92), rgba(10,5,30,0.95));
+    border: 1.5px solid transparent;
+    background-clip: padding-box;
+    box-shadow:
+      0 0 0 1.5px rgba(0,255,255,0.35),
+      0 0 30px rgba(0,255,255,0.12),
+      0 0 60px rgba(200,0,255,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .title-capsule-inner::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, #0ff 0%, #f0f 50%, #ffcc00 100%);
+    z-index: -1;
+    opacity: 0.5;
+  }
+  .title-main {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #00eeff, #cc44ff, #ffdd00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: block;
+    line-height: 1.1;
+    filter: drop-shadow(0 0 8px rgba(0,220,255,0.5));
+    user-select: none;
+    cursor: default;
+  }
+  .title-sub {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: rgba(180,220,255,0.55);
+    display: block;
+    margin-top: 4px;
+    user-select: none;
+    cursor: default;
+  }
+  .controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; background: rgba(10,20,40,0.75); backdrop-filter: blur(12px); border: 1px solid rgba(0,255,255,0.4); border-radius: 60px; padding: 12px 24px; margin-bottom: 24px; box-shadow: 0 0 15px rgba(0,255,255,0.2); }
+  .controls button:not(.char-btn) { background: linear-gradient(135deg, #ff3366, #cc0044); border: none; color: white; padding: 10px 24px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 0 6px #ff3366; user-select: none; }
+  .controls button:not(.char-btn):hover { transform: scale(1.05); box-shadow: 0 0 18px #ff3366; background: linear-gradient(135deg, #ff5577, #ee2255); }
+  .center-actions { display: flex; align-items: center; gap: 20px; width: 100%; }
+  /* === VIP & X2 TOGGLE BUTTONS === */
+  .toggle-switch { display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
+  .toggle-switch input { display: none; }
+  .switch-slider { display: none; }
+
+  .toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 40px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.22s ease;
+    border: 2px solid rgba(160,180,220,0.45);
+    background: rgba(40,55,85,0.85);
+    color: #c8d8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .toggle-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    border-radius: 38px;
+  }
+  .toggle-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.15);
+  }
+  .toggle-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* VIP Platinum — золотой */
+  .toggle-btn-vip {
+    border-color: rgba(180,140,40,0.35);
+  }
+  .toggle-btn-vip::before {
+    background: linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,160,30,0.10));
+  }
+  .toggle-btn-vip:hover::before { opacity: 1; }
+
+  .toggle-switch:has(#vipCheckbox:checked) .toggle-btn-vip {
+    background: linear-gradient(135deg, rgba(255,200,30,0.18), rgba(200,130,10,0.22));
+    border-color: #d4a017;
+    color: #ffe566;
+    text-shadow: 0 0 6px rgba(255,215,0,0.7), 0 0 14px rgba(255,180,0,0.5);
+    box-shadow: 0 0 10px rgba(255,200,0,0.35), 0 0 22px rgba(255,160,0,0.22), inset 0 0 8px rgba(255,215,0,0.10);
+    animation: goldPulse 2s ease-in-out infinite alternate;
+  }
+  @keyframes goldPulse {
+    0%  { box-shadow: 0 0 8px rgba(255,200,0,0.3), 0 0 18px rgba(255,160,0,0.18); }
+    100%{ box-shadow: 0 0 16px rgba(255,215,0,0.55), 0 0 32px rgba(255,180,0,0.32); }
+  }
+
+  .toggle-btn-x2 {
+    border-color: rgba(200,60,130,0.35);
+  }
+  .toggle-btn-x2::before {
+    background: linear-gradient(135deg, rgba(255,80,160,0.18), rgba(255,120,180,0.10));
+  }
+  .toggle-btn-x2:hover::before { opacity: 1; }
+
+  .toggle-switch:has(#x2Checkbox:checked) .toggle-btn-x2 {
+    background: linear-gradient(135deg, rgba(255,80,160,0.20), rgba(255,140,190,0.14));
+    border-color: #ff50a0;
+    color: #ffaacc;
+    text-shadow: 0 0 6px rgba(255,80,160,0.9), 0 0 18px rgba(255,80,160,0.6);
+    box-shadow: 0 0 10px rgba(255,80,160,0.45), 0 0 24px rgba(255,80,160,0.25), inset 0 0 8px rgba(255,80,160,0.12);
+    animation: pinkPulse 1.8s ease-in-out infinite alternate;
+  }
+  @keyframes pinkPulse {
+    0%  { box-shadow: 0 0 8px rgba(255,80,160,0.4), 0 0 18px rgba(255,80,160,0.2); }
+    100%{ box-shadow: 0 0 18px rgba(255,80,160,0.65), 0 0 36px rgba(255,80,160,0.35); }
+  }
+
+  .switch-label { display: none; }
+  .date-display { font-family: monospace; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); padding: 10px 22px; border-radius: 40px; font-size: 0.95rem; font-weight: 700; border: 1px solid rgba(0,255,255,0.5); color: #bbf0ff; white-space: nowrap; user-select: none; cursor: default; }
+  .legend { margin:8px 0 14px 0; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center; background: rgba(10,20,40,0.75); backdrop-filter: blur(12px); border-radius: 60px; padding: 12px 24px; border: 1px solid rgba(0,255,255,0.4); box-shadow: 0 0 15px rgba(0,255,255,0.2); }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 18px;
+    border-radius: 30px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    user-select: none;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: rgba(150,160,180,0.5);
+    transition: all 0.2s ease;
+    text-decoration: line-through;
+    text-decoration-color: rgba(150,160,180,0.3);
+  }
+  .filter-btn:hover {
+    transform: scale(1.05);
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.35);
+    color: rgba(220,230,255,0.85);
+    box-shadow: 0 0 14px rgba(255,255,255,0.12);
+  }
+  .filter-btn.active[data-col="col-easy"]:hover    { box-shadow: 0 0 18px rgba(74,222,128,0.45); }
+  .filter-btn.active[data-col="col-medium"]:hover  { box-shadow: 0 0 18px rgba(251,191,36,0.45); }
+  .filter-btn.active[data-col="col-joint"]:hover   { box-shadow: 0 0 18px rgba(96,165,250,0.45); }
+  .filter-btn.active[data-col="col-avoid"]:hover   { box-shadow: 0 0 18px rgba(148,163,184,0.35); }
+  .filter-btn.active[data-col="col-fraction"]:hover{ box-shadow: 0 0 18px rgba(192,132,252,0.45); }
+  .filter-btn.active {
+    text-decoration: none;
+  }
+  .filter-btn.active[data-col="col-easy"]    { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.6); color: #4ade80; box-shadow: 0 0 10px rgba(74,222,128,0.2); }
+  .filter-btn.active[data-col="col-medium"]  { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.6); color: #fbbf24; box-shadow: 0 0 10px rgba(251,191,36,0.2); }
+  .filter-btn.active[data-col="col-joint"]   { background: rgba(96,165,250,0.15); border-color: rgba(96,165,250,0.6); color: #60a5fa; box-shadow: 0 0 10px rgba(96,165,250,0.2); }
+  .filter-btn.active[data-col="col-avoid"]   { background: rgba(148,163,184,0.15); border-color: rgba(148,163,184,0.5); color: #94a3b8; box-shadow: 0 0 10px rgba(148,163,184,0.15); }
+  .filter-btn.active[data-col="col-fraction"]{ background: rgba(192,132,252,0.15); border-color: rgba(192,132,252,0.6); color: #c084fc; box-shadow: 0 0 10px rgba(192,132,252,0.2); }
+
+  /* === CHARACTER SWITCHER === */
+  .char-switcher {
+    display: inline-flex;
+    gap: 8px;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    border: none;
+  }
+  .char-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: 40px;
+    border: 2px solid rgba(120,130,160,0.3);
+    background: rgba(40,55,85,0.5);
+    color: rgba(120,130,160,0.55);
+    cursor: pointer;
+    user-select: none;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.5px;
+    transition: all 0.22s ease;
+  }
+  .char-btn .char-icon { display: none; }
+  .char-btn .char-label { font-size: 0.88rem; }
+  .char-btn:hover {
+    transform: scale(1.05);
+    border-color: rgba(160,180,220,0.5);
+    color: rgba(200,210,240,0.8);
+  }
+  .char-btn.active {
+    background: linear-gradient(135deg, rgba(0,200,255,0.18), rgba(80,0,255,0.14));
+    border-color: rgba(0,220,255,0.7);
+    color: #7df0ff;
+    box-shadow: 0 0 12px rgba(0,220,255,0.45), 0 0 24px rgba(0,200,255,0.2), inset 0 0 8px rgba(0,200,255,0.08);
+    animation: charPulse 2.2s ease-in-out infinite alternate;
+  }
+  @keyframes charPulse {
+    0%  { box-shadow: 0 0 10px rgba(0,220,255,0.35), 0 0 20px rgba(0,200,255,0.18), inset 0 0 6px rgba(0,200,255,0.06); }
+    100%{ box-shadow: 0 0 22px rgba(0,220,255,0.65), 0 0 40px rgba(0,200,255,0.3), inset 0 0 12px rgba(0,200,255,0.12); }
+  }
+  /* Полоска активного персонажа под шапкой */
+  .char-indicator {
+    text-align: center;
+    margin: -14px 0 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #7df0ff;
+    text-shadow: 0 0 10px rgba(0,220,255,0.6);
+    opacity: 0.85;
+    transition: all 0.3s;
+  }
+
+  /* Персонаж 2 — тоже синяя неоновая подсветка */
+  body.char2-active .char-btn#charBtn2.active {
+    background: linear-gradient(135deg, rgba(0,200,255,0.18), rgba(80,0,255,0.14));
+    border-color: rgba(0,220,255,0.7);
+    color: #7df0ff;
+    box-shadow: 0 0 12px rgba(0,220,255,0.45), 0 0 24px rgba(0,200,255,0.2), inset 0 0 8px rgba(0,200,255,0.08);
+    animation: charPulse 2.2s ease-in-out infinite alternate;
+  }
+  body.char2-active .char-indicator {
+    color: #39ff6a;
+    text-shadow: 0 0 10px rgba(57,255,100,0.8), 0 0 22px rgba(0,255,80,0.5);
+  }
+  body.char2-active .controls {
+    border-color: rgba(57,255,100,0.45);
+    box-shadow: 0 0 18px rgba(57,255,100,0.2), 0 0 40px rgba(0,255,80,0.08);
+  }
+  body.char2-active .legend {
+    border-color: rgba(57,255,100,0.4);
+    box-shadow: 0 0 14px rgba(57,255,100,0.15);
+  }
+  /* Зелёная токсичная шапка для персонажа 2 */
+  body.char2-active .title-capsule-inner {
+    box-shadow:
+      0 0 0 1.5px rgba(57,255,100,0.5),
+      0 0 30px rgba(57,255,100,0.2),
+      0 0 60px rgba(0,255,80,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  body.char2-active .title-capsule-inner::before {
+    background: linear-gradient(135deg, #39ff6a 0%, #00ff55 40%, #aaff00 80%, #ccff00 100%);
+    opacity: 0.55;
+  }
+  body.char2-active .title-main {
+    background: linear-gradient(135deg, #39ff6a, #00ff99, #aaff00, #ccff44);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(57,255,100,0.7)) drop-shadow(0 0 20px rgba(0,255,80,0.4));
+  }
+  body.char2-active .title-sub {
+    color: rgba(100,255,160,0.6);
+  }
+  @keyframes greenToxicPulse {
+    0%   { box-shadow: 0 0 0 1.5px rgba(57,255,100,0.35), 0 0 25px rgba(57,255,100,0.18), 0 0 50px rgba(0,255,80,0.08), inset 0 1px 0 rgba(255,255,255,0.06); }
+    100% { box-shadow: 0 0 0 1.5px rgba(57,255,100,0.65), 0 0 50px rgba(57,255,100,0.35), 0 0 90px rgba(0,255,80,0.18), inset 0 1px 0 rgba(255,255,255,0.08); }
+  }
+  body.char2-active .title-capsule-inner {
+    animation: greenToxicPulse 3s ease-in-out infinite alternate;
+  }
+
+  .column.hidden {
+    display: none;
+  }
+  .column {
+    transition: opacity 0.3s ease;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(var(--visible-cols, 5), 1fr);
+    gap: 14px;
+    margin: 0 auto;
+    align-items: start;
+    transition: grid-template-columns 0.35s ease;
+  }
+  .column { border-radius:10px; padding:12px; overflow:hidden; align-self:start; display:flex; flex-direction:column; box-sizing:border-box; background: var(--card-surface); border:1px solid #263145; box-shadow: var(--card-shadow); }
+  .column h2 {
+    margin: 0 0 12px 0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: 30px;
+    border: 1px solid currentColor;
+    user-select: none;
+    cursor: default;
+  }
+  .easy-col h2 {
+    color: #4ade80;
+    background: rgba(74,222,128,0.1);
+    border-color: rgba(74,222,128,0.45);
+    box-shadow: 0 0 12px rgba(74,222,128,0.15), inset 0 0 8px rgba(74,222,128,0.07);
+    text-shadow: 0 0 8px rgba(74,222,128,0.7);
+  }
+  .medium-col h2 {
+    color: #fbbf24;
+    background: rgba(251,191,36,0.1);
+    border-color: rgba(251,191,36,0.45);
+    box-shadow: 0 0 12px rgba(251,191,36,0.15), inset 0 0 8px rgba(251,191,36,0.07);
+    text-shadow: 0 0 8px rgba(251,191,36,0.7);
+  }
+  .joint-col h2 {
+    color: #60a5fa;
+    background: rgba(96,165,250,0.1);
+    border-color: rgba(96,165,250,0.45);
+    box-shadow: 0 0 12px rgba(96,165,250,0.15), inset 0 0 8px rgba(96,165,250,0.07);
+    text-shadow: 0 0 8px rgba(96,165,250,0.7);
+  }
+  .avoid-col h2 {
+    color: #94a3b8;
+    background: rgba(148,163,184,0.1);
+    border-color: rgba(148,163,184,0.4);
+    box-shadow: 0 0 12px rgba(148,163,184,0.12), inset 0 0 8px rgba(148,163,184,0.06);
+    text-shadow: 0 0 8px rgba(148,163,184,0.6);
+  }
+  .column table { width:100%; border-collapse:collapse; }
+  .column td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.08); vertical-align:middle; color:#e5e7eb; }
+  .column .reward { white-space:nowrap; font-weight:700; }
+
+  .easy-col { border-color: rgba(34,197,94,.75); background: linear-gradient(0deg, rgba(34,197,94,.20), transparent 45%), var(--card-surface); }
+  .medium-col { border-color: rgba(245,158,11,.78); background: linear-gradient(0deg, rgba(245,158,11,.22), transparent 45%), var(--card-surface); }
+  .joint-col { border-color: rgba(59,130,246,.80); background: linear-gradient(0deg, rgba(59,130,246,.24), transparent 45%), var(--card-surface); }
+  .avoid-col { border-color: rgba(148,163,184,.70); background: linear-gradient(0deg, rgba(148,163,184,.18), transparent 45%), var(--card-surface); }
+  .fraction-col { border-color: rgba(139,92,246,.70); background: linear-gradient(0deg, rgba(139,92,246,.22), transparent 45%), var(--card-surface); }
+  .fraction-col h2 {
+    color: #c084fc;
+    background: rgba(192,132,252,0.1);
+    border-color: rgba(192,132,252,0.45);
+    box-shadow: 0 0 12px rgba(192,132,252,0.15), inset 0 0 8px rgba(192,132,252,0.07);
+    text-shadow: 0 0 8px rgba(192,132,252,0.7);
+  }
+  .fraction-table { background: transparent; border: none; border-radius: 0; margin-top: 0; }
+
+  .toggle-switch input[type="checkbox"] { display: none !important; }
+  input[type="checkbox"]{
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin:0; border-radius:4px; border:2px solid #475569; background:#0b1220; display:inline-grid; place-content:center; outline:none;
+  }
+  input[type="checkbox"]::after{ content:""; width:12px; height:12px; transform:scale(0); transition:transform .18s ease; clip-path: polygon(14% 44%, 0 56%, 41% 96%, 100% 22%, 86% 8%, 41% 66%); background:#e5e7eb; }
+  input[type="checkbox"]:checked::after{ transform:scale(1); }
+  button, #fractionToggle{ padding:10px 14px; font-size:0.95rem; cursor:pointer; background:#111827; border:1px solid #334155; color:#e5e7eb; border-radius:10px; }
+  .online-bubble { display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; border:1px solid #f2d9a8; background: rgba(15,23,42,.72); margin-top:10px; font-weight:700; cursor:pointer; user-select:none; }
+  .online-bubble .bp { white-space:nowrap; padding:4px 8px; border-radius:8px; background:rgba(0,0,0,0.3); }
+
+
+  .total {
+    display: flex;
+    gap: 14px;
+    margin: 12px 0 14px 0;
+    position: relative;
+  }
+  .total-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 18px 24px;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+  }
+  .total-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    opacity: 0.07;
+  }
+  /* Итого — голубой циан */
+  .total-card.card-done {
+    background: rgba(5, 25, 40, 0.85);
+    border: 1px solid rgba(0, 210, 255, 0.45);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .total-card.card-done::before {
+    background: radial-gradient(ellipse at top, #00d2ff, transparent 70%);
+    opacity: 0.12;
+  }
+  .total-card.card-done .card-icon { color: #00d2ff; }
+  .total-card.card-done .card-label { color: rgba(100, 220, 255, 0.7); }
+  .total-card.card-done .card-value {
+    background: linear-gradient(135deg, #a8f0ff, #00d2ff, #0099cc);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 8px rgba(0,210,255,0.6));
+  }
+  /* Осталось — розово-малиновый */
+  .total-card.card-left {
+    background: rgba(30, 5, 20, 0.85);
+    border: 1px solid rgba(255, 80, 160, 0.45);
+    box-shadow: 0 0 20px rgba(255, 80, 160, 0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .total-card.card-left::before {
+    background: radial-gradient(ellipse at top, #ff50a0, transparent 70%);
+    opacity: 0.12;
+  }
+  .total-card.card-left .card-icon { color: #ff50a0; }
+  .total-card.card-left .card-label { color: rgba(255, 150, 200, 0.7); }
+  .total-card.card-left .card-value {
+    background: linear-gradient(135deg, #ffb3d9, #ff50a0, #cc2266);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 8px rgba(255,80,160,0.6));
+  }
+
+  .card-icon { display: none; }
+  .card-label {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    user-select: none;
+    cursor: default;
+  }
+  .card-value {
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    line-height: 1;
+    user-select: none;
+    cursor: default;
+  }
+  .card-unit {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    margin-top: 2px;
+    user-select: none;
+    cursor: default;
+  }
+  @keyframes neonPulse { 0% { filter: drop-shadow(0 0 4px currentColor); } 100% { filter: drop-shadow(0 0 12px currentColor); } }
+  @media (max-width:700px){ .total{ flex-direction:column; } }
+
+  .tasks-column tr{ transition: background .2s ease; cursor:pointer; user-select: none; }
+  .tasks-column td{ cursor: pointer; user-select: none; }
+  .tasks-column tr:hover td{ background: rgba(148,163,184,.10); }
+  .tasks-column tr.done td{ background: rgba(34,197,94,.22); border-bottom-color: rgba(34,197,94,.50); }
+  .tasks-column tr.done td:first-child{ color:#b8f3d6; text-decoration: line-through; text-decoration-color:#34d399; text-decoration-thickness:2px; }
+  .reward { font-weight:bold; background:rgba(2,6,23,.35); border-radius:4px; box-shadow:inset 0 0 0 1px rgba(148,163,184,.16); margin-left:10px; white-space:nowrap; text-align:center; min-width:45px; padding:2px 6px; transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease; }
+
+  /* VIP активен — золотой текст BP */
+  body.vip-mode .reward {
+    color: #ffd700;
+    text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
+  }
+
+  /* x2 активен — только розовая обводка потолще */
+  body.x2-mode .reward {
+    background: rgba(2,6,23,.35);
+    box-shadow: inset 0 0 0 2px rgba(255,80,160,0.7), 0 0 6px rgba(255,80,160,0.2);
+  }
+
+  /* Оба активны — розовая обводка + золотой текст */
+  body.vip-mode.x2-mode .reward {
+    color: #ffd700;
+    text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
+    background: rgba(2,6,23,.35);
+    box-shadow: inset 0 0 0 2px rgba(255,80,160,0.7), 0 0 6px rgba(255,80,160,0.2);
+  }
+
+  @media (max-width:1600px){ .grid{ grid-template-columns: repeat(min(var(--visible-cols, 5), 3), 1fr); } }
+  @media (max-width:1100px){ .grid{ grid-template-columns: repeat(min(var(--visible-cols, 5), 2), 1fr); } }
+  @media (max-width:700px){ body{ padding:14px; } .grid{ grid-template-columns: 1fr; } .controls{ flex-direction:column; align-items:stretch; } .center-actions{ flex-wrap:wrap; justify-content:center; } }
+/* VIP режим — золотой текст для "3 часа в онлайне" */
+body.vip-mode .online-bubble {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 14px rgba(255,180,0,0.5);
+}
+body.vip-mode .online-bubble .bp {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
+}
+
+/* x2 режим — розовая обводка на BP-квадратике онлайн пузыря */
+body.x2-mode .online-bubble .online-cb {
+  box-shadow: inset 0 0 0 2px rgba(255,80,160,0.85), 0 0 8px rgba(255,80,160,0.4);
+}
+
+/* x2 режим — розовая обводка на BP-квадратике онлайн пузыря */
+body.x2-mode .online-bubble .online-cb {
+  box-shadow: inset 0 0 0 2px rgba(255,80,160,0.85), 0 0 8px rgba(255,80,160,0.4);
+}
+
+/* Оба активны */
+body.vip-mode.x2-mode .online-bubble {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 14px rgba(255,180,0,0.5);
+}
+body.vip-mode.x2-mode .online-bubble .bp {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
+}
+body.vip-mode.x2-mode .online-bubble .online-cb {
+  box-shadow: inset 0 0 0 2px rgba(255,80,160,0.85), 0 0 8px rgba(255,80,160,0.4);
+}
+
+/* Выполнено — зелёная подсветка онлайн-задания */
+.online-bubble.done {
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.55);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.online-bubble.done .online-label {
+  color: #b8f3d6;
+  text-decoration: line-through;
+  text-decoration-color: #34d399;
+  text-decoration-thickness: 2px;
+}
+
+
+#resetBtn {
+  background: rgba(30, 40, 60, 0.7);
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  color: #ccf4ff;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 10px 24px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+#resetBtn:hover {
+  transform: scale(1.02);
+  background: rgba(0, 255, 255, 0.15);
+  border-color: #0ff;
+  box-shadow: 0 0 12px cyan;
+  color: #ffffff;
+}
+
+/* ── ЗАВЕРШЕНО оверлей столбца ── */
+.column {
+  position: relative;
+}
+.col-done-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  /* тёмный матовый, близкий к фону сайта */
+  background: rgba(8, 16, 30, 0.82);
+  backdrop-filter: blur(8px) saturate(0.85);
+  -webkit-backdrop-filter: blur(8px) saturate(0.85);
+  border: 1.5px solid rgba(100, 120, 150, 0.25);
+  box-shadow: inset 0 0 40px rgba(15,25,45,0.5), 0 0 20px rgba(0,0,0,0.3);
+  animation: overlayIn 0.35s ease;
+}
+.col-done-overlay.visible {
+  display: flex;
+}
+@keyframes overlayIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.col-done-label {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: #8eaac8;
+  text-shadow: 0 0 12px rgba(100,150,200,0.4), 0 2px 6px rgba(0,0,0,0.5);
+  text-align: center;
+  line-height: 1.2;
+}
+.col-done-icon {
+  display: none;
+}
+.col-reset-btn {
+  margin-top: 4px;
+  padding: 9px 22px;
+  border-radius: 30px;
+  border: 1.5px solid rgba(200, 215, 230, 0.4);
+  background: rgba(15, 25, 40, 0.55);
+  color: #c8d8e8;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+.col-reset-btn:hover {
+  background: rgba(200, 215, 230, 0.15);
+  border-color: rgba(220, 235, 250, 0.7);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(180,200,220,0.3);
+  transform: scale(1.04);
+}
+
+</style>
+</head>
+<body>
+
+<!-- ██ PIN LOCK SCREEN ██ -->
+<div id="pinOverlay" style="display:none;">
+  <div class="pin-bg"></div>
+  <div class="pin-box">
+    <div class="pin-title">⬡ ДОСТУП ЗАКРЫТ ⬡</div>
+    <div class="pin-sub">ВВЕДИТЕ КОД ДОСТУПА</div>
+    <div class="pin-display" id="pinDisplay">
+      <span class="pin-digit" id="pd0">—</span>
+      <span class="pin-digit" id="pd1">—</span>
+      <span class="pin-digit" id="pd2">—</span>
+      <span class="pin-digit" id="pd3">—</span>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-keypad">
+      <button class="pin-key" data-v="1">1</button>
+      <button class="pin-key" data-v="2">2</button>
+      <button class="pin-key" data-v="3">3</button>
+      <button class="pin-key" data-v="4">4</button>
+      <button class="pin-key" data-v="5">5</button>
+      <button class="pin-key" data-v="6">6</button>
+      <button class="pin-key" data-v="7">7</button>
+      <button class="pin-key" data-v="8">8</button>
+      <button class="pin-key" data-v="9">9</button>
+      <button class="pin-key pin-key-clear" data-v="C">⌫</button>
+      <button class="pin-key" data-v="0">0</button>
+      <button class="pin-key pin-key-empty" disabled></button>
+    </div>
+  </div>
+</div>
+
+<style>
+#pinOverlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #050d1a;
+  display: flex; align-items: center; justify-content: center;
+}
+.pin-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 30%, rgba(0,255,255,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 70%, rgba(180,0,255,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,200,0,0.04) 0%, transparent 70%);
+  animation: bgShift 6s ease-in-out infinite alternate;
+}
+@keyframes bgShift {
+  0%   { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+.pin-box {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 18px;
+  padding: 48px 52px 44px;
+  border-radius: 24px;
+  background: rgba(5, 14, 30, 0.95);
+  border: 1.5px solid rgba(0,255,255,0.25);
+  box-shadow:
+    0 0 0 1px rgba(0,255,255,0.15),
+    0 0 40px rgba(0,255,255,0.18),
+    0 0 80px rgba(180,0,255,0.12),
+    0 0 120px rgba(255,200,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: boxPulse 3s ease-in-out infinite alternate;
+}
+@keyframes boxPulse {
+  0%   { box-shadow: 0 0 0 1px rgba(0,255,255,0.15), 0 0 40px rgba(0,255,255,0.18), 0 0 80px rgba(180,0,255,0.12), 0 0 120px rgba(255,200,0,0.06), inset 0 1px 0 rgba(255,255,255,0.06); }
+  100% { box-shadow: 0 0 0 1px rgba(0,255,255,0.35), 0 0 60px rgba(0,255,255,0.32), 0 0 110px rgba(180,0,255,0.22), 0 0 160px rgba(255,200,0,0.10), inset 0 1px 0 rgba(255,255,255,0.08); }
+}
+.pin-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #00eeff, #cc44ff, #ffdd00);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 10px rgba(0,220,255,0.6));
+}
+.pin-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: rgba(150,210,255,0.45);
+  margin-top: -10px;
+}
+.pin-display {
+  display: flex; gap: 16px; margin: 8px 0 4px;
+}
+.pin-digit {
+  width: 64px; height: 80px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.6rem; font-weight: 900; font-family: monospace;
+  border-radius: 12px;
+  background: rgba(0,20,45,0.85);
+  border: 2px solid rgba(0,255,255,0.2);
+  color: #00eeff;
+  text-shadow: 0 0 14px rgba(0,220,255,0.8);
+  box-shadow: inset 0 0 12px rgba(0,255,255,0.06);
+  transition: all 0.15s ease;
+}
+.pin-digit.filled {
+  border-color: rgba(0,255,255,0.55);
+  color: #fff;
+  text-shadow: 0 0 18px rgba(0,220,255,1), 0 0 32px rgba(0,180,255,0.6);
+  box-shadow: inset 0 0 16px rgba(0,255,255,0.12), 0 0 12px rgba(0,200,255,0.25);
+}
+.pin-digit.error {
+  border-color: rgba(255,60,60,0.8) !important;
+  color: #ff4444 !important;
+  text-shadow: 0 0 14px rgba(255,60,60,0.9) !important;
+  animation: shake 0.4s ease;
+}
+@keyframes shake {
+  0%,100%{ transform: translateX(0); }
+  20%    { transform: translateX(-8px); }
+  40%    { transform: translateX(8px); }
+  60%    { transform: translateX(-6px); }
+  80%    { transform: translateX(6px); }
+}
+.pin-error {
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 2px;
+  color: #ff4444;
+  text-shadow: 0 0 8px rgba(255,60,60,0.7);
+  min-height: 20px;
+  text-transform: uppercase;
+}
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  gap: 12px;
+}
+.pin-key {
+  width: 80px; height: 72px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0,255,255,0.2);
+  background: rgba(0,20,50,0.7);
+  color: #c8f0ff;
+  font-size: 1.6rem; font-weight: 800; font-family: monospace;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  user-select: none;
+}
+.pin-key:hover {
+  background: rgba(0,255,255,0.12);
+  border-color: rgba(0,255,255,0.55);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(0,255,255,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+}
+.pin-key:active {
+  transform: scale(0.93);
+  background: rgba(0,255,255,0.2);
+}
+.pin-key-clear {
+  border-color: rgba(255,80,160,0.3);
+  color: #ff80c0;
+}
+.pin-key-clear:hover {
+  background: rgba(255,80,160,0.15);
+  border-color: rgba(255,80,160,0.7);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(255,80,160,0.3);
+}
+.pin-key-empty { visibility: hidden; pointer-events: none; }
+</style>
+
+<script>
+(function(){
+  const PIN = '0505';
+  const STORAGE_KEY = 'pin_passed_date';
+  const today = new Date().toDateString();
+  const passed = localStorage.getItem(STORAGE_KEY);
+  const overlay = document.getElementById('pinOverlay');
+
+  if (passed === today) { overlay.style.display = 'none'; return; }
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  let entered = '';
+
+  function renderDigits() {
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById('pd' + i);
+      if (i < entered.length) {
+        el.textContent = entered[i];
+        el.classList.add('filled');
+        el.classList.remove('error');
+      } else {
+        el.textContent = '—';
+        el.classList.remove('filled', 'error');
+      }
+    }
+  }
+
+  function showError() {
+    document.getElementById('pinError').textContent = '✕ НЕВЕРНЫЙ КОД';
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById('pd' + i);
+      el.classList.add('error');
+    }
+    setTimeout(() => {
+      entered = '';
+      document.getElementById('pinError').textContent = '';
+      renderDigits();
+    }, 900);
+  }
+
+  function checkPin() {
+    if (entered === PIN) {
+      localStorage.setItem(STORAGE_KEY, today);
+      overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 500);
+    } else {
+      showError();
+    }
+  }
+
+  document.querySelectorAll('.pin-key').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.v;
+      if (v === 'C') {
+        entered = entered.slice(0, -1);
+        document.getElementById('pinError').textContent = '';
+        renderDigits();
+      } else if (entered.length < 4) {
+        entered += v;
+        renderDigits();
+        if (entered.length === 4) setTimeout(checkPin, 180);
+      }
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (overlay.style.display === 'none') return;
+    if (e.key >= '0' && e.key <= '9' && entered.length < 4) {
+      entered += e.key;
+      renderDigits();
+      if (entered.length === 4) setTimeout(checkPin, 180);
+    } else if (e.key === 'Backspace') {
+      entered = entered.slice(0, -1);
+      document.getElementById('pinError').textContent = '';
+      renderDigits();
+    }
+  });
+})();
+</script>
+<style>
+@keyframes fadeOutOverlay {
+  to { opacity: 0; transform: scale(1.04); }
+}
+</style>
+
+<div class="layout">
+<div class="title-capsule">
+  <div class="title-capsule-inner">
+    <span class="title-main">⚡ ФАРМ BONUS POINT ⚡</span>
+    <span class="title-sub">by LIME</span>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="center-actions">
+    <button id="resetBtn">⟳ Сбросить задания</button>
+    <label class="toggle-switch">
+      <input id="vipCheckbox" type="checkbox">
+      <span class="switch-slider"></span>
+      <span class="toggle-btn toggle-btn-vip">💎 Platinum VIP</span>
+    </label>
+    <label class="toggle-switch">
+      <input id="x2Checkbox" type="checkbox">
+      <span class="switch-slider"></span>
+      <span class="toggle-btn toggle-btn-x2">✨ Акции x2</span>
+    </label>
+    <div class="date-display" id="currentDate">—</div>
+    <div style="margin-left:auto; display:flex; align-items:center;">
+      <div class="char-switcher">
+        <button class="char-btn active" id="charBtn1" onclick="switchChar(1)">
+          <span class="char-icon">⚔️</span>
+          <span class="char-label">Персонаж 1</span>
+        </button>
+        <button class="char-btn" id="charBtn2" onclick="switchChar(2)">
+          <span class="char-icon">🛡️</span>
+          <span class="char-label">Персонаж 2</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="char-indicator" id="charIndicator">⚔️ &nbsp;Персонаж 1</div>
+
+<div class="legend">
+  <button class="filter-btn active" data-col="col-easy">🟢 Лёгкие</button>
+  <button class="filter-btn active" data-col="col-medium">🟡 Средние</button>
+  <button class="filter-btn active" data-col="col-joint">🔵 Совместные</button>
+  <button class="filter-btn active" data-col="col-avoid">⚪ Сложные</button>
+  <button class="filter-btn active" data-col="col-fraction">🟣 Фракционные</button>
+</div>
+
+<div class="total">
+  <div class="total-card card-done">
+    <div class="card-icon">✅</div>
+    <div class="card-label">Выполнено</div>
+    <div class="card-value" id="totalDisplay">0</div>
+    <div class="card-unit">BONUS POINTS</div>
+  </div>
+  <div class="total-card card-left">
+    <div class="card-icon">⏳</div>
+    <div class="card-label">Осталось</div>
+    <div class="card-value" id="remainingDisplay">324</div>
+    <div class="card-unit">BONUS POINTS</div>
+  </div>
+</div>
+
+<div class="grid" id="tasksGrid">
+  <!-- Легкие -->
+  <div class="column easy-col" id="col-easy">
+    <div class="col-done-overlay" id="overlay-col-easy">
+      <div class="col-done-icon">✅</div>
+      <div class="col-done-label">ЗАВЕРШЕНО</div>
+      <button class="col-reset-btn" data-target="col-easy">⟳ Сбросить прогресс</button>
+    </div>
+    <h2>Легкие</h2>
+    <table class="tasks-column"><tbody>
+      <tr><td>Купить лотерейный билет</td><td style="width:1px;"><input id="cb0" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Посетить любой сайт в браузере</td><td><input id="cb1" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Поставить лайк любой анкете в Match</td><td><input id="cb2" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Зайти в любой канал в Brawl</td><td><input id="cb3" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Добавить 5 видео в кинотеатре</td><td><input id="cb4" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Арендовать киностудию</td><td><input id="cb5" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>Забить 2 гола в футболе</td><td><input id="cb6" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Починить деталь в автосервисе</td><td><input id="cb7" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Успешная тренировка в тире</td><td><input id="cb8" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Поиграть 1 минуту в настольный теннис</td><td><input id="cb9" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>10 действий на ферме</td><td><input id="cb10" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Нули в казино</td><td><input id="cb11" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>Ставка межсерверное колесо</td><td><input id="cb12" type="checkbox"></td><td class="reward" data-with="6" data-without="3">12 BP</td></tr>
+      <tr><td>Забросить 2 мяча в баскетболе</td><td><input id="cb13" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Поиграть 1 минуту в большой теннис</td><td><input id="cb14" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Победить в дартс</td><td><input id="cb15" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Забить 10 голов в волейболе</td><td><input id="cb16" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Сделать платёж по лизингу</td><td><input id="cb41" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+    </tbody></table>
+  </div>
+
+  <!-- Средние -->
+  <div class="column medium-col" id="col-medium">
+    <div class="col-done-overlay" id="overlay-col-medium">
+      <div class="col-done-icon">✅</div>
+      <div class="col-done-label">ЗАВЕРШЕНО</div>
+      <button class="col-reset-btn" data-target="col-medium">⟳ Сбросить прогресс</button>
+    </div>
+    <h2>Средние</h2>
+    <div style="margin-bottom:12px; display:flex; justify-content:center;"><div class="online-bubble" id="onlineBubble"><input class="tasks-column" id="cbOnline" type="checkbox" title="3 часа в онлайне"><div class="online-label">3 часа в онлайне</div><div class="bp online-cb" id="onlineBp">8 BP</div></div></div>
+    <table class="tasks-column"><tbody>
+      <tr><td>25 действий на стройке</td><td><input id="cb17" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>25 действий в порту</td><td><input id="cb18" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>25 действий в шахте</td><td><input id="cb19" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>2 круга на любом маршруте автобусника</td><td><input id="cb21" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>Выполнить 2 квеста любых клубов</td><td><input id="cb22" type="checkbox"></td><td class="reward" data-with="8" data-without="4">16 BP</td></tr>
+      <tr><td>Проехать 1 станцию на метро</td><td><input id="cb23" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>Поймать 20 рыб</td><td><input id="cb24" type="checkbox"></td><td class="reward" data-with="8" data-without="4">16 BP</td></tr>
+      <tr><td>Кинуть мяч питомцу 15 раз</td><td><input id="cb25" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>15 выполненных питомцем команд</td><td><input id="cb26" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>20 подходов в тренажерном зале</td><td><input id="cb27" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Выкопать 1 сокровище</td><td><input id="cb30" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>5 раз снять 100% шкуру с животных</td><td><input id="cb34" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>Выполнить 3 заказа дальнобойщиком</td><td><input id="cb35" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+    </tbody></table>
+  </div>
+
+  <!-- Совместные -->
+  <div class="column joint-col" id="col-joint">
+    <div class="col-done-overlay" id="overlay-col-joint">
+      <div class="col-done-icon">✅</div>
+      <div class="col-done-label">ЗАВЕРШЕНО</div>
+      <button class="col-reset-btn" data-target="col-joint">⟳ Сбросить прогресс</button>
+    </div>
+    <h2>Совместные</h2>
+    <table class="tasks-column"><tbody>
+      <tr><td>Сыграть в мафию в казино</td><td><input id="cb_mafia2" type="checkbox"></td><td class="reward" data-with="6" data-without="3">12 BP</td></tr>
+      <tr><td>Выиграть гонку в картинге</td><td><input id="cb29" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Проехать 1 уличную гонку (через тлф. ставка от 1000$)</td><td><input id="cb31" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Выиграть 5 игр в тренировочном комплексе со ставкой (от 100$)</td><td><input id="cb32" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Выиграть 3 любых игры на арене со ставкой (от 100$)</td><td><input id="cb33" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>3 победы в Дэнс Баттлах</td><td><input id="cb37" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>Победить в армрестлинге</td><td><input id="cb20" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Починка авто другому игроку</td><td><input id="cb_repair_other" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+    </tbody></table>
+  </div>
+
+  <!-- Не хочется -->
+  <div class="column avoid-col" id="col-avoid">
+    <div class="col-done-overlay" id="overlay-col-avoid">
+      <div class="col-done-icon">✅</div>
+      <div class="col-done-label">ЗАВЕРШЕНО</div>
+      <button class="col-reset-btn" data-target="col-avoid">⟳ Сбросить прогресс</button>
+    </div>
+    <h2>Сложные</h2>
+    <table class="tasks-column"><tbody>
+      <tr><td>10 посылок на почте</td><td><input id="cb28" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Прокрутить за DP серебрянный или золотой кейс</td><td><input id="cb36" type="checkbox"></td><td class="reward" data-with="20" data-without="10">40 BP</td></tr>
+      <tr><td>Заказ материалов для бизнеса вручную (просто прожать вкл/выкл)</td><td><input id="cb38" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Потушить 25 "огоньков" пожарным</td><td><input id="cb39" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
+      <tr><td>Два раза оплатить смену внешности у хирурга в EMS</td><td><input id="cb40" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
+      <tr><td>Принять участие в двух аирдропах</td><td><input id="cb42" type="checkbox"></td><td class="reward" data-with="8" data-without="4">16 BP</td></tr>
+    </tbody></table>
+  </div>
+
+  <!-- Фракционные -->
+  <div class="column fraction-col" id="col-fraction">
+    <div class="col-done-overlay" id="overlay-col-fraction">
+      <div class="col-done-icon">✅</div>
+      <div class="col-done-label">ЗАВЕРШЕНО</div>
+      <button class="col-reset-btn" data-target="col-fraction">⟳ Сбросить прогресс</button>
+    </div>
+    <h2>Фракционные</h2>
+    <table class="fraction-table tasks-column" id="fractionTable"><tbody id="fractionTbody">
+      <tr class="fraction-row"><td>7 закрашенных граффити</td><td><input class="fraction-cb" data-with="1" data-without="1" type="checkbox"></td><td class="reward" data-with="1" data-without="1">4 BP</td></tr>
+      <tr class="fraction-row"><td>Сдать 5 контрабанды</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
+      <tr class="fraction-row"><td>Участие в каптах/бизварах</td><td><input class="fraction-cb" data-with="1" data-without="1" type="checkbox"></td><td class="reward" data-with="1" data-without="1">4 BP</td></tr>
+      <tr class="fraction-row"><td>Сдать Хаммер с ВЗХ</td><td><input class="fraction-cb" data-with="3" data-without="3" type="checkbox"></td><td class="reward" data-with="3" data-without="3">12 BP</td></tr>
+      <tr class="fraction-row"><td>5 выданных медкарт в EMS</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
+      <tr class="fraction-row"><td>Закрыть 15 вызовов в EMS</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
+      <tr class="fraction-row"><td>Отредактировать 40 объявлений в WN</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
+      <tr class="fraction-row"><td>Взломать 15 замков на ограбах домов или автоугонах</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
+      <tr class="fraction-row"><td>Закрыть 5 кодов в силовых структурах</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
+      <tr class="fraction-row"><td>Поставить на учет 2 автомобиля (для LSPD)</td><td><input class="fraction-cb" data-with="1" data-without="1" type="checkbox"></td><td class="reward" data-with="1" data-without="1">4 BP</td></tr>
+      <tr class="fraction-row"><td>Произвести 1 арест в КПЗ</td><td><input class="fraction-cb" data-with="1" data-without="1" type="checkbox"></td><td class="reward" data-with="1" data-without="1">4 BP</td></tr>
+      <tr class="fraction-row"><td>Выкупить двух человек из КПЗ</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
+      <tr class="fraction-row"><td>Посадить траву в теплице</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="4" data-without="4">16 BP</td></tr>
+      <tr class="fraction-row"><td>Запустить переработку обезболивающих в лаборатории</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="4" data-without="4">16 BP</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div style="margin-top:12px;text-align:center;"><div style="margin-top:4px;font-size:0.9rem;color:#aaa;">LIME - GTA 5 RP</div></div>
+</div>
+
+<script>
+(function(){
+  // Autosave только для VIP и x2 чекбоксов — задачи управляются системой персонажей
+  const PREFIX = 'autosave::' + location.origin + '::';
+  const SELECTOR = 'input#vipCheckbox, input#x2Checkbox';
+  function keyFor(el){ return PREFIX + '#' + el.id; }
+  function getValue(el){ return el.checked ? '1' : '0'; }
+  // Не делаем restoreAll — это теперь делает loadState() с учётом персонажа
+  function bindAutosave(){
+    document.addEventListener('change', e=>{ const el=e.target; if(!el.matches(SELECTOR))return; try{localStorage.setItem(keyFor(el), getValue(el));}catch(_){} }, {passive:true});
+  }
+  bindAutosave();
+})();
+</script>
+
+<script>
+const storageKey = 'daily_tasks_done_v4_grid';
+const vipStorageKey = 'daily_tasks_vip_mode_v4';
+const x2StorageKey = 'daily_tasks_x2_mode_v4';
+
+// === ПЕРСОНАЖИ ===
+let currentChar = parseInt(localStorage.getItem('active_char') || '1');
+
+function charSuffix(n) { return n === 1 ? '' : '_char2'; }
+function getStorageKey()    { return storageKey + charSuffix(currentChar); }
+function getVipStorageKey() { return vipStorageKey + charSuffix(currentChar); }
+function getX2StorageKey()  { return x2StorageKey + charSuffix(currentChar); }
+
+function switchChar(n) {
+  if (n === currentChar) return;
+  // Сохраняем состояние текущего персонажа
+  saveStateForChar(currentChar);
+  currentChar = n;
+  localStorage.setItem('active_char', n);
+  updateCharUI();
+  loadState();
+}
+
+function updateCharUI() {
+  document.getElementById('charBtn1').classList.toggle('active', currentChar === 1);
+  document.getElementById('charBtn2').classList.toggle('active', currentChar === 2);
+  const icons = ['⚔️', '🛡️'];
+  const names = ['Персонаж 1', 'Персонаж 2'];
+  const idx = currentChar - 1;
+  document.getElementById('charIndicator').innerHTML = icons[idx] + ' &nbsp;' + names[idx];
+  // Цветовой акцент для персонажа 2
+  document.body.classList.toggle('char2-active', currentChar === 2);
+}
+
+function saveStateForChar(charNum) {
+  const suffix = charSuffix(charNum);
+  const arr = qa('.tasks-column input[type="checkbox"]').map(cb => !!cb.checked);
+  localStorage.setItem(storageKey + suffix, JSON.stringify(arr));
+  localStorage.setItem(vipStorageKey + suffix, JSON.stringify(!!vipCheckbox.checked));
+  localStorage.setItem(x2StorageKey + suffix, JSON.stringify(!!x2Checkbox.checked));
+  const cbOnlineEl = document.getElementById('cbOnline');
+  if (cbOnlineEl) localStorage.setItem(storageKey + suffix + '_online', cbOnlineEl.checked ? 'true' : 'false');
+}
+
+function q(sel){return document.querySelector(sel);} 
+function qa(sel){return Array.from(document.querySelectorAll(sel));}
+
+let checkboxes = qa('.tasks-column input[type="checkbox"]');
+let N = checkboxes.length;
+const vipCheckbox = q('#vipCheckbox');
+const x2Checkbox = q('#x2Checkbox');
+
+function getPairFromRewardCell(cell) {
+  const without = parseInt(cell.getAttribute('data-without') || '0', 10);
+  const withv = parseInt(cell.getAttribute('data-with') || without.toString(), 10);
+  return {a: without, b: withv};
+}
+function updateRewardCellsDisplay(showVip, x2) {
+  const rewardCells = qa('.tasks-column td.reward');
+  rewardCells.forEach(cell => {
+    const {a,b} = getPairFromRewardCell(cell);
+    let base = showVip ? b : a;
+    if (showVip && b === a) base = a * 2;
+    const displayVal = base * (x2 ? 2 : 1);
+    cell.textContent = displayVal + ' BP';
+  });
+  document.body.classList.toggle('vip-mode', !!showVip);
+  document.body.classList.toggle('x2-mode', !!x2);
+  const onlineBase = 2; 
+  const onlineBaseVip = vipCheckbox.checked ? onlineBase * 2 : onlineBase;
+  const onlineVal = onlineBaseVip * (x2Checkbox.checked ? 2 : 1);
+  const onlineElem = q('#onlineBp');
+  if (onlineElem) onlineElem.textContent = onlineVal + ' BP';
+}
+function computeTotals(showVip, x2) {
+  let sumSelectedTasks = 0;
+  let possibleTotalTasks = 0;
+  const rows = qa('.tasks-column tr');
+  rows.forEach(row => {
+    const rewardCell = row.querySelector('td.reward');
+    if (!rewardCell) return;
+    const {a,b} = getPairFromRewardCell(rewardCell);
+    let val = (showVip ? b : a);
+    if (showVip && b === a) val = a * 2;
+    val = val * (x2 ? 2 : 1);
+    const cb = row.querySelector('input[type="checkbox"]');
+    const isFraction = row.classList.contains('fraction-row');
+    if (cb && cb.checked) sumSelectedTasks += val;
+    if (!isFraction) possibleTotalTasks += val;
+  });
+  // Учитываем "3 часа в онлайне"
+  const onlineBase = 2;
+  const onlineVal = (showVip ? onlineBase * 2 : onlineBase) * (x2 ? 2 : 1);
+  const cbOnlineEl = q('#cbOnline');
+  if (cbOnlineEl && cbOnlineEl.checked) sumSelectedTasks += onlineVal;
+  possibleTotalTasks += onlineVal;
+  const totalDisplayVal = sumSelectedTasks;
+  const remaining = Math.max(0, possibleTotalTasks - sumSelectedTasks);
+  return {totalDisplayVal, remaining};
+}
+function refreshAll() {
+  checkboxes = qa('.tasks-column input[type="checkbox"]');
+  N = checkboxes.length;
+  const vipMode = !!JSON.parse(localStorage.getItem(getVipStorageKey()) || 'false');
+  const x2Mode = !!JSON.parse(localStorage.getItem(getX2StorageKey()) || 'false');
+  vipCheckbox.checked = vipMode; x2Checkbox.checked = x2Mode;
+  updateRewardCellsDisplay(vipMode, x2Mode);
+  const {totalDisplayVal, remaining} = computeTotals(vipMode, x2Mode);
+  q('#totalDisplay').textContent = totalDisplayVal;
+  q('#remainingDisplay').textContent = remaining;
+  qa('.tasks-column tr').forEach(row => {
+    const cb = row.querySelector('input[type="checkbox"]');
+    if (cb && cb.checked) row.classList.add('done'); else row.classList.remove('done');
+  });
+  // Обновляем оверлеи завершения столбцов
+  if (typeof checkColumnCompletion === 'function') checkColumnCompletion();
+}
+function loadState() {
+  const raw = localStorage.getItem(getStorageKey());
+  let arr = null;
+  try { arr = JSON.parse(raw); } catch(e){ arr = null; }
+  if(!Array.isArray(arr) || arr.length !== N) arr = new Array(N).fill(false);
+  for(let i=0;i<N;i++){ const cb = checkboxes[i]; if (cb) cb.checked = !!arr[i]; }
+  const vipMode = !!JSON.parse(localStorage.getItem(getVipStorageKey()) || 'false');
+  const x2Mode = !!JSON.parse(localStorage.getItem(getX2StorageKey()) || 'false');
+  vipCheckbox.checked = vipMode; x2Checkbox.checked = x2Mode;
+  // Онлайн-пузырёк
+  const cbOnlineEl = document.getElementById('cbOnline');
+  if (cbOnlineEl) {
+    const onlineRaw = localStorage.getItem(getStorageKey() + '_online');
+    cbOnlineEl.checked = onlineRaw === 'true';
+    const bubble = document.getElementById('onlineBubble');
+    if (bubble) bubble.classList.toggle('done', cbOnlineEl.checked);
+  }
+  refreshAll();
+}
+function saveState() {
+  const arr = qa('.tasks-column input[type="checkbox"]').map(cb => !!cb.checked);
+  localStorage.setItem(getStorageKey(), JSON.stringify(arr));
+  localStorage.setItem(getVipStorageKey(), JSON.stringify(!!vipCheckbox.checked));
+  localStorage.setItem(getX2StorageKey(), JSON.stringify(!!x2Checkbox.checked));
+  // Онлайн-пузырёк
+  const cbOnlineEl = document.getElementById('cbOnline');
+  if (cbOnlineEl) localStorage.setItem(getStorageKey() + '_online', cbOnlineEl.checked ? 'true' : 'false');
+  refreshAll();
+}
+function attachCheckboxListeners(){
+  qa('.tasks-column input[type="checkbox"]').forEach(cb => {
+    cb.removeEventListener('change', onCheckChange);
+    cb.addEventListener('change', onCheckChange);
+  });
+}
+function onCheckChange(e){
+  const cb = e.target;
+  const row = cb.closest('tr');
+  if (row) row.classList.toggle('done', cb.checked);
+  saveState();
+}
+function attachRowClickListeners(){
+  qa('.tasks-column tr').forEach(row => {
+    row.removeEventListener('click', onRowClick);
+    row.addEventListener('click', onRowClick);
+  });
+}
+function onRowClick(e){
+  if (e.target.closest('input[type="checkbox"]')) return;
+  const row = e.currentTarget;
+  const cb = row.querySelector('input[type="checkbox"]');
+  if (!cb) return;
+  cb.checked = !cb.checked;
+  cb.dispatchEvent(new Event('change', { bubbles: true }));
+}
+attachCheckboxListeners();
+attachRowClickListeners();
+vipCheckbox.addEventListener('change', ()=>{ localStorage.setItem(getVipStorageKey(), JSON.stringify(!!vipCheckbox.checked)); refreshAll(); });
+x2Checkbox.addEventListener('change', ()=>{ localStorage.setItem(getX2StorageKey(), JSON.stringify(!!x2Checkbox.checked)); refreshAll(); });
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  qa('.tasks-column input[type="checkbox"]').forEach(cb => cb.checked = false);
+  const bubble = document.getElementById('onlineBubble');
+  if (bubble) bubble.classList.remove('done');
+  const cbOnlineEl = document.getElementById('cbOnline');
+  if (cbOnlineEl) cbOnlineEl.checked = false;
+  saveState();
+});
+loadState();
+
+// ── Проверка завершения каждого столбца ──
+function checkColumnCompletion() {
+  const columns = [
+    { colId: 'col-easy', overlayId: 'overlay-col-easy' },
+    { colId: 'col-medium', overlayId: 'overlay-col-medium' },
+    { colId: 'col-joint', overlayId: 'overlay-col-joint' },
+    { colId: 'col-avoid', overlayId: 'overlay-col-avoid' },
+    { colId: 'col-fraction', overlayId: 'overlay-col-fraction' },
+  ];
+  columns.forEach(({ colId, overlayId }) => {
+    const col = document.getElementById(colId);
+    const overlay = document.getElementById(overlayId);
+    if (!col || !overlay) return;
+    const cbs = Array.from(col.querySelectorAll('.tasks-column input[type="checkbox"]'));
+    // для средних — учитываем онлайн-пузырёк отдельно
+    const extraCb = colId === 'col-medium' ? document.getElementById('cbOnline') : null;
+    const allCbs = extraCb ? [...cbs, extraCb] : cbs;
+    if (allCbs.length > 0 && allCbs.every(cb => cb.checked)) {
+      overlay.classList.add('visible');
+    } else {
+      overlay.classList.remove('visible');
+    }
+  });
+}
+
+// Вешаем checkColumnCompletion на каждое изменение чекбокса
+function attachColumnCompletionListeners() {
+  document.querySelectorAll('.tasks-column input[type="checkbox"]').forEach(cb => {
+    cb.removeEventListener('change', checkColumnCompletion);
+    cb.addEventListener('change', checkColumnCompletion);
+  });
+  const cbOnlineEl = document.getElementById('cbOnline');
+  if (cbOnlineEl) {
+    cbOnlineEl.removeEventListener('change', checkColumnCompletion);
+    cbOnlineEl.addEventListener('change', checkColumnCompletion);
+  }
+}
+attachColumnCompletionListeners();
+checkColumnCompletion();
+updateCharUI();
+
+// ── Сброс прогресса отдельного столбца ──
+document.querySelectorAll('.col-reset-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const colId = btn.dataset.target;
+    const col = document.getElementById(colId);
+    if (!col) return;
+    col.querySelectorAll('.tasks-column input[type="checkbox"]').forEach(cb => {
+      cb.checked = false;
+      cb.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    // Для средних — сбрасываем онлайн-пузырёк
+    if (colId === 'col-medium') {
+      const cbOnlineEl = document.getElementById('cbOnline');
+      if (cbOnlineEl) {
+        cbOnlineEl.checked = false;
+        cbOnlineEl.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+    saveState();
+    checkColumnCompletion();
+  });
+});
+
+// Онлайн-задание: зелёная подсветка при выполнении + клик по всему пузырьку
+const cbOnline = document.getElementById('cbOnline');
+const onlineBubble = document.getElementById('onlineBubble');
+if (cbOnline && onlineBubble) {
+  function updateOnlineDone() {
+    onlineBubble.classList.toggle('done', cbOnline.checked);
+  }
+  cbOnline.addEventListener('change', () => { updateOnlineDone(); refreshAll(); });
+  onlineBubble.addEventListener('click', (e) => {
+    if (e.target === cbOnline) return;
+    cbOnline.checked = !cbOnline.checked;
+    cbOnline.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  updateOnlineDone();
+}
+
+// Кнопки-фильтры категорий
+const grid = document.getElementById('tasksGrid');
+function updateGridCols() {
+  const total = document.querySelectorAll('.grid > .column').length;
+  const hidden = document.querySelectorAll('.grid > .column.hidden').length;
+  const visible = Math.max(3, total - hidden);
+  grid.style.setProperty('--visible-cols', visible);
+}
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const colId = btn.dataset.col;
+    const col = document.getElementById(colId);
+    if (!col) return;
+    const isActive = btn.classList.contains('active');
+    btn.classList.toggle('active', !isActive);
+    if (isActive) {
+      // Hide: fade out then display:none
+      col.style.opacity = '0';
+      col.style.pointerEvents = 'none';
+      setTimeout(() => {
+        col.classList.add('hidden');
+        col.style.opacity = '';
+        col.style.pointerEvents = '';
+        updateGridCols();
+      }, 280);
+    } else {
+      // Show: remove hidden, then fade in
+      col.classList.remove('hidden');
+      updateGridCols();
+      // Force reflow
+      col.getBoundingClientRect();
+      col.style.opacity = '0';
+      requestAnimationFrame(() => {
+        col.style.opacity = '';
+      });
+    }
+  });
+});
+updateGridCols();
+
+// Дата
+(function updateDate() {
+  const dateElem = document.getElementById('currentDate');
+  if (dateElem) {
+    const now = new Date();
+    const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    dateElem.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  }
+})();
+</script>
+</body>
+</html>
