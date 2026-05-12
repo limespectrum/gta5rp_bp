@@ -230,13 +230,14 @@
     color: rgba(120,130,160,0.55);
     cursor: pointer;
     user-select: none;
+    -webkit-user-select: none;
     font-weight: 700;
     font-size: 0.88rem;
     letter-spacing: 0.5px;
     transition: all 0.22s ease;
   }
-  .char-btn .char-icon { display: none; }
-  .char-btn .char-label { font-size: 0.88rem; }
+  .char-btn .char-icon { display: none; user-select: none; -webkit-user-select: none; }
+  .char-btn .char-label { font-size: 0.88rem; user-select: none; -webkit-user-select: none; pointer-events: none; }
   .char-btn:hover {
     transform: scale(1.05);
     border-color: rgba(160,180,220,0.5);
@@ -267,13 +268,17 @@
     transition: all 0.3s;
   }
 
-  /* Персонаж 2 — тоже синяя неоновая подсветка */
+  /* Персонаж 2 — зелёная токсичная подсветка */
   body.char2-active .char-btn#charBtn2.active {
-    background: linear-gradient(135deg, rgba(0,200,255,0.18), rgba(80,0,255,0.14));
-    border-color: rgba(0,220,255,0.7);
-    color: #7df0ff;
-    box-shadow: 0 0 12px rgba(0,220,255,0.45), 0 0 24px rgba(0,200,255,0.2), inset 0 0 8px rgba(0,200,255,0.08);
-    animation: charPulse 2.2s ease-in-out infinite alternate;
+    background: linear-gradient(135deg, rgba(57,255,100,0.18), rgba(0,200,60,0.14));
+    border-color: rgba(57,255,100,0.75);
+    color: #39ff6a;
+    box-shadow: 0 0 12px rgba(57,255,100,0.55), 0 0 24px rgba(0,255,80,0.28), inset 0 0 8px rgba(57,255,100,0.12);
+    animation: greenCharPulse 2.2s ease-in-out infinite alternate;
+  }
+  @keyframes greenCharPulse {
+    0%  { box-shadow: 0 0 10px rgba(57,255,100,0.4), 0 0 20px rgba(0,255,80,0.2), inset 0 0 6px rgba(57,255,100,0.08); }
+    100%{ box-shadow: 0 0 22px rgba(57,255,100,0.72), 0 0 40px rgba(0,255,80,0.38), inset 0 0 12px rgba(57,255,100,0.16); }
   }
   body.char2-active .char-indicator {
     color: #39ff6a;
@@ -827,7 +832,7 @@ body.vip-mode.x2-mode .online-bubble .online-cb {
 
 <script>
 (function(){
-  const PIN = '0505';
+  const PIN = '7777';
   const STORAGE_KEY = 'pin_passed_date';
   const today = new Date().toDateString();
   const passed = localStorage.getItem(STORAGE_KEY);
@@ -922,7 +927,7 @@ body.vip-mode.x2-mode .online-bubble .online-cb {
   </div>
 </div>
 
-<div class="controls">
+<div class="controls" style="position:relative;">
   <div class="center-actions">
     <button id="resetBtn">⟳ Сбросить задания</button>
     <label class="toggle-switch">
@@ -935,8 +940,8 @@ body.vip-mode.x2-mode .online-bubble .online-cb {
       <span class="switch-slider"></span>
       <span class="toggle-btn toggle-btn-x2">✨ Акции x2</span>
     </label>
-    <div class="date-display" id="currentDate">—</div>
-    <div style="margin-left:auto; display:flex; align-items:center;">
+    <div class="date-display" id="currentDate" style="position:absolute; left:50%; transform:translateX(-50%); pointer-events:none;">—</div>
+    <div style="display:flex; align-items:center; margin-left:auto;">
       <div class="char-switcher">
         <button class="char-btn active" id="charBtn1" onclick="switchChar(1)">
           <span class="char-icon">⚔️</span>
@@ -954,11 +959,11 @@ body.vip-mode.x2-mode .online-bubble .online-cb {
 <div class="char-indicator" id="charIndicator">⚔️ &nbsp;Персонаж 1</div>
 
 <div class="legend">
-  <button class="filter-btn active" data-col="col-easy">🟢 Лёгкие</button>
-  <button class="filter-btn active" data-col="col-medium">🟡 Средние</button>
-  <button class="filter-btn active" data-col="col-joint">🔵 Совместные</button>
-  <button class="filter-btn active" data-col="col-avoid">⚪ Сложные</button>
-  <button class="filter-btn active" data-col="col-fraction">🟣 Фракционные</button>
+  <button class="filter-btn active" data-col="col-easy">🟢 ЛЁГКИЕ</button>
+  <button class="filter-btn active" data-col="col-medium">🟡 СРЕДНИЕ</button>
+  <button class="filter-btn active" data-col="col-joint">🔵 СОВМЕСТНЫЕ</button>
+  <button class="filter-btn active" data-col="col-avoid">⚪ СЛОЖНЫЕ</button>
+  <button class="filter-btn active" data-col="col-fraction">🟣 ФРАКЦИОННЫЕ</button>
 </div>
 
 <div class="total">
