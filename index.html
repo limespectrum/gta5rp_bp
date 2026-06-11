@@ -846,6 +846,14 @@ body.char2-active .filter-btn.active[data-col="col-medium"]:hover {
 body.char2-active .online-bubble {
   border-color: rgba(255, 220, 0, 0.7);
 }
+body.char2-active .online-bubble.done {
+  background: rgba(255, 220, 0, 0.13);
+  border-color: rgba(255, 220, 0, 0.55);
+}
+body.char2-active .online-bubble.done .online-label {
+  color: #ffe97a;
+  text-decoration-color: #ffd700;
+}
 
 /* Совместные → без изменений (розово-малиновый) */
 body.char2-active .joint-col {
@@ -1383,13 +1391,9 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     <div class="date-display" id="currentDate">
       <span class="date-day" id="dateDayName"></span>
       <span class="date-main" id="dateMainText">—</span>
+      <span class="date-online"><span class="online-dot-mini"></span><span id="onlineCount">—</span> онлайн</span>
     </div>
     <div style="display:flex; align-items:center; margin-left:auto; gap: 12px;">
-      <div class="online-counter" id="onlineCounter">
-        <span class="online-dot"></span>
-        <span class="online-count" id="onlineCount">—</span>
-        <span class="online-label">онлайн</span>
-      </div>
       <div class="char-switcher">
         <button class="char-btn active" id="charBtn1" onclick="switchChar(1)">
           <span class="char-label">Персонаж 1</span>
@@ -1942,48 +1946,31 @@ updateGridCols();
 })();
 </script>
 <style>
-.online-counter {
-  display: inline-flex;
+.date-online {
+  font-family: monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(100, 255, 140, 0.55);
+  display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
-  border-radius: 40px;
-  background: rgba(0, 30, 15, 0.7);
-  border: 1px solid rgba(57, 255, 100, 0.35);
-  box-shadow: 0 0 10px rgba(57, 255, 100, 0.12);
-  user-select: none;
-  cursor: default;
-  white-space: nowrap;
+  gap: 5px;
+  justify-content: center;
+  margin-top: 1px;
 }
-.online-dot {
-  width: 8px; height: 8px;
+.online-dot-mini {
+  width: 6px; height: 6px;
   border-radius: 50%;
-  background: #39ff64;
-  box-shadow: 0 0 6px rgba(57,255,100,0.9), 0 0 12px rgba(57,255,100,0.5);
+  background: rgba(80, 255, 120, 0.75);
+  box-shadow: 0 0 5px rgba(57,255,100,0.8);
   animation: dotPulse 2s ease-in-out infinite alternate;
   flex-shrink: 0;
 }
 @keyframes dotPulse {
-  0%   { box-shadow: 0 0 4px rgba(57,255,100,0.7), 0 0 8px rgba(57,255,100,0.4); }
-  100% { box-shadow: 0 0 10px rgba(57,255,100,1), 0 0 20px rgba(57,255,100,0.7); }
+  0%   { box-shadow: 0 0 3px rgba(57,255,100,0.6); opacity: 0.8; }
+  100% { box-shadow: 0 0 8px rgba(57,255,100,1); opacity: 1; }
 }
-.online-count {
-  font-family: monospace;
-  font-size: 1rem;
-  font-weight: 900;
-  color: #39ff64;
-  text-shadow: 0 0 8px rgba(57,255,100,0.8);
-  letter-spacing: 1px;
-  min-width: 16px;
-  text-align: center;
-}
-.online-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(57,255,100,0.5);
-}
+body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
 </style>
 
 <script type="module">
