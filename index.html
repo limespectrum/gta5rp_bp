@@ -967,33 +967,17 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 <body>
 
 <!-- ██ PIN LOCK SCREEN ██ -->
-<div id="pinOverlay" style="display:none;">
+<div id="pinOverlay" style="display:flex;">
   <div class="pin-bg"></div>
   <div class="pin-box">
     <div class="pin-title">⬡ ДОСТУП ЗАКРЫТ ⬡</div>
-    <div class="pin-sub">ВВЕДИТЕ КОД ДОСТУПА</div>
-    <div class="pin-display" id="pinDisplay">
-      <span class="pin-digit" id="pd0">—</span>
-      <span class="pin-digit" id="pd1">—</span>
-      <span class="pin-digit" id="pd2">—</span>
-      <span class="pin-digit" id="pd3">—</span>
-      <span class="pin-digit" id="pd4">—</span>
+    <div class="pin-sub">ВХОД В СИСТЕМУ</div>
+    <div class="auth-form">
+      <input type="email" id="authEmail" class="auth-input" placeholder="ПОЧТА" autocomplete="username">
+      <input type="password" id="authPass" class="auth-input" placeholder="КОД ДОСТУПА" autocomplete="current-password">
     </div>
     <div class="pin-error" id="pinError"></div>
-    <div class="pin-keypad">
-      <button class="pin-key" data-v="1">1</button>
-      <button class="pin-key" data-v="2">2</button>
-      <button class="pin-key" data-v="3">3</button>
-      <button class="pin-key" data-v="4">4</button>
-      <button class="pin-key" data-v="5">5</button>
-      <button class="pin-key" data-v="6">6</button>
-      <button class="pin-key" data-v="7">7</button>
-      <button class="pin-key" data-v="8">8</button>
-      <button class="pin-key" data-v="9">9</button>
-      <button class="pin-key pin-key-clear" data-v="C">⌫</button>
-      <button class="pin-key" data-v="0">0</button>
-      <button class="pin-key pin-key-empty" disabled></button>
-    </div>
+    <button class="pin-key auth-submit" id="authSubmit">ВОЙТИ</button>
   </div>
 </div>
 
@@ -1062,46 +1046,6 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   -webkit-user-select: none;
   cursor: default;
 }
-.pin-display {
-  display: flex; gap: 16px; margin: 8px 0 4px;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.pin-digit {
-  width: 64px; height: 80px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.6rem; font-weight: 900; font-family: monospace;
-  border-radius: 12px;
-  background: rgba(0,20,45,0.85);
-  border: 2px solid rgba(0,255,255,0.2);
-  color: #00eeff;
-  text-shadow: 0 0 14px rgba(0,220,255,0.8);
-  box-shadow: inset 0 0 12px rgba(0,255,255,0.06);
-  transition: all 0.15s ease;
-  user-select: none;
-  -webkit-user-select: none;
-  pointer-events: none;
-  cursor: default;
-}
-.pin-digit.filled {
-  border-color: rgba(0,255,255,0.55);
-  color: #fff;
-  text-shadow: 0 0 18px rgba(0,220,255,1), 0 0 32px rgba(0,180,255,0.6);
-  box-shadow: inset 0 0 16px rgba(0,255,255,0.12), 0 0 12px rgba(0,200,255,0.25);
-}
-.pin-digit.error {
-  border-color: rgba(255,60,60,0.8) !important;
-  color: #ff4444 !important;
-  text-shadow: 0 0 14px rgba(255,60,60,0.9) !important;
-  animation: shake 0.4s ease;
-}
-@keyframes shake {
-  0%,100%{ transform: translateX(0); }
-  20%    { transform: translateX(-8px); }
-  40%    { transform: translateX(8px); }
-  60%    { transform: translateX(-6px); }
-  80%    { transform: translateX(6px); }
-}
 .pin-error {
   font-size: 0.82rem; font-weight: 700; letter-spacing: 2px;
   color: #ff4444;
@@ -1111,131 +1055,162 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   user-select: none;
   -webkit-user-select: none;
   cursor: default;
+  text-align: center;
 }
-.pin-keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 80px);
-  gap: 12px;
+.auth-form {
+  display: flex; flex-direction: column; gap: 14px;
+  width: 100%; margin: 8px 0 4px;
 }
-.pin-key {
-  width: 80px; height: 72px;
+.auth-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 56px;
+  padding: 0 18px;
+  font-size: 1rem; font-weight: 700; font-family: monospace;
+  letter-spacing: 1px;
+  border-radius: 12px;
+  background: rgba(0,20,45,0.85);
+  border: 2px solid rgba(0,255,255,0.2);
+  color: #00eeff;
+  text-shadow: 0 0 8px rgba(0,220,255,0.5);
+  box-shadow: inset 0 0 12px rgba(0,255,255,0.06);
+  transition: all 0.15s ease;
+  outline: none;
+}
+.auth-input::placeholder {
+  color: rgba(150,210,255,0.35);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.auth-input:focus {
+  border-color: rgba(0,255,255,0.55);
+  color: #fff;
+  text-shadow: 0 0 14px rgba(0,220,255,0.9);
+  box-shadow: inset 0 0 16px rgba(0,255,255,0.12), 0 0 12px rgba(0,200,255,0.25);
+}
+.auth-input.error {
+  border-color: rgba(255,60,60,0.8) !important;
+  animation: shake 0.4s ease;
+}
+.auth-submit {
+  width: 100%;
+  height: 56px;
   border-radius: 14px;
-  border: 1.5px solid rgba(0,255,255,0.2);
-  background: rgba(0,20,50,0.7);
-  color: #c8f0ff;
-  font-size: 1.6rem; font-weight: 800; font-family: monospace;
+  border: 1.5px solid rgba(0,255,255,0.3);
+  background: linear-gradient(135deg, rgba(0,238,255,0.18), rgba(204,68,255,0.18));
+  color: #fff;
+  font-size: 1rem; font-weight: 900; font-family: monospace;
+  letter-spacing: 4px;
+  text-transform: uppercase;
   cursor: pointer;
   transition: all 0.12s ease;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-  user-select: none;
 }
-.pin-key:hover {
-  background: rgba(0,255,255,0.12);
-  border-color: rgba(0,255,255,0.55);
-  color: #fff;
+.auth-submit:hover {
+  background: linear-gradient(135deg, rgba(0,238,255,0.3), rgba(204,68,255,0.3));
+  border-color: rgba(0,255,255,0.6);
   box-shadow: 0 0 14px rgba(0,255,255,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
   transform: translateY(-2px);
 }
-.pin-key:active {
-  transform: scale(0.93);
-  background: rgba(0,255,255,0.2);
+.auth-submit:active {
+  transform: scale(0.97);
 }
-.pin-key-clear {
-  border-color: rgba(255,80,160,0.3);
-  color: #ff80c0;
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
 }
-.pin-key-clear:hover {
-  background: rgba(255,80,160,0.15);
-  border-color: rgba(255,80,160,0.7);
-  color: #fff;
-  box-shadow: 0 0 14px rgba(255,80,160,0.3);
+@keyframes shake {
+  0%,100%{ transform: translateX(0); }
+  20%    { transform: translateX(-8px); }
+  40%    { transform: translateX(8px); }
+  60%    { transform: translateX(-6px); }
+  80%    { transform: translateX(6px); }
 }
-.pin-key-empty { visibility: hidden; pointer-events: none; }
 </style>
 
-<script>
-(function(){
-  const PIN = '88775';
-  const STORAGE_KEY = 'pin_passed_month';
-  const now = new Date();
-  const thisMonth = now.getFullYear() + '-' + (now.getMonth() + 1);
-  const passed = localStorage.getItem(STORAGE_KEY);
-  const overlay = document.getElementById('pinOverlay');
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  if (passed === thisMonth) { overlay.style.display = 'none'; return; }
-  overlay.style.display = 'flex';
+  const firebaseConfig = {
+    apiKey: "AIzaSyCMVd8slq6gc6lD1noTW0DDW8VkALJcZao",
+    authDomain: "bonuspoint-lime.firebaseapp.com",
+    databaseURL: "https://bonuspoint-lime-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "bonuspoint-lime",
+    storageBucket: "bonuspoint-lime.firebasestorage.app",
+    messagingSenderId: "647315774952",
+    appId: "1:647315774952:web:b8269372e8abf5d97f185d"
+  };
+
+  const authApp = initializeApp(firebaseConfig, "authApp");
+  const auth = getAuth(authApp);
+  setPersistence(auth, browserLocalPersistence);
+
+  const overlay = document.getElementById('pinOverlay');
+  const emailInput = document.getElementById('authEmail');
+  const passInput = document.getElementById('authPass');
+  const errEl = document.getElementById('pinError');
+  const submitBtn = document.getElementById('authSubmit');
+
   document.body.style.overflow = 'hidden';
 
-  let entered = '';
-
-  function renderDigits() {
-    for (let i = 0; i < 5; i++) {
-      const el = document.getElementById('pd' + i);
-      if (i < entered.length) {
-        el.textContent = entered[i];
-        el.classList.add('filled');
-        el.classList.remove('error');
-      } else {
-        el.textContent = '—';
-        el.classList.remove('filled', 'error');
-      }
-    }
-  }
-
-  function showError() {
-    document.getElementById('pinError').textContent = '✕ НЕВЕРНЫЙ КОД';
-    for (let i = 0; i < 5; i++) {
-      const el = document.getElementById('pd' + i);
-      el.classList.add('error');
-    }
-    setTimeout(() => {
-      entered = '';
-      document.getElementById('pinError').textContent = '';
-      renderDigits();
-    }, 900);
-  }
-
-  function checkPin() {
-    if (entered === PIN) {
-      localStorage.setItem(STORAGE_KEY, thisMonth);
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
       overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
       setTimeout(() => {
         overlay.style.display = 'none';
         document.body.style.overflow = '';
       }, 500);
     } else {
-      showError();
+      overlay.style.animation = '';
+      overlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
     }
+  });
+
+  function clearError() {
+    errEl.textContent = '';
+    emailInput.classList.remove('error');
+    passInput.classList.remove('error');
   }
 
-  document.querySelectorAll('.pin-key').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const v = btn.dataset.v;
-      if (v === 'C') {
-        entered = entered.slice(0, -1);
-        document.getElementById('pinError').textContent = '';
-        renderDigits();
-      } else if (entered.length < 5) {
-        entered += v;
-        renderDigits();
-        if (entered.length === 5) setTimeout(checkPin, 180);
-      }
+  function showError(msg) {
+    errEl.textContent = msg;
+    emailInput.classList.add('error');
+    passInput.classList.add('error');
+    setTimeout(() => {
+      emailInput.classList.remove('error');
+      passInput.classList.remove('error');
+    }, 400);
+  }
+
+  function tryLogin() {
+    const email = emailInput.value.trim();
+    const pass = passInput.value;
+    clearError();
+    if (!email || !pass) {
+      showError('✕ ЗАПОЛНИТЕ ВСЕ ПОЛЯ');
+      return;
+    }
+    submitBtn.disabled = true;
+    signInWithEmailAndPassword(auth, email, pass)
+      .catch(() => {
+        showError('✕ НЕВЕРНЫЙ ЛОГИН ИЛИ КОД ДОСТУПА');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+      });
+  }
+
+  submitBtn.addEventListener('click', tryLogin);
+  [emailInput, passInput].forEach(el => {
+    el.addEventListener('input', clearError);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryLogin();
     });
   });
-
-  document.addEventListener('keydown', (e) => {
-    if (overlay.style.display === 'none') return;
-    if (e.key >= '0' && e.key <= '9' && entered.length < 5) {
-      entered += e.key;
-      renderDigits();
-      if (entered.length === 5) setTimeout(checkPin, 180);
-    } else if (e.key === 'Backspace') {
-      entered = entered.slice(0, -1);
-      document.getElementById('pinError').textContent = '';
-      renderDigits();
-    }
-  });
-})();
 </script>
 <style>
 @keyframes fadeOutOverlay {
