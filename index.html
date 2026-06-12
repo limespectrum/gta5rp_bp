@@ -996,7 +996,11 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 <!-- ██ PIN LOCK SCREEN ██ -->
 <div id="pinOverlay" style="display:flex;">
   <div class="pin-bg"></div>
-  <div class="pin-box">
+  <div class="pin-box" id="loadingBox">
+    <div class="pin-loader"></div>
+    <div class="pin-sub">ПРОВЕРКА ДОСТУПА...</div>
+  </div>
+  <div class="pin-box" id="loginBox" style="display:none;">
     <div class="pin-title">⬡ ДОСТУП ЗАКРЫТ ⬡</div>
     <div class="pin-sub">ВХОД В СИСТЕМУ</div>
     <div class="auth-form">
@@ -1049,6 +1053,17 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 @keyframes boxPulse {
   0%   { box-shadow: 0 0 0 1px rgba(0,255,255,0.15), 0 0 40px rgba(0,255,255,0.18), 0 0 80px rgba(180,0,255,0.12), 0 0 120px rgba(255,200,0,0.06), inset 0 1px 0 rgba(255,255,255,0.06); }
   100% { box-shadow: 0 0 0 1px rgba(0,255,255,0.35), 0 0 60px rgba(0,255,255,0.32), 0 0 110px rgba(180,0,255,0.22), 0 0 160px rgba(255,200,0,0.10), inset 0 1px 0 rgba(255,255,255,0.08); }
+}
+.pin-loader {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid rgba(0,255,255,0.18);
+  border-top-color: rgba(0,220,255,0.85);
+  animation: pinSpin 0.9s linear infinite;
+}
+@keyframes pinSpin {
+  to { transform: rotate(360deg); }
 }
 .pin-title {
   font-size: 1.5rem;
@@ -1234,6 +1249,8 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   }
 
   const overlay = document.getElementById('pinOverlay');
+  const loadingBox = document.getElementById('loadingBox');
+  const loginBox = document.getElementById('loginBox');
   const emailInput = document.getElementById('authEmail');
   const passInput = document.getElementById('authPass');
   const errEl = document.getElementById('pinError');
@@ -1270,6 +1287,8 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         }
       }
     } else {
+      loadingBox.style.display = 'none';
+      loginBox.style.display = 'flex';
       overlay.style.animation = '';
       overlay.style.display = 'flex';
       document.body.style.overflow = 'hidden';
