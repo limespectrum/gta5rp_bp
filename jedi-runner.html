@@ -815,7 +815,7 @@ function die() {
   }
 
   const nick = window._gameNick;
-  console.log("[jedi] die — nick:", nick, "score:", score);
+  console.log("[jedi] die — nick:", nick, "score:", score, "auth.currentUser:", auth.currentUser?.email);
   if (nick) {
     submitScore(nick, score);
   } else {
