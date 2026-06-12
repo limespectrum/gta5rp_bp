@@ -815,9 +815,11 @@ function die() {
   }
 
   const nick = window._gameNick;
+  console.log("[jedi] die — nick:", nick, "score:", score);
   if (nick) {
     submitScore(nick, score);
   } else {
+    console.warn("[jedi] no nick, score pending:", score);
     window._pendingScore = score;
   }
 
