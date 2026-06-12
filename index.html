@@ -1004,7 +1004,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     <div class="pin-title">⬡ ДОСТУП ЗАКРЫТ ⬡</div>
     <div class="pin-sub">ВХОД В СИСТЕМУ</div>
     <div class="auth-form">
-      <input type="email" id="authEmail" class="auth-input" placeholder="ПОЧТА" autocomplete="username">
+      <input type="text" id="authEmail" class="auth-input" placeholder="НИКНЕЙМ" autocomplete="username">
       <input type="password" id="authPass" class="auth-input" placeholder="КОД ДОСТУПА" autocomplete="current-password">
     </div>
     <div class="pin-error" id="pinError"></div>
@@ -1323,13 +1323,14 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   }
 
   function tryLogin() {
-    const email = emailInput.value.trim();
+    let email = emailInput.value.trim();
     const pass = passInput.value;
     clearError();
     if (!email || !pass) {
       showError('✕ ЗАПОЛНИТЕ ВСЕ ПОЛЯ');
       return;
     }
+    if (!email.includes('@')) email = email + '@lime.ru';
     submitBtn.disabled = true;
     signInWithEmailAndPassword(auth, email, pass)
       .catch(() => {
