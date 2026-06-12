@@ -373,13 +373,18 @@ onValue(ref(db, 'jedi_runner/leaderboard'), snap => {
   renderLeaderboard(snap.val() || {});
 });
 
-function submitScore(nick, score) {
+function submitScore(nick, scoreVal) {
   const key = nick.toUpperCase().replace(/[^A-Z0-9_]/g, '').slice(0, 14);
   const r = ref(db, `jedi_runner/leaderboard/${key}`);
+  // Читаем текущий рекорд, пишем только если новый лучше
   onValue(r, snap => {
     const cur = snap.val();
-    if (!cur || score > (cur.score || 0)) {
-      set(r, { nick: key, score, ts: Date.now() });
+    if (!cur || scoreVal > (cur.score || 0)) {
+      set(r, { nick: key, score: scoreVal, ts: Date.now() })
+        .then(() => console.log('[jedi] score saved:', key, scoreVal))
+        .catch(err => console.error('[jedi] write error:', err));
+    } else {
+      console.log('[jedi] not a new record:', scoreVal, 'vs current', cur.score);
     }
   }, { onlyOnce: true });
 }
