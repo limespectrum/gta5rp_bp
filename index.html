@@ -30,7 +30,7 @@
   h1 { display: none; }
   .title-capsule {
     text-align: center;
-    margin: 0 0 18px 0;
+    margin: 0 0 8px 0;
   }
   .title-capsule-inner {
     display: inline-block;
@@ -84,7 +84,32 @@
   .controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; background: rgba(10,20,40,0.75); backdrop-filter: blur(12px); border: 1px solid rgba(0,255,255,0.4); border-radius: 60px; padding: 12px 24px; margin-bottom: 24px; box-shadow: 0 0 15px rgba(0,255,255,0.2); }
   .controls button:not(.char-btn) { background: linear-gradient(135deg, #ff3366, #cc0044); border: none; color: white; padding: 10px 24px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 0 6px #ff3366; user-select: none; }
   .controls button:not(.char-btn):hover { transform: scale(1.05); box-shadow: 0 0 18px #ff3366; background: linear-gradient(135deg, #ff5577, #ee2255); }
-  .center-actions { display: flex; align-items: center; gap: 20px; width: 100%; }
+  .center-actions {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+  .left-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .right-group {
+    flex-wrap: wrap;
+    justify-self: end;
+  }
+  @media (max-width: 900px) {
+    .center-actions {
+      grid-template-columns: 1fr;
+    }
+    .left-group, .right-group, .date-display {
+      justify-self: center;
+    }
+  }
+
   /* === VIP & X2 TOGGLE BUTTONS === */
   .toggle-switch { display: inline-flex; align-items: center; gap: 0; cursor: pointer; }
   .toggle-switch input { display: none; }
@@ -170,9 +195,6 @@
 
   .switch-label { display: none; }
   .date-display {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     pointer-events: none;
     display: flex;
     flex-direction: column;
@@ -181,6 +203,10 @@
     user-select: none;
     cursor: default;
     white-space: nowrap;
+    padding: 4px 14px;
+    border-radius: 40px;
+    border: 1px solid transparent;
+    background: transparent;
   }
   .date-display .date-day {
     font-family: monospace;
@@ -1132,7 +1158,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCMVd8slq6gc6lD1noTW0DDW8VkALJcZao",
@@ -1156,6 +1182,12 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
   document.body.style.overflow = 'hidden';
 
+  function getDisplayName(email) {
+    if (!email) return '';
+    const local = email.split('@')[0].toUpperCase();
+    return local;
+  }
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
@@ -1163,12 +1195,24 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         overlay.style.display = 'none';
         document.body.style.overflow = '';
       }, 500);
+      const nameEl = document.getElementById('userNameDisplay');
+      if (nameEl) nameEl.textContent = getDisplayName(user.email);
     } else {
       overlay.style.animation = '';
       overlay.style.display = 'flex';
       document.body.style.overflow = 'hidden';
+      const nameEl = document.getElementById('userNameDisplay');
+      if (nameEl) nameEl.textContent = '';
     }
   });
+
+  // Logout button
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth);
+    });
+  }
 
   function clearError() {
     errEl.textContent = '';
@@ -1352,6 +1396,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
 <div class="controls" style="position:relative;">
   <div class="center-actions">
+    <div class="left-group">
     <button id="resetBtn">⟳ Сбросить задания</button>
     <label class="toggle-switch">
       <input id="vipCheckbox" type="checkbox">
@@ -1363,12 +1408,13 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <span class="switch-slider"></span>
       <span class="toggle-btn toggle-btn-x2">✨ Акция x2</span>
     </label>
+    </div>
     <div class="date-display" id="currentDate">
       <span class="date-day" id="dateDayName"></span>
       <span class="date-main" id="dateMainText">—</span>
       <span class="date-online"><span class="online-dot-mini"></span><span id="onlineCount">—</span> онлайн</span>
     </div>
-    <div style="display:flex; align-items:center; margin-left:auto; gap: 12px;">
+    <div class="right-group" style="display:flex; align-items:center; gap: 14px;">
       <div class="char-switcher">
         <button class="char-btn active" id="charBtn1" onclick="switchChar(1)">
           <span class="char-label">Персонаж 1</span>
@@ -1377,6 +1423,47 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
           <span class="char-label">Персонаж 2</span>
         </button>
       </div>
+      <span id="userNameDisplay" style="
+        font-family: monospace;
+        font-size: 1.15rem;
+        font-weight: 900;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #00eeff, #cc44ff, #ffdd00);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: drop-shadow(0 0 10px rgba(0,220,255,0.6));
+        user-select: none;
+        cursor: default;
+        white-space: nowrap;
+      "></span>
+      <button id="logoutBtn" title="Выйти из аккаунта" style="
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: linear-gradient(135deg, rgba(255,50,50,0.12), rgba(180,0,0,0.10));
+        border: 1.5px solid rgba(255,80,80,0.4);
+        color: rgba(255,120,120,0.85);
+        padding: 7px 16px;
+        border-radius: 40px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        box-shadow: 0 0 8px rgba(255,50,50,0.12);
+      " onmouseover="this.style.boxShadow='0 0 18px rgba(255,50,50,0.4)';this.style.borderColor='rgba(255,80,80,0.7)';this.style.color='#ff9999';" onmouseout="this.style.boxShadow='0 0 8px rgba(255,50,50,0.12)';this.style.borderColor='rgba(255,80,80,0.4)';this.style.color='rgba(255,120,120,0.85)';">
+        <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.9;flex-shrink:0;">
+          <rect x="0" y="0.5" width="14" height="1.5" rx="0.75" fill="currentColor"/>
+          <rect x="0" y="5" width="14" height="1.5" rx="0.75" fill="currentColor"/>
+          <rect x="0" y="9.5" width="14" height="1.5" rx="0.75" fill="currentColor"/>
+        </svg>
+        Выйти
+      </button>
     </div>
   </div>
 </div>
@@ -1534,7 +1621,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   </div>
 </div>
 
-<div style="margin-top:12px;text-align:center;"><div style="margin-top:4px;font-size:0.9rem;color:#aaa;">LIME - GTA 5 RP</div></div>
+<div style="margin-top:12px;text-align:center;"><div style="margin-top:4px;font-size:0.9rem;color:#aaa;user-select:none;-webkit-user-select:none;cursor:default;">LIME - GTA 5 RP</div></div>
 </div>
 
 <script>
