@@ -1505,7 +1505,12 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     <div class="date-display" id="currentDate">
       <span class="date-day" id="dateDayName"></span>
       <span class="date-main" id="dateMainText">—</span>
-      <span class="date-online"><span class="online-dot-mini"></span><span id="onlineCount">—</span> онлайн</span>
+      <span class="date-online"><span class="online-dot-mini"></span><span id="onlineCount">—</span> онлайн
+        <div class="online-tooltip" id="onlineTooltip">
+          <div class="online-tooltip-title">В сети сейчас</div>
+          <div class="online-tooltip-list" id="onlineNickList"><div class="online-tooltip-empty">...</div></div>
+        </div>
+      </span>
     </div>
     <div class="right-group" style="display:flex; align-items:center; gap: 14px;">
       <div class="char-switcher">
@@ -2126,65 +2131,171 @@ updateGridCols();
   100% { box-shadow: 0 0 8px rgba(57,255,100,1); opacity: 1; }
 }
 body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
+
+/* Онлайн-счётчик — интерактивный */
+.date-online {
+  position: relative;
+  cursor: default;
+  pointer-events: auto !important;
+}
+.date-online:hover {
+  color: rgba(130, 255, 170, 0.85);
+}
+
+/* Попап с никами */
+.online-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 160px;
+  max-width: 260px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(8, 16, 28, 0.94);
+  backdrop-filter: blur(18px) saturate(0.7);
+  -webkit-backdrop-filter: blur(18px) saturate(0.7);
+  border: 1px solid rgba(80, 255, 130, 0.18);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(60,255,110,0.08) inset,
+    0 0 24px rgba(57,255,100,0.06);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+}
+.date-online:hover .online-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.online-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(8,16,28,0.94);
+}
+.online-tooltip-title {
+  font-family: monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(80, 255, 130, 0.45);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.online-tooltip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.online-tooltip-nick {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(200, 255, 220, 0.88);
+}
+.online-tooltip-nick::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(57, 255, 100, 0.85);
+  box-shadow: 0 0 6px rgba(57,255,100,0.9);
+  flex-shrink: 0;
+  animation: dotPulse 2s ease-in-out infinite alternate;
+}
+.online-tooltip-empty {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: rgba(150,180,160,0.45);
+  letter-spacing: 2px;
+  text-align: center;
+}
 </style>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCMVd8slq6gc6lD1noTW0DDW8VkALJcZao",
-    authDomain: "bonuspoint-lime.firebaseapp.com",
-    databaseURL: "https://bonuspoint-lime-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "bonuspoint-lime",
-    storageBucket: "bonuspoint-lime.firebasestorage.app",
-    messagingSenderId: "647315774952",
-    appId: "1:647315774952:web:b8269372e8abf5d97f185d"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const onlineRef = ref(db, 'online');
-
-  // Слушаем количество онлайн (запускаем сразу, не ждём IP)
-  onValue(onlineRef, (snapshot) => {
-    const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-    const el = document.getElementById('onlineCount');
-    if (el) el.textContent = count;
-  });
-
-  // Получаем IP и регистрируем пользователя по нему
-  async function registerOnline() {
-    let clientKey;
-
-    try {
-      // Получаем реальный IP через публичный API
-      const res = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      // Заменяем точки на дефисы (Firebase не любит точки в ключах)
-      clientKey = data.ip.replace(/\./g, '-').replace(/:/g, '-');
-    } catch (e) {
-      // Если не удалось получить IP — fallback на стабильный ID в localStorage
-      let storedId = localStorage.getItem('_farm_uid');
-      if (!storedId) {
-        storedId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-        localStorage.setItem('_farm_uid', storedId);
-      }
-      clientKey = storedId;
-    }
-
-    const userRef = ref(db, `online/${clientKey}`);
-
-    // Записываем себя как онлайн
-    await set(userRef, { t: serverTimestamp() });
-
-    // При закрытии/уходе — удаляем себя
-    // (срабатывает когда все вкладки с этого IP закрыты)
-    onDisconnect(userRef).remove();
+  // Переиспользуем уже инициализированное приложение authApp
+  let app;
+  try { app = getApp("authApp"); } catch(e) {
+    app = initializeApp({
+      apiKey: "AIzaSyCMVd8slq6gc6lD1noTW0DDW8VkALJcZao",
+      authDomain: "bonuspoint-lime.firebaseapp.com",
+      databaseURL: "https://bonuspoint-lime-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "bonuspoint-lime",
+      storageBucket: "bonuspoint-lime.firebasestorage.app",
+      messagingSenderId: "647315774952",
+      appId: "1:647315774952:web:b8269372e8abf5d97f185d"
+    }, "authApp");
   }
 
-  registerOnline();
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+  const onlineRef = ref(db, 'online');
+
+  function getNick(email) {
+    if (!email) return '???';
+    return email.split('@')[0].toUpperCase();
+  }
+
+  function updateTooltip(snapshot) {
+    const listEl = document.getElementById('onlineNickList');
+    const countEl = document.getElementById('onlineCount');
+    if (!listEl || !countEl) return;
+
+    if (!snapshot.exists()) {
+      countEl.textContent = '0';
+      listEl.innerHTML = '<div class="online-tooltip-empty">никого нет</div>';
+      return;
+    }
+
+    const data = snapshot.val();
+    const entries = Object.values(data);
+    const count = entries.length;
+    countEl.textContent = count;
+
+    if (count === 0) {
+      listEl.innerHTML = '<div class="online-tooltip-empty">никого нет</div>';
+      return;
+    }
+
+    listEl.innerHTML = entries
+      .map(e => `<div class="online-tooltip-nick">${e.nick || '???'}</div>`)
+      .join('');
+  }
+
+  // Слушаем онлайн в реальном времени
+  onValue(onlineRef, (snapshot) => {
+    updateTooltip(snapshot);
+  });
+
+  // Регистрируем себя по UID (уникальный пользователь, не устройство)
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    const uid = user.uid;
+    const nick = getNick(user.email);
+    const userRef = ref(db, `online/${uid}`);
+
+    await set(userRef, { nick, t: serverTimestamp() });
+    onDisconnect(userRef).remove();
+  });
 </script>
 </body>
 </html>
