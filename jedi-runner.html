@@ -328,9 +328,8 @@ const FB_CONFIG = {
 
 let app;
 try { app = getApp("authApp"); } catch(e) {
-  try { app = getApp("jediApp"); } catch(e2) {
-    app = initializeApp(FB_CONFIG, "jediApp");
-  }
+  // Используем то же имя что основной сайт — читаем общую сессию из localStorage
+  app = initializeApp(FB_CONFIG, "authApp");
 }
 
 const db = getDatabase(app);
