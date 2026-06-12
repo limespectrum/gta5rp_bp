@@ -298,6 +298,7 @@
     border-radius: 0;
     padding: 0;
     border: none;
+    align-items: center;
   }
   .char-btn-wrap {
     display: flex;
@@ -347,6 +348,7 @@
   .char-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     padding: 10px 22px;
     border-radius: 40px;
     border: 2px solid rgba(120,130,160,0.3);
@@ -358,25 +360,129 @@
     font-weight: 700;
     font-size: 0.88rem;
     letter-spacing: 0.5px;
-    transition: all 0.22s ease;
+    transition: all 0.32s cubic-bezier(0.4,0,0.2,1), width 0.32s cubic-bezier(0.4,0,0.2,1), padding 0.32s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+    white-space: nowrap;
   }
   .char-btn .char-icon { display: none; user-select: none; -webkit-user-select: none; }
-  .char-btn .char-label { font-size: 0.88rem; user-select: none; -webkit-user-select: none; pointer-events: none; }
+  .char-btn .char-label { font-size: 0.88rem; user-select: none; -webkit-user-select: none; pointer-events: none; transition: opacity 0.2s ease, max-width 0.32s ease; }
   .char-btn:hover {
     transform: scale(1.05);
     border-color: rgba(160,180,220,0.5);
     color: rgba(200,210,240,0.8);
   }
+
+  /* Collapsed state — circle with number */
+  .char-btn.collapsed {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1rem;
+    font-weight: 900;
+    color: rgba(140,155,185,0.65);
+    border-color: rgba(120,130,160,0.25);
+    background: rgba(30,42,65,0.4);
+    flex-shrink: 0;
+  }
+  .char-btn.collapsed:hover {
+    transform: scale(1.12);
+    border-color: rgba(160,180,220,0.5);
+    color: rgba(200,210,240,0.85);
+    background: rgba(40,55,85,0.65);
+  }
+  .char-btn.collapsed .char-label {
+    display: none;
+  }
+  .char-btn.collapsed .char-num {
+    display: block;
+  }
+  .char-num {
+    display: none;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* === CHAR TOGGLE PILL === */
+  .char-toggle-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    border-radius: 40px;
+    border: 2px solid rgba(0,220,255,0.7);
+    background: linear-gradient(135deg, rgba(0,200,255,0.18), rgba(80,0,255,0.14));
+    box-shadow: 0 0 7px rgba(0,220,255,0.25), 0 0 14px rgba(0,200,255,0.1), inset 0 0 5px rgba(0,200,255,0.05);
+    animation: charPulse 2.2s ease-in-out infinite alternate;
+    transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+    position: relative;
+  }
+  .char-toggle-pill:hover {
+    transform: scale(1.05);
+    filter: brightness(1.15);
+  }
+  .char-toggle-pill:active {
+    transform: scale(0.97);
+  }
+  .ctp-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #7df0ff;
+    padding: 8px 14px 8px 18px;
+    transition: color 0.25s;
+    pointer-events: none;
+  }
+  .ctp-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,180,255,0.25);
+    border: 1.5px solid rgba(0,220,255,0.55);
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #7df0ff;
+    margin: 4px 5px 4px 0;
+    flex-shrink: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    box-shadow: 0 0 5px rgba(0,220,255,0.2);
+  }
+  /* Char 2 active — green pill */
+  body.char2-active .char-toggle-pill {
+    border-color: rgba(57,255,100,0.75);
+    background: linear-gradient(135deg, rgba(57,255,100,0.18), rgba(0,200,60,0.14));
+    box-shadow: 0 0 7px rgba(57,255,100,0.3), 0 0 14px rgba(0,255,80,0.14), inset 0 0 5px rgba(57,255,100,0.07);
+    animation: greenCharPulse 2.2s ease-in-out infinite alternate;
+  }
+  body.char2-active .ctp-label {
+    color: #39ff6a;
+  }
+  body.char2-active .ctp-circle {
+    background: rgba(57,255,100,0.22);
+    border-color: rgba(57,255,100,0.6);
+    color: #39ff6a;
+    box-shadow: 0 0 5px rgba(57,255,100,0.22);
+  }
+
   .char-btn.active {
     background: linear-gradient(135deg, rgba(0,200,255,0.18), rgba(80,0,255,0.14));
     border-color: rgba(0,220,255,0.7);
     color: #7df0ff;
-    box-shadow: 0 0 12px rgba(0,220,255,0.45), 0 0 24px rgba(0,200,255,0.2), inset 0 0 8px rgba(0,200,255,0.08);
+    box-shadow: 0 0 7px rgba(0,220,255,0.25), 0 0 14px rgba(0,200,255,0.1), inset 0 0 5px rgba(0,200,255,0.05);
     animation: charPulse 2.2s ease-in-out infinite alternate;
   }
   @keyframes charPulse {
-    0%  { box-shadow: 0 0 10px rgba(0,220,255,0.35), 0 0 20px rgba(0,200,255,0.18), inset 0 0 6px rgba(0,200,255,0.06); }
-    100%{ box-shadow: 0 0 22px rgba(0,220,255,0.65), 0 0 40px rgba(0,200,255,0.3), inset 0 0 12px rgba(0,200,255,0.12); }
+    0%  { box-shadow: 0 0 6px rgba(0,220,255,0.2), 0 0 12px rgba(0,200,255,0.1), inset 0 0 4px rgba(0,200,255,0.04); }
+    100%{ box-shadow: 0 0 14px rgba(0,220,255,0.38), 0 0 24px rgba(0,200,255,0.16), inset 0 0 7px rgba(0,200,255,0.07); }
   }
   /* Полоска активного персонажа под шапкой */
   .char-indicator {
@@ -387,7 +493,7 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     color: #7df0ff;
-    text-shadow: 0 0 10px rgba(0,220,255,0.6);
+    text-shadow: 0 0 6px rgba(0,220,255,0.35);
     opacity: 0.85;
     transition: all 0.3s;
     user-select: none;
@@ -396,20 +502,30 @@
   }
 
   /* Персонаж 2 — зелёная токсичная подсветка */
+  body.char2-active .char-btn#charBtn1.collapsed {
+    border-color: rgba(57,255,100,0.2);
+    color: rgba(57,255,100,0.5);
+    background: rgba(20,40,25,0.4);
+  }
+  body.char2-active .char-btn#charBtn1.collapsed:hover {
+    border-color: rgba(57,255,100,0.5);
+    color: rgba(57,255,100,0.85);
+    background: rgba(30,55,35,0.6);
+  }
   body.char2-active .char-btn#charBtn2.active {
     background: linear-gradient(135deg, rgba(57,255,100,0.18), rgba(0,200,60,0.14));
     border-color: rgba(57,255,100,0.75);
     color: #39ff6a;
-    box-shadow: 0 0 12px rgba(57,255,100,0.55), 0 0 24px rgba(0,255,80,0.28), inset 0 0 8px rgba(57,255,100,0.12);
+    box-shadow: 0 0 7px rgba(57,255,100,0.3), 0 0 14px rgba(0,255,80,0.14), inset 0 0 5px rgba(57,255,100,0.07);
     animation: greenCharPulse 2.2s ease-in-out infinite alternate;
   }
   @keyframes greenCharPulse {
-    0%  { box-shadow: 0 0 10px rgba(57,255,100,0.4), 0 0 20px rgba(0,255,80,0.2), inset 0 0 6px rgba(57,255,100,0.08); }
-    100%{ box-shadow: 0 0 22px rgba(57,255,100,0.72), 0 0 40px rgba(0,255,80,0.38), inset 0 0 12px rgba(57,255,100,0.16); }
+    0%  { box-shadow: 0 0 6px rgba(57,255,100,0.22), 0 0 12px rgba(0,255,80,0.1), inset 0 0 4px rgba(57,255,100,0.05); }
+    100%{ box-shadow: 0 0 14px rgba(57,255,100,0.42), 0 0 24px rgba(0,255,80,0.2), inset 0 0 7px rgba(57,255,100,0.09); }
   }
   body.char2-active .char-indicator {
     color: #39ff6a;
-    text-shadow: 0 0 10px rgba(57,255,100,0.8), 0 0 22px rgba(0,255,80,0.5);
+    text-shadow: 0 0 6px rgba(57,255,100,0.45), 0 0 14px rgba(0,255,80,0.25);
   }
   body.char2-active .controls {
     border-color: rgba(57,255,100,0.45);
@@ -1513,13 +1629,9 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       </span>
     </div>
     <div class="right-group" style="display:flex; align-items:center; gap: 14px;">
-      <div class="char-switcher">
-        <button class="char-btn active" id="charBtn1" onclick="switchChar(1)">
-          <span class="char-label">Персонаж 1</span>
-        </button>
-        <button class="char-btn" id="charBtn2" onclick="switchChar(2)">
-          <span class="char-label">Персонаж 2</span>
-        </button>
+      <div class="char-toggle-pill" id="charTogglePill" onclick="switchChar(currentChar === 1 ? 2 : 1)" title="Переключить персонажа">
+        <span class="ctp-label" id="ctpLabel">Персонаж 1</span>
+        <span class="ctp-circle" id="ctpCircle">2</span>
       </div>
       <span id="userNameDisplay" style="
         font-family: monospace;
@@ -1761,8 +1873,11 @@ function switchChar(n) {
 }
 
 function updateCharUI() {
-  document.getElementById('charBtn1').classList.toggle('active', currentChar === 1);
-  document.getElementById('charBtn2').classList.toggle('active', currentChar === 2);
+  // Обновляем пилюлю-переключатель
+  const label = document.getElementById('ctpLabel');
+  const circle = document.getElementById('ctpCircle');
+  if (label) label.textContent = 'Персонаж ' + currentChar;
+  if (circle) circle.textContent = currentChar === 1 ? '2' : '1';
   const icons = ['⚔️', '🛡️'];
   const names = ['Персонаж 1', 'Персонаж 2'];
   const idx = currentChar - 1;
