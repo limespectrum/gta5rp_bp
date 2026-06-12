@@ -1160,6 +1160,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getDatabase, ref, get, set as dbSet } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCMVd8slq6gc6lD1noTW0DDW8VkALJcZao",
@@ -1173,7 +1174,64 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
   const authApp = initializeApp(firebaseConfig, "authApp");
   const auth = getAuth(authApp);
+  const db = getDatabase(authApp);
   setPersistence(auth, browserLocalPersistence);
+
+  // === Синхронизация прогресса между устройствами через Firebase ===
+  const SYNC_KEYS = [
+    'daily_tasks_done_v4_grid',
+    'daily_tasks_done_v4_grid_char2',
+    'daily_tasks_done_v4_grid_online',
+    'daily_tasks_done_v4_grid_char2_online',
+    'daily_tasks_vip_mode_v4',
+    'daily_tasks_vip_mode_v4_char2',
+    'daily_tasks_x2_mode_v4',
+    'daily_tasks_x2_mode_v4_char2',
+    'active_char'
+  ];
+  const SYNC_KEY_SET = new Set(SYNC_KEYS);
+  let currentUid = null;
+  let syncTimer = null;
+
+  const _origSetItem = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(key, value) {
+    _origSetItem(key, value);
+    if (SYNC_KEY_SET.has(key) && currentUid) {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(pushStateToCloud, 700);
+    }
+  };
+
+  function collectLocalState() {
+    const data = {};
+    SYNC_KEYS.forEach(k => {
+      const v = localStorage.getItem(k);
+      if (v !== null) data[k] = v;
+    });
+    return data;
+  }
+
+  async function pushStateToCloud() {
+    if (!currentUid) return;
+    try {
+      await dbSet(ref(db, 'users/' + currentUid + '/state'), collectLocalState());
+    } catch(e) {}
+  }
+
+  async function pullStateFromCloud(uid) {
+    try {
+      const snap = await get(ref(db, 'users/' + uid + '/state'));
+      if (snap.exists()) {
+        const data = snap.val();
+        SYNC_KEYS.forEach(k => {
+          if (data[k] !== undefined) _origSetItem(k, data[k]);
+          else localStorage.removeItem(k);
+        });
+        return true;
+      }
+    } catch(e) {}
+    return false;
+  }
 
   const overlay = document.getElementById('pinOverlay');
   const emailInput = document.getElementById('authEmail');
@@ -1189,7 +1247,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     return local;
   }
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
       setTimeout(() => {
@@ -1198,12 +1256,26 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       }, 500);
       const nameEl = document.getElementById('userNameDisplay');
       if (nameEl) nameEl.textContent = getDisplayName(user.email);
+
+      currentUid = user.uid;
+      const syncFlag = 'cloud_synced_' + user.uid;
+      if (sessionStorage.getItem(syncFlag) !== '1') {
+        const hadCloud = await pullStateFromCloud(user.uid);
+        sessionStorage.setItem(syncFlag, '1');
+        if (hadCloud) {
+          location.reload();
+          return;
+        } else {
+          pushStateToCloud();
+        }
+      }
     } else {
       overlay.style.animation = '';
       overlay.style.display = 'flex';
       document.body.style.overflow = 'hidden';
       const nameEl = document.getElementById('userNameDisplay');
       if (nameEl) nameEl.textContent = '';
+      currentUid = null;
     }
   });
 
