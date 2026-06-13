@@ -249,7 +249,9 @@
   body.char2-active .date-display .date-time {
     color: rgba(57, 255, 100, 0.38);
   }
-  .legend { margin:8px 0 14px 0; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center; background: rgba(10,20,40,0.75); backdrop-filter: blur(12px); border-radius: 60px; padding: 12px 24px; border: 1px solid rgba(0,255,255,0.4); box-shadow: 0 0 15px rgba(0,255,255,0.2); }
+  .legend { margin:8px 0 14px 0; display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center; background: rgba(10,20,40,0.75); backdrop-filter: blur(12px); border-radius: 60px; padding: 12px 24px; border: 1px solid rgba(0,255,255,0.4); box-shadow: 0 0 15px rgba(0,255,255,0.2); }
+  .legend-filters { grid-column: 2; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center; }
+  .legend-settings { grid-column: 3; justify-self: end; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 
   .filter-btn {
     display: inline-flex;
@@ -289,6 +291,181 @@
   .filter-btn.active[data-col="col-joint"]   { background: rgba(96,165,250,0.15); border-color: rgba(96,165,250,0.6); color: #60a5fa; box-shadow: 0 0 10px rgba(96,165,250,0.2); }
   .filter-btn.active[data-col="col-avoid"]   { background: rgba(148,163,184,0.15); border-color: rgba(148,163,184,0.5); color: #94a3b8; box-shadow: 0 0 10px rgba(148,163,184,0.15); }
   .filter-btn.active[data-col="col-fraction"]{ background: rgba(192,132,252,0.15); border-color: rgba(192,132,252,0.6); color: #c084fc; box-shadow: 0 0 10px rgba(192,132,252,0.2); }
+
+  /* === КНОПКИ РЕДАКТИРОВАНИЯ ПОРЯДКА === */
+  .edit-order-btn.active {
+    background: rgba(0,200,255,0.18) !important;
+    border-color: rgba(0,220,255,0.75) !important;
+    color: #00eeff !important;
+    box-shadow: 0 0 12px rgba(0,200,255,0.35) !important;
+    animation: editBtnPulse 1.8s ease-in-out infinite alternate;
+  }
+  @keyframes editBtnPulse {
+    0%  { box-shadow: 0 0 8px rgba(0,200,255,0.3); }
+    100%{ box-shadow: 0 0 18px rgba(0,200,255,0.6); }
+  }
+  @keyframes editPulse {
+    0%  { box-shadow: 0 0 8px rgba(255,0,60,0.4); background: rgba(255,0,60,0.10); }
+    100%{ box-shadow: 0 0 20px rgba(255,0,60,0.8); background: rgba(255,0,60,0.22); }
+  }
+
+  /* Draggable rows in edit mode */
+  body.edit-order-mode .tasks-column tbody tr {
+    cursor: grab;
+    transition: background 0.15s, transform 0.15s;
+    position: relative;
+  }
+  body.edit-order-mode .tasks-column tbody tr::before {
+    content: '⠿';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: rgba(0,200,255,0.4);
+    pointer-events: none;
+  }
+  body.edit-order-mode .tasks-column tbody tr:hover {
+    background: rgba(0,200,255,0.06);
+  }
+  body.edit-order-mode .tasks-column tbody tr.dragging {
+    opacity: 1;
+    cursor: grabbing;
+    background: rgba(0, 180, 255, 0.18) !important;
+    box-shadow:
+      0 0 0 2px rgba(0, 220, 255, 0.85),
+      0 0 14px rgba(0, 200, 255, 0.65),
+      0 0 30px rgba(0, 180, 255, 0.30),
+      inset 0 0 10px rgba(0, 220, 255, 0.10);
+    border-radius: 6px;
+    animation: dragNeon 0.8s ease-in-out infinite alternate;
+  }
+  @keyframes dragNeon {
+    0%   { box-shadow: 0 0 0 2px rgba(0,220,255,0.7),  0 0 12px rgba(0,200,255,0.5),  0 0 24px rgba(0,180,255,0.22); }
+    100% { box-shadow: 0 0 0 2px rgba(0,220,255,1.0),  0 0 22px rgba(0,210,255,0.85), 0 0 42px rgba(0,180,255,0.45); }
+  }
+  body.edit-order-mode .tasks-column tbody tr.drag-over {
+    background: rgba(0,200,255,0.12);
+    box-shadow: inset 0 2px 0 rgba(0,220,255,0.5);
+  }
+  /* Пустой столбец — drop-зона */
+  body.edit-order-mode .tasks-column tbody.empty-drop-zone {
+    display: block;
+    min-height: 56px;
+    border: 1.5px dashed rgba(0,200,255,0.35);
+    border-radius: 8px;
+    position: relative;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  body.edit-order-mode .tasks-column tbody.empty-drop-zone::after {
+    content: '↓ перетащи сюда';
+    display: block;
+    text-align: center;
+    padding: 14px 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(0,200,255,0.35);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  body.edit-order-mode .tasks-column tbody.empty-drop-zone.drag-over-zone {
+    border-color: rgba(0,220,255,0.75);
+    background: rgba(0,200,255,0.08);
+  }
+  body.edit-order-mode .tasks-column tbody.empty-drop-zone.drag-over-zone::after {
+    color: rgba(0,220,255,0.75);
+  }
+  /* Edit mode column highlight */
+  body.edit-order-mode .column {
+    box-shadow: 0 0 0 1.5px rgba(0,200,255,0.2), var(--card-shadow);
+  }
+  body.edit-order-mode .col-title {
+    cursor: text;
+    border-radius: 6px;
+    outline: 1.5px dashed rgba(0,200,255,0.5);
+    animation: titleDashBlink 1s steps(1, end) infinite;
+    transition: background 0.2s;
+    position: relative;
+    padding-right: 28px !important;
+  }
+  body.edit-order-mode .col-title::after {
+    content: '✏️';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9em;
+    filter: drop-shadow(0 0 4px rgba(0,220,255,0.9)) drop-shadow(0 0 8px rgba(0,220,255,0.6));
+    animation: pencilGlow 1.2s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes pencilGlow {
+    0%   { opacity: 0.55; transform: translateY(-50%) scale(0.95); }
+    100% { opacity: 1; transform: translateY(-50%) scale(1.1); }
+  }
+  body.edit-order-mode .col-title:hover,
+  body.edit-order-mode .col-title:focus {
+    outline-color: rgba(0,220,255,0.95);
+    background: rgba(0,200,255,0.08);
+    animation: none;
+  }
+  @keyframes titleDashBlink {
+    0%, 49%   { outline-color: rgba(0,200,255,0.85); }
+    50%, 100% { outline-color: rgba(0,200,255,0.15); }
+  }
+  /* Edit mode banner */
+  .edit-mode-banner {
+    display: none;
+    text-align: center;
+    padding: 8px 20px;
+    margin-bottom: 10px;
+    border-radius: 30px;
+    background: rgba(255,0,60,0.10);
+    border: 1px solid rgba(255,0,60,0.5);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #ff4d6d;
+    animation: editPulse 0.9s ease-in-out infinite alternate;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body.edit-order-mode .edit-mode-banner {
+    display: block;
+  }
+  #resetOrderBtn {
+    display: none !important;
+  }
+  body.edit-order-mode #resetOrderBtn {
+    display: inline-flex !important;
+  }
+  body.edit-order-mode #editOrderBtn,
+  body.edit-order-mode #resetOrderBtn {
+    box-shadow: 0 0 14px rgba(0,200,255,0.7), inset 0 0 0 1.5px rgba(0,200,255,0.8);
+    border-color: rgba(0,220,255,0.8);
+    color: #7be8ff;
+    background: rgba(0,200,255,0.16);
+  }
+
+  /* Затемнение всех блоков кроме столбиков с заданиями и логотипа в режиме редактирования */
+  body.edit-order-mode .controls,
+  body.edit-order-mode .total,
+  body.edit-order-mode .char-switcher {
+    opacity: 0.35;
+    filter: grayscale(0.8);
+    pointer-events: none;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+  }
+  body.edit-order-mode .controls .left-group #editOrderBtn,
+  body.edit-order-mode .controls .left-group .reset-order-btn,
+  body.edit-order-mode #editOrderBtn,
+  body.edit-order-mode #resetOrderBtn,
+  body.edit-order-mode .legend .filter-btn {
+    opacity: 1;
+    filter: none;
+    pointer-events: auto;
+  }
 
   /* === CHARACTER SWITCHER === */
   .char-switcher {
@@ -626,6 +803,41 @@
   .column td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.08); vertical-align:middle; color:#e5e7eb; user-select:none; -webkit-user-select:none; cursor:pointer; }
   .column .reward { white-space:nowrap; font-weight:700; }
 
+  /* Когда видна только 1-2 категории, разворачиваем задания в несколько колонок внутри блока */
+  .column.wide-multi2 table,
+  .column.wide-multi3 table {
+    display: block;
+  }
+  .column.wide-multi2 tbody,
+  .column.wide-multi3 tbody {
+    display: block;
+    column-gap: 24px;
+  }
+  .column.wide-multi2 tbody {
+    column-count: 2;
+  }
+  .column.wide-multi3 tbody {
+    column-count: 3;
+  }
+  .column.wide-multi2 tbody tr,
+  .column.wide-multi3 tbody tr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    break-inside: avoid-column;
+    -webkit-column-break-inside: avoid;
+  }
+  .column.wide-multi2 tbody td,
+  .column.wide-multi3 tbody td {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .column.wide-multi2 tbody td:first-child,
+  .column.wide-multi3 tbody td:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
   .easy-col { border-color: rgba(34,197,94,.75); background: linear-gradient(0deg, rgba(34,197,94,.20), transparent 45%), var(--card-surface); }
   .medium-col { border-color: rgba(245,158,11,.78); background: linear-gradient(0deg, rgba(245,158,11,.22), transparent 45%), var(--card-surface); }
   .joint-col { border-color: rgba(59,130,246,.80); background: linear-gradient(0deg, rgba(59,130,246,.24), transparent 45%), var(--card-surface); }
@@ -647,8 +859,6 @@
   input[type="checkbox"]::after{ content:""; width:12px; height:12px; transform:scale(0); transition:transform .18s ease; clip-path: polygon(14% 44%, 0 56%, 41% 96%, 100% 22%, 86% 8%, 41% 66%); background:#e5e7eb; }
   input[type="checkbox"]:checked::after{ transform:scale(1); }
   button, #fractionToggle{ padding:10px 14px; font-size:0.95rem; cursor:pointer; background:#111827; border:1px solid #334155; color:#e5e7eb; border-radius:10px; }
-  .online-bubble { display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; border:1px solid #f2d9a8; background: rgba(15,23,42,.72); margin-top:10px; font-weight:700; cursor:pointer; user-select:none; }
-  .online-bubble .bp { white-space:nowrap; padding:4px 8px; border-radius:8px; background:rgba(0,0,0,0.3); }
 
 
   .total {
@@ -806,52 +1016,8 @@
 
   @media (max-width:1600px){ .grid{ grid-template-columns: repeat(min(var(--visible-cols, 5), 3), 1fr); } }
   @media (max-width:1100px){ .grid{ grid-template-columns: repeat(min(var(--visible-cols, 5), 2), 1fr); } }
-  @media (max-width:700px){ body{ padding:14px; } .grid{ grid-template-columns: 1fr; } .controls{ flex-direction:column; align-items:stretch; } .center-actions{ flex-wrap:wrap; justify-content:center; } }
-/* VIP режим — золотой текст для "3 часа в онлайне" */
-body.vip-mode .online-bubble {
-  color: #ffd700;
-  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 14px rgba(255,180,0,0.5);
-}
-body.vip-mode .online-bubble .bp {
-  color: #ffd700;
-  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
-}
-
-/* x2 режим — розовая обводка на BP-квадратике онлайн пузыря */
-body.x2-mode .online-bubble .online-cb {
-  box-shadow: inset 0 0 0 2px rgba(255,80,160,0.85), 0 0 8px rgba(255,80,160,0.4);
-}
-
-/* x2 режим — розовая обводка на BP-квадратике онлайн пузыря */
-body.x2-mode .online-bubble .online-cb {
-  box-shadow: inset 0 0 0 2px rgba(255,80,160,0.85), 0 0 8px rgba(255,80,160,0.4);
-}
-
-/* Оба активны */
-body.vip-mode.x2-mode .online-bubble {
-  color: #ffd700;
-  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 14px rgba(255,180,0,0.5);
-}
-body.vip-mode.x2-mode .online-bubble .bp {
-  color: #ffd700;
-  text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
-}
-body.vip-mode.x2-mode .online-bubble .online-cb {
-  box-shadow: inset 0 0 0 2px rgba(255,80,160,0.85), 0 0 8px rgba(255,80,160,0.4);
-}
-
+  @media (max-width:700px){ body{ padding:14px; } .grid{ grid-template-columns: 1fr; } .controls{ flex-direction:column; align-items:stretch; } .center-actions{ flex-wrap:wrap; justify-content:center; } .legend{ grid-template-columns: 1fr; } .legend-filters, .legend-settings{ grid-column: 1; justify-self: center; justify-content: center; } }
 /* Выполнено — зелёная подсветка онлайн-задания */
-.online-bubble.done {
-  background: rgba(34,197,94,0.18);
-  border-color: rgba(34,197,94,0.55);
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-.online-bubble.done .online-label {
-  color: #b8f3d6;
-  text-decoration: line-through;
-  text-decoration-color: #34d399;
-  text-decoration-thickness: 2px;
-}
 
 
 #resetBtn {
@@ -986,18 +1152,6 @@ body.char2-active .filter-btn.active[data-col="col-medium"] {
 body.char2-active .filter-btn.active[data-col="col-medium"]:hover {
   box-shadow: 0 0 18px rgba(255,220,0,0.5);
 }
-body.char2-active .online-bubble {
-  border-color: rgba(255, 220, 0, 0.7);
-}
-body.char2-active .online-bubble.done {
-  background: rgba(255, 220, 0, 0.13);
-  border-color: rgba(255, 220, 0, 0.55);
-}
-body.char2-active .online-bubble.done .online-label {
-  color: #ffe97a;
-  text-decoration-color: #ffd700;
-}
-
 /* Совместные → без изменений (розово-малиновый) */
 body.char2-active .joint-col {
   border-color: rgba(255, 50, 130, 0.80);
@@ -1318,7 +1472,18 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     'daily_tasks_vip_mode_v4_char2',
     'daily_tasks_x2_mode_v4',
     'daily_tasks_x2_mode_v4_char2',
-    'active_char'
+    'active_char',
+    'hidden_columns_v1',
+    'task_order_v1_col-easy',
+    'task_order_v1_col-medium',
+    'task_order_v1_col-joint',
+    'task_order_v1_col-avoid',
+    'task_order_v1_col-fraction',
+    'col_title_v1_col-easy',
+    'col_title_v1_col-medium',
+    'col_title_v1_col-joint',
+    'col_title_v1_col-avoid',
+    'col_title_v1_col-fraction'
   ];
   const SYNC_KEY_SET = new Set(SYNC_KEYS);
   let currentUid = null;
@@ -1327,6 +1492,15 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   const _origSetItem = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value) {
     _origSetItem(key, value);
+    if (SYNC_KEY_SET.has(key) && currentUid) {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(pushStateToCloud, 700);
+    }
+  };
+
+  const _origRemoveItem = localStorage.removeItem.bind(localStorage);
+  localStorage.removeItem = function(key) {
+    _origRemoveItem(key);
     if (SYNC_KEY_SET.has(key) && currentUid) {
       clearTimeout(syncTimer);
       syncTimer = setTimeout(pushStateToCloud, 700);
@@ -1681,12 +1855,59 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 <div class="char-indicator" id="charIndicator">⚔️ &nbsp;Персонаж 1</div>
 
 <div class="legend">
+  <div class="legend-filters">
   <button class="filter-btn active" data-col="col-easy">ЛЁГКИЕ</button>
   <button class="filter-btn active" data-col="col-medium">СРЕДНИЕ</button>
   <button class="filter-btn active" data-col="col-joint">СОВМЕСТНЫЕ</button>
   <button class="filter-btn active" data-col="col-avoid">СЛОЖНЫЕ</button>
   <button class="filter-btn active" data-col="col-fraction">ФРАКЦИОННЫЕ</button>
+  </div>
+  <div class="legend-settings">
+  <button class="reset-order-btn" id="resetOrderBtn" title="Сбросить порядок заданий по умолчанию" style="
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(100,116,139,0.10));
+    border: 1.5px solid rgba(148,163,184,0.4);
+    color: rgba(190,205,225,0.85);
+    padding: 7px 16px;
+    border-radius: 40px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 8px rgba(148,163,184,0.12);
+  " onmouseover="this.style.boxShadow='0 0 18px rgba(148,163,184,0.4)';this.style.borderColor='rgba(180,195,215,0.7)';this.style.color='#e5edf7';" onmouseout="this.style.boxShadow='0 0 8px rgba(148,163,184,0.12)';this.style.borderColor='rgba(148,163,184,0.4)';this.style.color='rgba(190,205,225,0.85)';">
+    ↺ По умолчанию
+  </button>
+  <button class="edit-order-btn" id="editOrderBtn" title="Редактировать порядок заданий" style="
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, rgba(0,200,255,0.12), rgba(0,120,180,0.10));
+    border: 1.5px solid rgba(0,200,255,0.4);
+    color: rgba(150,230,255,0.85);
+    padding: 7px 16px;
+    border-radius: 40px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 8px rgba(0,200,255,0.12);
+  " onmouseover="this.style.boxShadow='0 0 18px rgba(0,200,255,0.4)';this.style.borderColor='rgba(0,220,255,0.7)';this.style.color='#aaf2ff';" onmouseout="this.style.boxShadow='0 0 8px rgba(0,200,255,0.12)';this.style.borderColor='rgba(0,200,255,0.4)';this.style.color='rgba(150,230,255,0.85)';">
+    ⚙️ Настройка
+  </button>
+  </div>
 </div>
+<div class="edit-mode-banner">✏️ &nbsp; РЕЖИМ РЕДАКТИРОВАНИЯ — ПЕРЕТАЩИТЕ ЗАДАНИЯ ДЛЯ ИЗМЕНЕНИЯ ПОРЯДКА</div>
 
 <div class="total">
   <div class="total-card card-done">
@@ -1717,7 +1938,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-easy">⟳ Сбросить прогресс</button>
     </div>
-    <h2>Легкие</h2>
+    <h2 class="col-title" data-default="Легкие">Легкие</h2>
     <table class="tasks-column"><tbody>
       <tr><td>Купить лотерейный билет</td><td style="width:1px;"><input id="cb0" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
       <tr><td>Посетить любой сайт в браузере</td><td><input id="cb1" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
@@ -1747,9 +1968,9 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-medium">⟳ Сбросить прогресс</button>
     </div>
-    <h2>Средние</h2>
-    <div style="margin-bottom:12px; display:flex; justify-content:center;"><div class="online-bubble" id="onlineBubble"><input class="tasks-column" id="cbOnline" type="checkbox" title="3 часа в онлайне"><div class="online-label">3 часа в онлайне</div><div class="bp online-cb" id="onlineBp">8 BP</div></div></div>
+    <h2 class="col-title" data-default="Средние">Средние</h2>
     <table class="tasks-column"><tbody>
+      <tr><td>3 часа в онлайне</td><td><input id="cb43" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
       <tr><td>25 действий на стройке</td><td><input id="cb17" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
       <tr><td>25 действий в порту</td><td><input id="cb18" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
       <tr><td>25 действий в шахте</td><td><input id="cb19" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
@@ -1773,7 +1994,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-joint">⟳ Сбросить прогресс</button>
     </div>
-    <h2>Совместные</h2>
+    <h2 class="col-title" data-default="Совместные">Совместные</h2>
     <table class="tasks-column"><tbody>
       <tr><td>Сыграть в мафию в казино</td><td><input id="cb_mafia2" type="checkbox"></td><td class="reward" data-with="6" data-without="3">12 BP</td></tr>
       <tr><td>Выиграть гонку в картинге</td><td><input id="cb29" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
@@ -1793,7 +2014,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-avoid">⟳ Сбросить прогресс</button>
     </div>
-    <h2>Сложные</h2>
+    <h2 class="col-title" data-default="Сложные">Сложные</h2>
     <table class="tasks-column"><tbody>
       <tr><td>10 посылок на почте</td><td><input id="cb28" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
       <tr><td>Прокрутить за DP серебрянный или золотой кейс</td><td><input id="cb36" type="checkbox"></td><td class="reward" data-with="20" data-without="10">40 BP</td></tr>
@@ -1811,7 +2032,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-fraction">⟳ Сбросить прогресс</button>
     </div>
-    <h2>Фракционные</h2>
+    <h2 class="col-title" data-default="Фракционные">Фракционные</h2>
     <table class="fraction-table tasks-column" id="fractionTable"><tbody id="fractionTbody">
       <tr class="fraction-row"><td>7 закрашенных граффити</td><td><input class="fraction-cb" data-with="1" data-without="1" type="checkbox"></td><td class="reward" data-with="1" data-without="1">4 BP</td></tr>
       <tr class="fraction-row"><td>Сдать 5 контрабанды</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
@@ -1893,12 +2114,9 @@ function getCharTaskProgress(charNum) {
   let arr = null;
   try { arr = JSON.parse(localStorage.getItem(key)); } catch(e){}
   if (!Array.isArray(arr)) arr = [];
-  // online bubble
-  const onlineKey = key + '_online';
-  const onlineDone = localStorage.getItem(onlineKey) === 'true';
   const allCheckboxes = qa('.tasks-column input[type="checkbox"]');
-  const total = allCheckboxes.length + 1; // +1 онлайн
-  const done = arr.filter(Boolean).length + (onlineDone ? 1 : 0);
+  const total = allCheckboxes.length;
+  const done = arr.filter(Boolean).length;
   return { done, total };
 }
 
@@ -1915,10 +2133,8 @@ function updateCharProgressBars() {
 
 function updateTaskProgressBar() {
   const allCbs = qa('.tasks-column input[type="checkbox"]');
-  const total = allCbs.length + 1; // +1 онлайн-задание
-  const cbOnlineEl = document.getElementById('cbOnline');
-  const onlineDone = cbOnlineEl ? cbOnlineEl.checked : false;
-  const done = allCbs.filter(cb => cb.checked).length + (onlineDone ? 1 : 0);
+  const total = allCbs.length;
+  const done = allCbs.filter(cb => cb.checked).length;
   const pct = total > 0 ? (done / total) * 100 : 0;
   const fill = document.getElementById('taskProgressFill');
   const label = document.getElementById('taskProgressLabel');
@@ -1932,8 +2148,6 @@ function saveStateForChar(charNum) {
   localStorage.setItem(storageKey + suffix, JSON.stringify(arr));
   localStorage.setItem(vipStorageKey + suffix, JSON.stringify(!!vipCheckbox.checked));
   localStorage.setItem(x2StorageKey + suffix, JSON.stringify(!!x2Checkbox.checked));
-  const cbOnlineEl = document.getElementById('cbOnline');
-  if (cbOnlineEl) localStorage.setItem(storageKey + suffix + '_online', cbOnlineEl.checked ? 'true' : 'false');
 }
 
 function q(sel){return document.querySelector(sel);} 
@@ -1960,16 +2174,11 @@ function updateRewardCellsDisplay(showVip, x2) {
   });
   document.body.classList.toggle('vip-mode', !!showVip);
   document.body.classList.toggle('x2-mode', !!x2);
-  const onlineBase = 2; 
-  const onlineBaseVip = vipCheckbox.checked ? onlineBase * 2 : onlineBase;
-  const onlineVal = onlineBaseVip * (x2Checkbox.checked ? 2 : 1);
-  const onlineElem = q('#onlineBp');
-  if (onlineElem) onlineElem.textContent = onlineVal + ' BP';
 }
 function computeTotals(showVip, x2) {
   let sumSelectedTasks = 0;
   let possibleTotalTasks = 0;
-  const rows = qa('.tasks-column tr');
+  const rows = qa('.tasks-column tr').filter(row => !row.closest('.column.hidden'));
   rows.forEach(row => {
     const rewardCell = row.querySelector('td.reward');
     if (!rewardCell) return;
@@ -1982,12 +2191,6 @@ function computeTotals(showVip, x2) {
     if (cb && cb.checked) sumSelectedTasks += val;
     possibleTotalTasks += val;
   });
-  // Учитываем "3 часа в онлайне"
-  const onlineBase = 2;
-  const onlineVal = (showVip ? onlineBase * 2 : onlineBase) * (x2 ? 2 : 1);
-  const cbOnlineEl = q('#cbOnline');
-  if (cbOnlineEl && cbOnlineEl.checked) sumSelectedTasks += onlineVal;
-  possibleTotalTasks += onlineVal;
   const totalDisplayVal = sumSelectedTasks;
   const remaining = Math.max(0, possibleTotalTasks - sumSelectedTasks);
   return {totalDisplayVal, remaining};
@@ -2020,14 +2223,6 @@ function loadState() {
   const vipMode = !!JSON.parse(localStorage.getItem(getVipStorageKey()) || 'false');
   const x2Mode = !!JSON.parse(localStorage.getItem(getX2StorageKey()) || 'false');
   vipCheckbox.checked = vipMode; x2Checkbox.checked = x2Mode;
-  // Онлайн-пузырёк
-  const cbOnlineEl = document.getElementById('cbOnline');
-  if (cbOnlineEl) {
-    const onlineRaw = localStorage.getItem(getStorageKey() + '_online');
-    cbOnlineEl.checked = onlineRaw === 'true';
-    const bubble = document.getElementById('onlineBubble');
-    if (bubble) bubble.classList.toggle('done', cbOnlineEl.checked);
-  }
   refreshAll();
 }
 function saveState() {
@@ -2035,9 +2230,6 @@ function saveState() {
   localStorage.setItem(getStorageKey(), JSON.stringify(arr));
   localStorage.setItem(getVipStorageKey(), JSON.stringify(!!vipCheckbox.checked));
   localStorage.setItem(getX2StorageKey(), JSON.stringify(!!x2Checkbox.checked));
-  // Онлайн-пузырёк
-  const cbOnlineEl = document.getElementById('cbOnline');
-  if (cbOnlineEl) localStorage.setItem(getStorageKey() + '_online', cbOnlineEl.checked ? 'true' : 'false');
   refreshAll();
 }
 function attachCheckboxListeners(){
@@ -2072,10 +2264,6 @@ vipCheckbox.addEventListener('change', ()=>{ localStorage.setItem(getVipStorageK
 x2Checkbox.addEventListener('change', ()=>{ localStorage.setItem(getX2StorageKey(), JSON.stringify(!!x2Checkbox.checked)); refreshAll(); });
 document.getElementById('resetBtn').addEventListener('click', ()=>{
   qa('.tasks-column input[type="checkbox"]').forEach(cb => cb.checked = false);
-  const bubble = document.getElementById('onlineBubble');
-  if (bubble) bubble.classList.remove('done');
-  const cbOnlineEl = document.getElementById('cbOnline');
-  if (cbOnlineEl) cbOnlineEl.checked = false;
   saveState();
 });
 loadState();
@@ -2093,10 +2281,7 @@ function checkColumnCompletion() {
     const col = document.getElementById(colId);
     const overlay = document.getElementById(overlayId);
     if (!col || !overlay) return;
-    const cbs = Array.from(col.querySelectorAll('.tasks-column input[type="checkbox"]'));
-    // для средних — учитываем онлайн-пузырёк отдельно
-    const extraCb = colId === 'col-medium' ? document.getElementById('cbOnline') : null;
-    const allCbs = extraCb ? [...cbs, extraCb] : cbs;
+    const allCbs = Array.from(col.querySelectorAll('.tasks-column input[type="checkbox"]'));
     if (allCbs.length > 0 && allCbs.every(cb => cb.checked)) {
       overlay.classList.add('visible');
     } else {
@@ -2111,11 +2296,6 @@ function attachColumnCompletionListeners() {
     cb.removeEventListener('change', checkColumnCompletion);
     cb.addEventListener('change', checkColumnCompletion);
   });
-  const cbOnlineEl = document.getElementById('cbOnline');
-  if (cbOnlineEl) {
-    cbOnlineEl.removeEventListener('change', checkColumnCompletion);
-    cbOnlineEl.addEventListener('change', checkColumnCompletion);
-  }
 }
 attachColumnCompletionListeners();
 checkColumnCompletion();
@@ -2132,43 +2312,66 @@ document.querySelectorAll('.col-reset-btn').forEach(btn => {
       cb.checked = false;
       cb.dispatchEvent(new Event('change', { bubbles: true }));
     });
-    // Для средних — сбрасываем онлайн-пузырёк
-    if (colId === 'col-medium') {
-      const cbOnlineEl = document.getElementById('cbOnline');
-      if (cbOnlineEl) {
-        cbOnlineEl.checked = false;
-        cbOnlineEl.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    }
     saveState();
     checkColumnCompletion();
   });
 });
-
-// Онлайн-задание: зелёная подсветка при выполнении + клик по всему пузырьку
-const cbOnline = document.getElementById('cbOnline');
-const onlineBubble = document.getElementById('onlineBubble');
-if (cbOnline && onlineBubble) {
-  function updateOnlineDone() {
-    onlineBubble.classList.toggle('done', cbOnline.checked);
-  }
-  cbOnline.addEventListener('change', () => { updateOnlineDone(); refreshAll(); });
-  onlineBubble.addEventListener('click', (e) => {
-    if (e.target === cbOnline) return;
-    cbOnline.checked = !cbOnline.checked;
-    cbOnline.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-  updateOnlineDone();
-}
 
 // Кнопки-фильтры категорий
 const grid = document.getElementById('tasksGrid');
 function updateGridCols() {
   const total = document.querySelectorAll('.grid > .column').length;
   const hidden = document.querySelectorAll('.grid > .column.hidden').length;
-  const visible = Math.max(3, total - hidden);
+  const visible = Math.max(1, total - hidden);
   grid.style.setProperty('--visible-cols', visible);
+
+  document.querySelectorAll('.grid > .column').forEach(col => {
+    col.classList.remove('wide-multi2', 'wide-multi3');
+  });
+  if (!document.body.classList.contains('edit-order-mode')) {
+    if (visible === 1) {
+      document.querySelectorAll('.grid > .column:not(.hidden)').forEach(col => {
+        col.classList.add('wide-multi3');
+      });
+    } else if (visible === 2) {
+      document.querySelectorAll('.grid > .column:not(.hidden)').forEach(col => {
+        col.classList.add('wide-multi2');
+      });
+    }
+  }
 }
+
+function saveHiddenColumns() {
+  const hidden = Array.from(document.querySelectorAll('.grid > .column.hidden')).map(c => c.id);
+  localStorage.setItem('hidden_columns_v1', JSON.stringify(hidden));
+}
+
+function applyHiddenColumns(hiddenIds) {
+  // Сначала показываем все
+  document.querySelectorAll('.grid > .column').forEach(col => {
+    col.classList.remove('hidden');
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.add('active');
+  });
+  // Затем скрываем нужные
+  hiddenIds.forEach(colId => {
+    const col = document.getElementById(colId);
+    const btn = document.querySelector('.filter-btn[data-col="' + colId + '"]');
+    if (col) col.classList.add('hidden');
+    if (btn) btn.classList.remove('active');
+  });
+  updateGridCols();
+  if (typeof refreshAll === 'function') refreshAll();
+}
+
+function loadHiddenColumns() {
+  try {
+    const raw = localStorage.getItem('hidden_columns_v1');
+    if (raw) applyHiddenColumns(JSON.parse(raw));
+  } catch(e) {}
+}
+
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const colId = btn.dataset.col;
@@ -2185,11 +2388,15 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
         col.style.opacity = '';
         col.style.pointerEvents = '';
         updateGridCols();
+        refreshAll();
+        saveHiddenColumns();
       }, 280);
     } else {
       // Show: remove hidden, then fade in
       col.classList.remove('hidden');
       updateGridCols();
+      refreshAll();
+      saveHiddenColumns();
       // Force reflow
       col.getBoundingClientRect();
       col.style.opacity = '0';
@@ -2200,6 +2407,392 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 updateGridCols();
+loadHiddenColumns();
+
+// === РЕДАКТИРОВАНИЕ ПОРЯДКА ЗАДАНИЙ ===
+(function() {
+  const ORDER_KEY_PREFIX = 'task_order_v1_';
+  const editBtn = document.getElementById('editOrderBtn');
+  const resetBtn = document.getElementById('resetOrderBtn');
+  let isEditMode = false;
+  let dragSrc = null;
+
+  const tbodies = Array.from(document.querySelectorAll('.tasks-column tbody'));
+
+  // Помечаем каждую строку атрибутом data-origin-col — её родной столбец
+  // и data-row-key — уникальный текстовый ключ. Делаем это один раз при старте.
+  const defaultOrders = {}; // colId -> [ {key, tr} ]
+  tbodies.forEach(tbody => {
+    const col = tbody.closest('.column');
+    const colId = col ? col.id : (tbody.id || 'fraction');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    defaultOrders[colId] = rows.map(tr => {
+      const td = tr.querySelector('td:first-child');
+      const key = td ? td.textContent.trim() : Math.random().toString();
+      tr.dataset.originCol = colId;
+      tr.dataset.rowKey = key;
+      return key;
+    });
+  });
+
+  // Глобальная карта ключ -> tr (по всему документу)
+  function buildGlobalRowMap() {
+    const map = {};
+    document.querySelectorAll('.tasks-column tbody tr').forEach(tr => {
+      if (tr.dataset.rowKey) map[tr.dataset.rowKey] = tr;
+    });
+    return map;
+  }
+
+  // ── Названия категорий ──
+  const TITLE_KEY_PREFIX = 'col_title_v1_';
+  const colTitles = Array.from(document.querySelectorAll('.col-title'));
+
+  function applySavedTitles() {
+    colTitles.forEach(h2 => {
+      const col = h2.closest('.column');
+      const colId = col ? col.id : '';
+      if (!colId) return;
+      const saved = localStorage.getItem(TITLE_KEY_PREFIX + colId);
+      h2.textContent = saved || h2.dataset.default;
+      syncFilterBtnLabel(colId, h2.textContent);
+    });
+  }
+
+  function syncFilterBtnLabel(colId, text) {
+    const btn = document.querySelector('.filter-btn[data-col="' + colId + '"]');
+    if (btn) btn.textContent = text.toUpperCase();
+  }
+
+  function saveTitle(h2) {
+    const col = h2.closest('.column');
+    const colId = col ? col.id : '';
+    if (!colId) return;
+    const text = h2.textContent.trim() || h2.dataset.default;
+    h2.textContent = text;
+    if (text === h2.dataset.default) {
+      localStorage.removeItem(TITLE_KEY_PREFIX + colId);
+    } else {
+      localStorage.setItem(TITLE_KEY_PREFIX + colId, text);
+    }
+    syncFilterBtnLabel(colId, text);
+  }
+
+  function resetAllTitles() {
+    colTitles.forEach(h2 => {
+      const col = h2.closest('.column');
+      const colId = col ? col.id : '';
+      if (colId) localStorage.removeItem(TITLE_KEY_PREFIX + colId);
+      h2.textContent = h2.dataset.default;
+      syncFilterBtnLabel(colId, h2.textContent);
+    });
+  }
+
+  colTitles.forEach(h2 => {
+    h2.addEventListener('blur', () => saveTitle(h2));
+    h2.addEventListener('input', () => {
+      const col = h2.closest('.column');
+      const colId = col ? col.id : '';
+      syncFilterBtnLabel(colId, h2.textContent.trim() || h2.dataset.default);
+    });
+    h2.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); h2.blur(); }
+    });
+  });
+
+  applySavedTitles();
+
+  // Единый ключ порядка для обоих персонажей
+  function orderKey(colId) {
+    return ORDER_KEY_PREFIX + colId;
+  }
+
+  // Применяем сохранённый порядок — строки ищем по всему документу
+  function applySavedOrder(tbody, colId) {
+    const saved = localStorage.getItem(orderKey(colId));
+    if (!saved) return;
+    let order;
+    try { order = JSON.parse(saved); } catch(e) { return; }
+    const globalMap = buildGlobalRowMap();
+    order.forEach(key => {
+      const tr = globalMap[key];
+      if (tr) tbody.appendChild(tr);
+    });
+  }
+
+  // Применяем порядки для всех столбцов
+  function applyAllSavedOrders() {
+    tbodies.forEach(tbody => {
+      const col = tbody.closest('.column');
+      const colId = col ? col.id : (tbody.id || 'fraction');
+      applySavedOrder(tbody, colId);
+    });
+  }
+
+  // Сохраняем текущий порядок
+  function saveCurrentOrder(tbody, colId) {
+    const order = Array.from(tbody.querySelectorAll('tr')).map(tr => tr.dataset.rowKey || '');
+    localStorage.setItem(orderKey(colId), JSON.stringify(order));
+  }
+
+  function saveAllOrders() {
+    tbodies.forEach(tbody => {
+      const col = tbody.closest('.column');
+      const colId = col ? col.id : (tbody.id || 'fraction');
+      saveCurrentOrder(tbody, colId);
+    });
+  }
+
+  // Сбрасываем порядок к дефолтному:
+  // ищем каждую строку по всему DOM и возвращаем в её родной tbody
+  function resetAllOrders() {
+    // Удаляем сохранённые порядки из localStorage
+    tbodies.forEach(tbody => {
+      const col = tbody.closest('.column');
+      const colId = col ? col.id : (tbody.id || 'fraction');
+      localStorage.removeItem(orderKey(colId));
+    });
+
+    // Строим карту tbody по colId
+    const tbodyMap = {};
+    tbodies.forEach(tbody => {
+      const col = tbody.closest('.column');
+      const colId = col ? col.id : (tbody.id || 'fraction');
+      tbodyMap[colId] = tbody;
+    });
+
+    // Глобальная карта всех строк
+    const globalMap = buildGlobalRowMap();
+
+    // Возвращаем каждую строку в родной tbody в дефолтном порядке
+    tbodies.forEach(tbody => {
+      const col = tbody.closest('.column');
+      const colId = col ? col.id : (tbody.id || 'fraction');
+      const defKeys = defaultOrders[colId];
+      if (!defKeys) return;
+      defKeys.forEach(key => {
+        const tr = globalMap[key];
+        if (tr) tbody.appendChild(tr);
+      });
+    });
+  }
+
+  // Drag & drop handlers
+  function onDragStart(e) {
+    dragSrc = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+  }
+  function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    // Убираем drag-over у остальных
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    if (this !== dragSrc) this.classList.add('drag-over');
+    return false;
+  }
+  function onDragLeave() {
+    this.classList.remove('drag-over');
+  }
+  function onDrop(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (dragSrc !== this) {
+      const tbody = this.parentNode;
+      // Определяем позицию: вставить до или после
+      const rect = this.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (e.clientY < midY) {
+        tbody.insertBefore(dragSrc, this);
+      } else {
+        if (this.nextSibling) tbody.insertBefore(dragSrc, this.nextSibling);
+        else tbody.appendChild(dragSrc);
+      }
+    }
+    this.classList.remove('drag-over');
+    updateEmptyTbodies();
+    return false;
+  }
+  function onDragEnd() {
+    document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    document.querySelectorAll('.drag-over-zone').forEach(el => el.classList.remove('drag-over-zone'));
+    dragSrc = null;
+    updateEmptyTbodies();
+  }
+
+  // Обновляем статус пустых tbody
+  function updateEmptyTbodies() {
+    tbodies.forEach(tbody => {
+      const hasRows = tbody.querySelectorAll('tr').length > 0;
+      if (!hasRows) {
+        tbody.classList.add('empty-drop-zone');
+      } else {
+        tbody.classList.remove('empty-drop-zone');
+      }
+    });
+  }
+
+  function enableEmptyTbodyDrop(tbody) {
+    tbody._onDragOver = function(e) {
+      if (!dragSrc) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      tbody.classList.add('drag-over-zone');
+    };
+    tbody._onDragLeave = function(e) {
+      // только если уходим из tbody целиком
+      if (!tbody.contains(e.relatedTarget)) {
+        tbody.classList.remove('drag-over-zone');
+      }
+    };
+    tbody._onDrop = function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      tbody.classList.remove('drag-over-zone');
+      if (dragSrc) {
+        tbody.appendChild(dragSrc);
+        updateEmptyTbodies();
+      }
+    };
+    tbody.addEventListener('dragover', tbody._onDragOver);
+    tbody.addEventListener('dragleave', tbody._onDragLeave);
+    tbody.addEventListener('drop', tbody._onDrop);
+  }
+
+  function enableDrag(tr) {
+    tr.setAttribute('draggable', 'true');
+    tr.addEventListener('dragstart', onDragStart);
+    tr.addEventListener('dragover', onDragOver);
+    tr.addEventListener('dragleave', onDragLeave);
+    tr.addEventListener('drop', onDrop);
+    tr.addEventListener('dragend', onDragEnd);
+  }
+  function disableDrag(tr) {
+    tr.removeAttribute('draggable');
+    tr.removeEventListener('dragstart', onDragStart);
+    tr.removeEventListener('dragover', onDragOver);
+    tr.removeEventListener('dragleave', onDragLeave);
+    tr.removeEventListener('drop', onDrop);
+    tr.removeEventListener('dragend', onDragEnd);
+  }
+
+  function enterEditMode() {
+    isEditMode = true;
+    editBtn.classList.add('active');
+    editBtn.textContent = '💾 Сохранить';
+    document.body.classList.add('edit-order-mode');
+    updateGridCols();
+    // Включаем перетаскивание
+    tbodies.forEach(tbody => {
+      tbody.querySelectorAll('tr').forEach(enableDrag);
+      enableEmptyTbodyDrop(tbody);
+    });
+    updateEmptyTbodies();
+    // Разрешаем редактирование названий категорий (макс. 12 символов)
+    colTitles.forEach(h2 => {
+      h2.setAttribute('contenteditable', 'true');
+      if (!h2._titleInputHandler) {
+        h2._titleInputHandler = function() {
+          const sel = window.getSelection();
+          const anchorOffset = sel.anchorOffset;
+          if (h2.textContent.length > 12) {
+            h2.textContent = h2.textContent.slice(0, 12);
+            // Восстанавливаем курсор в конец
+            const range = document.createRange();
+            range.selectNodeContents(h2);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        };
+        h2._titleKeydownHandler = function(e) {
+          // Разрешаем: Backspace, Delete, стрелки, Tab, Enter, Ctrl+A/C/V/X/Z
+          const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Tab','Enter'];
+          if (allowed.includes(e.key)) return;
+          if (e.ctrlKey || e.metaKey) return;
+          if (h2.textContent.length >= 12) {
+            // Если выделен текст — разрешить замену, иначе блокировать
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed) {
+              e.preventDefault();
+            }
+          }
+        };
+      }
+      h2.addEventListener('input', h2._titleInputHandler);
+      h2.addEventListener('keydown', h2._titleKeydownHandler);
+    });
+  }
+
+  function exitEditMode(save) {
+    isEditMode = false;
+    editBtn.classList.remove('active');
+    editBtn.textContent = '⚙️ Настройка';
+    document.body.classList.remove('edit-order-mode');
+    updateGridCols();
+    // Отключаем перетаскивание
+    tbodies.forEach(tbody => {
+      tbody.querySelectorAll('tr').forEach(disableDrag);
+      // Убираем обработчики пустого tbody
+      if (tbody._onDragOver) { tbody.removeEventListener('dragover', tbody._onDragOver); delete tbody._onDragOver; }
+      if (tbody._onDragLeave) { tbody.removeEventListener('dragleave', tbody._onDragLeave); delete tbody._onDragLeave; }
+      if (tbody._onDrop) { tbody.removeEventListener('drop', tbody._onDrop); delete tbody._onDrop; }
+      tbody.classList.remove('empty-drop-zone', 'drag-over-zone');
+    });
+    // Запрещаем редактирование названий категорий
+    colTitles.forEach(h2 => {
+      h2.removeAttribute('contenteditable');
+      if (h2._titleInputHandler) h2.removeEventListener('input', h2._titleInputHandler);
+      if (h2._titleKeydownHandler) h2.removeEventListener('keydown', h2._titleKeydownHandler);
+      saveTitle(h2);
+    });
+    if (save) {
+      saveAllOrders();
+      // Мини-вспышка кнопки
+      editBtn.style.color = '#39ff6a';
+      editBtn.style.borderColor = 'rgba(57,255,100,0.6)';
+      setTimeout(() => {
+        editBtn.style.color = '';
+        editBtn.style.borderColor = '';
+      }, 800);
+    }
+  }
+
+  editBtn.addEventListener('click', () => {
+    if (!isEditMode) enterEditMode();
+    else exitEditMode(true);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (isEditMode) exitEditMode(false);
+    resetAllOrders();
+    resetAllTitles();
+    // Раскрываем все скрытые категории
+    applyHiddenColumns([]);
+    saveHiddenColumns();
+    updateGridCols();
+    // Визуальный отклик
+    resetBtn.style.color = '#fbbf24';
+    resetBtn.style.borderColor = 'rgba(251,191,36,0.6)';
+    setTimeout(() => {
+      resetBtn.style.color = '';
+      resetBtn.style.borderColor = '';
+    }, 800);
+  });
+
+  // Применяем сохранённые порядки при загрузке
+  applyAllSavedOrders();
+
+  // Обновляем порядок при смене персонажа
+  const _origSwitchChar = window.switchChar;
+  window.switchChar = function(n) {
+    if (isEditMode) exitEditMode(false);
+    _origSwitchChar(n);
+    applyAllSavedOrders();
+  };
+})();
 
 // Дата
 (function updateDate() {
