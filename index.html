@@ -2114,11 +2114,21 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       const snap = await get(ref(db, 'users/' + uid + '/state'));
       if (snap.exists()) {
         const data = snap.val();
+        // Проверяем есть ли реальные отличия от локального состояния
+        let hasChanges = false;
         SYNC_KEYS.forEach(k => {
-          if (data[k] !== undefined) _origSetItem(k, data[k]);
-          else localStorage.removeItem(k);
+          const localVal = localStorage.getItem(k);
+          const cloudVal = data[k] !== undefined ? data[k] : null;
+          if (localVal !== cloudVal) hasChanges = true;
         });
-        return true;
+        if (hasChanges) {
+          SYNC_KEYS.forEach(k => {
+            if (data[k] !== undefined) _origSetItem(k, data[k]);
+            else _origRemoveItem(k);
+          });
+          return true; // есть изменения — нужен reload
+        }
+        return false; // данные идентичны — reload не нужен
       }
     } catch(e) {}
     return false;
@@ -2151,16 +2161,12 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       if (nameEl) nameEl.textContent = getDisplayName(user.email);
 
       currentUid = user.uid;
-      const syncFlag = 'cloud_synced_' + user.uid;
-      if (sessionStorage.getItem(syncFlag) !== '1') {
-        const hadCloud = await pullStateFromCloud(user.uid);
-        sessionStorage.setItem(syncFlag, '1');
-        if (hadCloud) {
-          location.reload();
-          return;
-        } else {
-          pushStateToCloud();
-        }
+      const hadCloud = await pullStateFromCloud(user.uid);
+      if (hadCloud) {
+        location.reload();
+        return;
+      } else {
+        pushStateToCloud();
       }
     } else {
       loadingBox.style.display = 'none';
