@@ -516,10 +516,20 @@
     animation: none;
     filter: drop-shadow(0 0 6px rgba(0,220,255,1));
   }
-  body.edit-order-mode .col-title:focus {
-    background: rgba(0,200,255,0.10);
-    box-shadow: 0 2px 0 0 rgba(0,220,255,0.95), 0 0 16px rgba(0,200,255,0.18);
+  body.edit-order-mode .col-title:focus,
+  body.edit-order-mode .col-title *:focus {
     outline: none;
+    background: transparent;
+    box-shadow: none;
+  }
+  body.edit-order-mode .col-title-text[contenteditable] {
+    border-bottom: 1.5px solid rgba(255,255,255,0.35);
+  }
+  body.edit-order-mode .col-title-text[contenteditable]:focus {
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+    border-bottom: 1.5px solid rgba(255,255,255,0.75);
   }
   /* Edit mode banner */
   .edit-mode-banner {
@@ -916,7 +926,7 @@
   .column.wide-multi3 tbody tr {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     gap: 10px;
     break-inside: avoid-column;
     -webkit-column-break-inside: avoid;
@@ -1055,7 +1065,7 @@
 
   .card-icon { display: none; }
   .card-label {
-    font-size: 0.88rem;
+    font-size: 1.08rem;
     font-weight: 800;
     letter-spacing: 4px;
     text-transform: uppercase;
@@ -1065,12 +1075,12 @@
   }
   .card-value-row {
     display: flex;
-    align-items: baseline;
-    gap: 6px;
+    align-items: center;
+    gap: 10px;
     line-height: 1;
   }
   .card-value {
-    font-size: 3rem;
+    font-size: 3.6rem;
     font-weight: 900;
     letter-spacing: 1px;
     line-height: 1;
@@ -1078,14 +1088,21 @@
     cursor: default;
   }
   .card-bp {
-    font-size: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    font-size: 1.05rem;
     font-weight: 900;
-    letter-spacing: 3px;
+    letter-spacing: 1.5px;
+    line-height: 1.25;
     font-family: monospace;
+    text-align: left;
     opacity: 0.85;
     user-select: none;
     cursor: default;
   }
+  .card-bp-line { display: block; }
   .card-max-row {
     font-size: 0.78rem;
     font-weight: 800;
@@ -1127,6 +1144,8 @@
     .total-divider::before { top: 50%; left: 50%; }
     .total-card.card-done::before { display: none; }
     .total-card.card-left::after  { display: none; }
+    .card-value { font-size: 3rem; }
+    .card-bp { font-size: 0.92rem; }
   }
 
   /* ── ПЕРСОНАЖ 2 ── */
@@ -1176,12 +1195,12 @@
   }
   body.char2-active .total-card.card-left .card-max-row { color: rgba(0, 220, 210, 0.65); }
 
-  .tasks-column tr{ transition: background .2s ease; cursor:pointer; user-select: none; }
+  .tasks-column tr{ cursor:pointer; user-select: none; }
   .tasks-column td{ cursor: pointer; user-select: none; }
   .tasks-column tr:hover td{ background: rgba(148,163,184,.10); }
   .tasks-column tr.done td{ background: rgba(34,197,94,.22); border-bottom-color: rgba(34,197,94,.50); }
   .tasks-column tr.done td:first-child{ color:#b8f3d6; text-decoration: line-through; text-decoration-color:#34d399; text-decoration-thickness:2px; }
-  .reward { font-weight:bold; background:rgba(2,6,23,.35); border-radius:4px; box-shadow:inset 0 0 0 1px rgba(148,163,184,.16); margin-left:10px; white-space:nowrap; text-align:center; min-width:45px; padding:2px 6px; transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease; }
+  .reward { font-weight:bold; background:rgba(2,6,23,.35); border-radius:4px; box-shadow:inset 0 0 0 1px rgba(148,163,184,.16); margin-left:10px; white-space:nowrap; text-align:center; min-width:45px; padding:2px 6px; transition: color 0.25s ease, box-shadow 0.25s ease; }
 
   /* VIP активен — золотой текст BP */
   body.vip-mode .reward {
@@ -1189,18 +1208,20 @@
     text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
   }
 
-  /* x2 активен — только розовая обводка потолще */
+  /* x2 активен — спокойный розово-пурпурный как в "ОСТАЛОСЬ" */
   body.x2-mode .reward {
     background: rgba(2,6,23,.35);
-    box-shadow: inset 0 0 0 2px rgba(255,80,160,0.7), 0 0 6px rgba(255,80,160,0.2);
+    box-shadow: inset 0 0 0 1px rgba(148,163,184,.16);
+    color: #ff50a0;
+    text-shadow: 0 0 8px rgba(255,80,160,0.6), 0 0 16px rgba(200,50,180,0.3);
   }
 
-  /* Оба активны — розовая обводка + золотой текст */
+  /* Оба активны — золото с розовой обводкой */
   body.vip-mode.x2-mode .reward {
-    color: #ffd700;
-    text-shadow: 0 0 6px rgba(255,210,0,0.7), 0 0 12px rgba(255,180,0,0.4);
     background: rgba(2,6,23,.35);
-    box-shadow: inset 0 0 0 2px rgba(255,80,160,0.7), 0 0 6px rgba(255,80,160,0.2);
+    box-shadow: inset 0 0 0 1.5px rgba(255,80,160,0.65), 0 0 8px rgba(255,80,160,0.15);
+    color: #ffd700;
+    text-shadow: 0 0 6px rgba(255,210,0,0.8), 0 0 14px rgba(255,80,160,0.35);
   }
 
   @media (max-width:1600px){ .grid{ grid-template-columns: repeat(min(var(--visible-cols, 5), 3), 1fr); } }
@@ -1479,16 +1500,14 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     border-radius: 50%;
     padding: 0;
     overflow: hidden;
-    border: 1.5px solid rgba(0,180,255,0.40);
+    border: 2px solid rgba(0,180,255,0.38);
     background: linear-gradient(135deg, rgba(8,18,42,0.92), rgba(4,12,32,0.95));
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     outline: none;
     transition: border-color 0.32s ease, box-shadow 0.32s ease, transform 0.18s ease;
-    box-shadow:
-      0 0 10px rgba(0,160,255,0.13),
-      0 2px 8px rgba(0,0,0,0.55);
+    box-shadow: 0 0 6px rgba(0,180,255,0.14);
     position: relative;
   }
   .cosmos-btn:focus { outline: none; }
@@ -1499,8 +1518,8 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     display: block;
     pointer-events: none;
     transition: filter 0.32s ease, opacity 0.32s ease;
-    filter: drop-shadow(0 0 3px rgba(100,190,255,0.5));
-    opacity: 0.75;
+    filter: drop-shadow(0 0 2px rgba(100,190,255,0.3));
+    opacity: 0.5;
   }
   .cosmos-btn:hover {
     transform: scale(1.09);
@@ -1519,6 +1538,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     border-color: rgba(0,215,255,0.88);
     background: linear-gradient(135deg, rgba(0,30,70,0.95), rgba(0,15,45,0.98));
     box-shadow: 0 0 14px rgba(0,200,255,0.55), 0 2px 8px rgba(0,0,0,0.5);
+    animation: charPulse 2.2s ease-in-out infinite alternate;
   }
   .cosmos-btn.active svg.galaxy-icon {
     filter: drop-shadow(0 0 5px rgba(0,220,255,0.9));
@@ -1534,12 +1554,12 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   body.char2-active .cosmos-btn {
     border-color: rgba(57,255,100,0.38);
     background: linear-gradient(135deg, rgba(5,22,10,0.92), rgba(3,14,7,0.95));
-    box-shadow:
-      0 0 10px rgba(57,255,100,0.11),
-      0 2px 8px rgba(0,0,0,0.55);
+    box-shadow: 0 0 6px rgba(57,255,100,0.1);
+    animation: none;
   }
   body.char2-active .cosmos-btn svg.galaxy-icon {
-    filter: drop-shadow(0 0 3px rgba(57,255,100,0.5));
+    filter: drop-shadow(0 0 2px rgba(57,255,100,0.3));
+    opacity: 0.5;
   }
   body.char2-active .cosmos-btn:hover {
     border-color: rgba(57,255,100,0.72);
@@ -1555,6 +1575,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     border-color: rgba(57,255,100,0.92);
     background: linear-gradient(135deg, rgba(0,28,10,0.95), rgba(0,16,7,0.98));
     box-shadow: 0 0 14px rgba(57,255,100,0.5), 0 2px 8px rgba(0,0,0,0.5);
+    animation: greenCharPulse 2.2s ease-in-out infinite alternate;
   }
   body.char2-active .cosmos-btn.active svg.galaxy-icon {
     filter: drop-shadow(0 0 5px rgba(57,255,100,0.9));
@@ -1642,6 +1663,174 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   .cosmos-popup-btn-no:hover {
     border-color: rgba(255,255,255,0.4);
     color: rgba(240,245,255,0.95);
+  }
+
+
+  /* ── КРУЖОЧЕК ЦВЕТА КАТЕГОРИИ (в режиме настройки) ── */
+  @keyframes dotBorderPulse {
+    0%   { box-shadow: 0 0 0 1.5px rgba(255,255,255,0.55), 0 0 6px 1px rgba(180,80,255,0.35); }
+    50%  { box-shadow: 0 0 0 2px rgba(255,255,255,0.85), 0 0 12px 2px rgba(80,200,255,0.55); }
+    100% { box-shadow: 0 0 0 1.5px rgba(255,255,255,0.55), 0 0 6px 1px rgba(255,80,160,0.35); }
+  }
+  .col-color-dot {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: conic-gradient(
+      #ff3380 0deg,
+      #ff6420 51deg,
+      #ffe500 102deg,
+      #4ade80 153deg,
+      #00d8c8 204deg,
+      #60a5fa 255deg,
+      #c084fc 306deg,
+      #ff3380 360deg
+    );
+    animation: dotBorderPulse 2s ease-in-out infinite;
+    transition: transform 0.18s ease;
+  }
+  .col-color-dot:hover {
+    transform: translateY(-50%) scale(1.3);
+    animation: dotBorderPulse 0.8s ease-in-out infinite;
+  }
+  body.edit-order-mode .col-color-dot {
+    display: block;
+  }
+  /* h2 needs position:relative for the absolute dot */
+  body.edit-order-mode .col-title {
+    position: relative;
+  }
+
+  /* ── ПОПАП ВЫБОРА ЦВЕТА КАТЕГОРИИ ── */
+  #colorPickerPopup {
+    position: fixed;
+    z-index: 10000;
+    min-width: 220px;
+    background: rgba(14,20,38,0.97);
+    border: 1.5px solid rgba(120,130,255,0.4);
+    border-radius: 14px;
+    padding: 14px 16px 12px;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.55), 0 0 22px rgba(120,90,255,0.18);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, visibility 0.18s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #colorPickerPopup.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  #colorPickerPopup::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: rgba(14,20,38,0.97);
+    border-right: 1.5px solid rgba(120,130,255,0.4);
+    border-bottom: 1.5px solid rgba(120,130,255,0.4);
+  }
+  .color-picker-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(180,190,220,0.6);
+    text-align: center;
+    margin-bottom: 12px;
+    font-family: monospace;
+  }
+  .color-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    justify-items: center;
+  }
+  .color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .color-swatch:hover {
+    transform: scale(1.18);
+    border-color: rgba(255,255,255,0.7);
+    box-shadow: 0 0 12px rgba(255,255,255,0.3);
+  }
+  .color-swatch.selected {
+    border-color: #fff;
+    box-shadow: 0 0 14px rgba(255,255,255,0.5);
+    transform: scale(1.1);
+  }
+  .color-picker-reset {
+    margin-top: 10px;
+    width: 100%;
+    padding: 6px 0;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: rgba(180,190,220,0.6);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: monospace;
+    transition: all 0.15s ease;
+  }
+  .color-picker-reset:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: rgba(220,230,255,0.9);
+    background: rgba(255,255,255,0.09);
+  }
+
+  /* ── ПОДСВЕТКА ВЫПОЛНЕННЫХ ЗАДАНИЙ ── */
+  body.task-hl-blue .tasks-column tr.done td { background: rgba(59,130,246,.22) !important; border-bottom-color: rgba(59,130,246,.50) !important; }
+  body.task-hl-blue .tasks-column tr.done td:first-child { color:#bfdbfe !important; text-decoration-color:#60a5fa !important; }
+
+  body.task-hl-yellow .tasks-column tr.done td { background: rgba(251,191,36,.20) !important; border-bottom-color: rgba(251,191,36,.50) !important; }
+  body.task-hl-yellow .tasks-column tr.done td:first-child { color:#fef08a !important; text-decoration-color:#fbbf24 !important; }
+
+  body.task-hl-red .tasks-column tr.done td { background: rgba(239,68,68,.20) !important; border-bottom-color: rgba(239,68,68,.50) !important; }
+  body.task-hl-red .tasks-column tr.done td:first-child { color:#fecaca !important; text-decoration-color:#f87171 !important; }
+
+  body.task-hl-white .tasks-column tr.done td { background: rgba(255,255,255,.10) !important; border-bottom-color: rgba(255,255,255,.30) !important; }
+  body.task-hl-white .tasks-column tr.done td:first-child { color:#f8fafc !important; text-decoration-color:rgba(255,255,255,0.7) !important; }
+
+  .th-swatch:hover { transform: scale(1.18) !important; box-shadow: 0 0 12px rgba(255,255,255,0.3) !important; }
+  .th-swatch.selected { border-color: #fff !important; box-shadow: 0 0 14px rgba(255,255,255,0.5) !important; transform: scale(1.1) !important; }
+
+  #taskHighlightPopup.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  /* Кнопка подсветки видна только в режиме редактирования */
+  #taskHighlightBtn {
+    opacity: 0.85;
+  }
+  #taskHighlightBtn:hover {
+    border-color: rgba(255,100,140,0.75) !important;
+    color: rgba(255,160,180,1) !important;
+    background: rgba(255,60,100,0.16) !important;
+    opacity: 1;
   }
 </style>
 </head>
@@ -1868,7 +2057,19 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     'col_title_v1_col-medium',
     'col_title_v1_col-joint',
     'col_title_v1_col-avoid',
-    'col_title_v1_col-fraction'
+    'col_title_v1_col-fraction',
+    'col_color_v1_col-easy',
+    'col_color_v1_col-medium',
+    'col_color_v1_col-joint',
+    'col_color_v1_col-avoid',
+    'col_color_v1_col-fraction',
+    'col_color_v1_col-easy_char2',
+    'col_color_v1_col-medium_char2',
+    'col_color_v1_col-joint_char2',
+    'col_color_v1_col-avoid_char2',
+    'col_color_v1_col-fraction_char2',
+    'task_highlight_color_v2_char1',
+    'task_highlight_color_v2_char2'
   ];
   const SYNC_KEY_SET = new Set(SYNC_KEYS);
   let currentUid = null;
@@ -2033,7 +2234,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 <div class="layout">
 <div class="super-panel">
 <div class="title-capsule">
-  <div class="title-capsule-inner" id="titleCapsule" style="cursor:pointer;">
+  <div class="title-capsule-inner" id="titleCapsule" style="cursor:default;">
     <span class="title-main">⚡ ФАРМ BONUS POINT ⚡</span>
     <span class="title-sub">by LIME</span>
   </div>
@@ -2353,7 +2554,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     <div class="total-card card-done">
       <div class="card-label">Выполнено</div>
       <div class="card-value-row">
-        <span class="card-value" id="totalDisplay">0</span><span class="card-bp">BP</span>
+        <span class="card-value" id="totalDisplay">0</span><span class="card-bp"><span class="card-bp-line">BONUS</span><span class="card-bp-line">POINT</span></span>
       </div>
       <div class="task-progress-wrap">
         <div class="task-progress-bar">
@@ -2366,15 +2567,91 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     <div class="total-card card-left">
       <div class="card-label">Осталось</div>
       <div class="card-value-row">
-        <span class="card-value" id="remainingDisplay">324</span><span class="card-bp">BP</span>
+        <span class="card-value" id="remainingDisplay">324</span><span class="card-bp"><span class="card-bp-line">BONUS</span><span class="card-bp-line">POINT</span></span>
       </div>
-      <div class="card-max-row">из <span id="maxDisplay">324</span> BP</div>
     </div>
   </div>
 </div>
 
 <div class="grid" id="tasksGrid">
-  <div class="edit-mode-banner">✏️ &nbsp; РЕЖИМ РЕДАКТИРОВАНИЯ — ПЕРЕТАЩИТЕ ЗАДАНИЯ ДЛЯ ИЗМЕНЕНИЯ ПОРЯДКА</div>
+  <div class="edit-mode-banner" id="editModeBanner">
+    <div style="display:inline-flex;align-items:center;gap:14px;position:relative;">
+      <!-- Кнопка подсветки заданий (левее карандашика) -->
+      <div style="position:relative;display:inline-flex;align-items:center;">
+        <button id="taskHighlightBtn" title="Подсветка заданий" onclick="toggleTaskHighlightPopup(event)" style="
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255,60,100,0.08);
+          border: 1.5px solid rgba(255,60,100,0.35);
+          color: rgba(255,120,150,0.75);
+          padding: 5px 13px;
+          border-radius: 30px;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          cursor: pointer;
+          user-select: none;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+          font-family: monospace;
+        ">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+            <circle cx="4.5" cy="4.5" r="3" fill="rgba(34,197,94,0.9)"/>
+            <circle cx="11.5" cy="4.5" r="3" fill="rgba(59,130,246,0.9)"/>
+            <circle cx="4.5" cy="11.5" r="3" fill="rgba(251,191,36,0.9)"/>
+            <circle cx="11.5" cy="11.5" r="3" fill="rgba(239,68,68,0.9)"/>
+          </svg>
+          Подсветка заданий
+        </button>
+        <!-- Попап выбора цвета подсветки -->
+        <div id="taskHighlightPopup" style="
+          position: absolute;
+          bottom: calc(100% + 10px);
+          left: 0;
+          z-index: 10001;
+          min-width: 220px;
+          background: rgba(14,20,38,0.97);
+          border: 1.5px solid rgba(120,130,255,0.4);
+          border-radius: 14px;
+          padding: 14px 16px 14px;
+          box-shadow: 0 10px 32px rgba(0,0,0,0.55), 0 0 22px rgba(120,90,255,0.18);
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: opacity 0.18s ease, visibility 0.18s;
+          user-select: none;
+          -webkit-user-select: none;
+        ">
+          <!-- Стрелка вниз — указывает на кнопку -->
+          <div style="position:absolute;bottom:-7px;left:24px;width:12px;height:12px;background:rgba(14,20,38,0.97);border-right:1.5px solid rgba(120,130,255,0.4);border-bottom:1.5px solid rgba(120,130,255,0.4);transform:rotate(45deg);"></div>
+          <div style="font-size:0.7rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:rgba(180,190,220,0.6);text-align:center;margin-bottom:12px;font-family:monospace;">Цвет выполненных заданий</div>
+          <!-- Тестовое задание -->
+          <div style="margin-bottom:12px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+            <table style="width:100%;border-collapse:collapse;">
+              <tbody>
+                <tr id="taskHighlightTestRow" style="pointer-events:none;">
+                  <td id="thTestTd1" style="padding:7px 10px;font-size:0.82rem;color:#e5e7eb;transition:all 0.25s;">Тестовое задание</td>
+                  <td id="thTestTd2" style="padding:7px 6px;transition:all 0.25s;"><input type="checkbox" checked disabled style="pointer-events:none;opacity:0.6;"></td>
+                  <td id="thTestTd3" style="padding:7px 8px;font-size:0.82rem;font-weight:700;color:rgba(150,160,180,0.7);white-space:nowrap;transition:all 0.25s;">— BP</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Свотчи цветов (без подписей) -->
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <div class="th-swatch" data-color="green" title="Зелёный" style="width:30px;height:30px;border-radius:6px;cursor:pointer;background:rgba(34,197,94,.35);border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,0.4);transition:transform 0.15s,border-color 0.15s,box-shadow 0.15s;" onclick="applyTaskHighlightColor('green',this)"></div>
+            <div class="th-swatch" data-color="blue" title="Синий" style="width:30px;height:30px;border-radius:6px;cursor:pointer;background:rgba(59,130,246,.35);border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,0.4);transition:transform 0.15s,border-color 0.15s,box-shadow 0.15s;" onclick="applyTaskHighlightColor('blue',this)"></div>
+            <div class="th-swatch" data-color="yellow" title="Жёлтый" style="width:30px;height:30px;border-radius:6px;cursor:pointer;background:rgba(251,191,36,.35);border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,0.4);transition:transform 0.15s,border-color 0.15s,box-shadow 0.15s;" onclick="applyTaskHighlightColor('yellow',this)"></div>
+            <div class="th-swatch" data-color="red" title="Красный" style="width:30px;height:30px;border-radius:6px;cursor:pointer;background:rgba(239,68,68,.35);border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,0.4);transition:transform 0.15s,border-color 0.15s,box-shadow 0.15s;" onclick="applyTaskHighlightColor('red',this)"></div>
+            <div class="th-swatch" data-color="white" title="Белый" style="width:30px;height:30px;border-radius:6px;cursor:pointer;background:rgba(255,255,255,.20);border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,0.4);transition:transform 0.15s,border-color 0.15s,box-shadow 0.15s;" onclick="applyTaskHighlightColor('white',this)"></div>
+          </div>
+        </div>
+      </div>
+      <span>✏️ &nbsp; РЕЖИМ РЕДАКТИРОВАНИЯ — ПЕРЕТАЩИТЕ ЗАДАНИЯ ДЛЯ ИЗМЕНЕНИЯ ПОРЯДКА</span>
+    </div>
+  </div>
   <!-- Легкие -->
   <div class="column easy-col" id="col-easy">
     <div class="col-done-overlay" id="overlay-col-easy">
@@ -2382,7 +2659,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-easy">⟳ Сбросить прогресс</button>
     </div>
-    <h2 class="col-title" data-default="Легкие">Легкие</h2>
+    <h2 class="col-title" data-default="Легкие" ><span class="col-color-dot" data-col-id="col-easy"></span><span class="col-title-text">Легкие</span></h2>
     <table class="tasks-column"><tbody>
       <tr><td>Купить лотерейный билет</td><td><input id="cb0" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
       <tr><td>Посетить любой сайт в браузере</td><td><input id="cb1" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
@@ -2412,7 +2689,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-medium">⟳ Сбросить прогресс</button>
     </div>
-    <h2 class="col-title" data-default="Средние">Средние</h2>
+    <h2 class="col-title" data-default="Средние" ><span class="col-color-dot" data-col-id="col-medium"></span><span class="col-title-text">Средние</span></h2>
     <table class="tasks-column"><tbody>
       <tr><td>3 часа в онлайне</td><td><input id="cb43" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
       <tr><td>25 действий на стройке</td><td><input id="cb17" type="checkbox"></td><td class="reward" data-with="4" data-without="2">8 BP</td></tr>
@@ -2438,7 +2715,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-joint">⟳ Сбросить прогресс</button>
     </div>
-    <h2 class="col-title" data-default="Совместные">Совместные</h2>
+    <h2 class="col-title" data-default="Совместные" ><span class="col-color-dot" data-col-id="col-joint"></span><span class="col-title-text">Совместные</span></h2>
     <table class="tasks-column"><tbody>
       <tr><td>Сыграть в мафию в казино</td><td><input id="cb_mafia2" type="checkbox"></td><td class="reward" data-with="6" data-without="3">12 BP</td></tr>
       <tr><td>Выиграть гонку в картинге</td><td><input id="cb29" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
@@ -2458,7 +2735,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-avoid">⟳ Сбросить прогресс</button>
     </div>
-    <h2 class="col-title" data-default="Сложные">Сложные</h2>
+    <h2 class="col-title" data-default="Сложные" ><span class="col-color-dot" data-col-id="col-avoid"></span><span class="col-title-text">Сложные</span></h2>
     <table class="tasks-column"><tbody>
       <tr><td>10 посылок на почте</td><td><input id="cb28" type="checkbox"></td><td class="reward" data-with="2" data-without="1">4 BP</td></tr>
       <tr><td>Прокрутить за DP серебрянный или золотой кейс</td><td><input id="cb36" type="checkbox"></td><td class="reward" data-with="20" data-without="10">40 BP</td></tr>
@@ -2476,7 +2753,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <div class="col-done-label">ЗАВЕРШЕНО</div>
       <button class="col-reset-btn" data-target="col-fraction">⟳ Сбросить прогресс</button>
     </div>
-    <h2 class="col-title" data-default="Фракционные">Фракционные</h2>
+    <h2 class="col-title" data-default="Фракционные" ><span class="col-color-dot" data-col-id="col-fraction"></span><span class="col-title-text">Фракционные</span></h2>
     <table class="fraction-table tasks-column" id="fractionTable"><tbody id="fractionTbody">
       <tr class="fraction-row"><td>7 закрашенных граффити</td><td><input class="fraction-cb" data-with="1" data-without="1" type="checkbox"></td><td class="reward" data-with="1" data-without="1">4 BP</td></tr>
       <tr class="fraction-row"><td>Сдать 5 контрабанды</td><td><input class="fraction-cb" data-with="2" data-without="2" type="checkbox"></td><td class="reward" data-with="2" data-without="2">8 BP</td></tr>
@@ -2895,14 +3172,20 @@ loadHiddenColumns();
   const TITLE_KEY_PREFIX = 'col_title_v1_';
   const colTitles = Array.from(document.querySelectorAll('.col-title'));
 
+  function getTitleEl(h2) {
+    // Text lives in .col-title-text span (or h2 itself if no span)
+    return h2.querySelector('.col-title-text') || h2;
+  }
+
   function applySavedTitles() {
     colTitles.forEach(h2 => {
       const col = h2.closest('.column');
       const colId = col ? col.id : '';
       if (!colId) return;
       const saved = localStorage.getItem(TITLE_KEY_PREFIX + colId);
-      h2.textContent = saved || h2.dataset.default;
-      syncFilterBtnLabel(colId, h2.textContent);
+      const el = getTitleEl(h2);
+      el.textContent = saved || h2.dataset.default;
+      syncFilterBtnLabel(colId, el.textContent);
     });
   }
 
@@ -2915,8 +3198,9 @@ loadHiddenColumns();
     const col = h2.closest('.column');
     const colId = col ? col.id : '';
     if (!colId) return;
-    const text = h2.textContent.trim() || h2.dataset.default;
-    h2.textContent = text;
+    const el = getTitleEl(h2);
+    const text = el.textContent.trim() || h2.dataset.default;
+    el.textContent = text;
     if (text === h2.dataset.default) {
       localStorage.removeItem(TITLE_KEY_PREFIX + colId);
     } else {
@@ -2930,20 +3214,22 @@ loadHiddenColumns();
       const col = h2.closest('.column');
       const colId = col ? col.id : '';
       if (colId) localStorage.removeItem(TITLE_KEY_PREFIX + colId);
-      h2.textContent = h2.dataset.default;
-      syncFilterBtnLabel(colId, h2.textContent);
+      const el = getTitleEl(h2);
+      el.textContent = h2.dataset.default;
+      syncFilterBtnLabel(colId, el.textContent);
     });
   }
 
   colTitles.forEach(h2 => {
-    h2.addEventListener('blur', () => saveTitle(h2));
-    h2.addEventListener('input', () => {
+    const el = getTitleEl(h2);
+    el.addEventListener('blur', () => saveTitle(h2));
+    el.addEventListener('input', () => {
       const col = h2.closest('.column');
       const colId = col ? col.id : '';
-      syncFilterBtnLabel(colId, h2.textContent.trim() || h2.dataset.default);
+      syncFilterBtnLabel(colId, el.textContent.trim() || h2.dataset.default);
     });
-    h2.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); h2.blur(); }
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
     });
   });
 
@@ -3139,27 +3425,27 @@ loadHiddenColumns();
     updateEmptyTbodies();
     // Разрешаем редактирование названий категорий (макс. 12 символов)
     colTitles.forEach(h2 => {
-      h2.setAttribute('contenteditable', 'true');
-      if (!h2._titleInputHandler) {
-        h2._titleInputHandler = function() {
+      const el = getTitleEl(h2);
+      el.setAttribute('contenteditable', 'true');
+      if (!el._titleInputHandler) {
+        el._titleInputHandler = function() {
           const sel = window.getSelection();
-          const anchorOffset = sel.anchorOffset;
-          if (h2.textContent.length > 12) {
-            h2.textContent = h2.textContent.slice(0, 12);
+          if (el.textContent.length > 12) {
+            el.textContent = el.textContent.slice(0, 12);
             // Восстанавливаем курсор в конец
             const range = document.createRange();
-            range.selectNodeContents(h2);
+            range.selectNodeContents(el);
             range.collapse(false);
             sel.removeAllRanges();
             sel.addRange(range);
           }
         };
-        h2._titleKeydownHandler = function(e) {
+        el._titleKeydownHandler = function(e) {
           // Разрешаем: Backspace, Delete, стрелки, Tab, Enter, Ctrl+A/C/V/X/Z
           const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Tab','Enter'];
           if (allowed.includes(e.key)) return;
           if (e.ctrlKey || e.metaKey) return;
-          if (h2.textContent.length >= 12) {
+          if (el.textContent.length >= 12) {
             // Если выделен текст — разрешить замену, иначе блокировать
             const sel = window.getSelection();
             if (!sel || sel.isCollapsed) {
@@ -3168,8 +3454,8 @@ loadHiddenColumns();
           }
         };
       }
-      h2.addEventListener('input', h2._titleInputHandler);
-      h2.addEventListener('keydown', h2._titleKeydownHandler);
+      el.addEventListener('input', el._titleInputHandler);
+      el.addEventListener('keydown', el._titleKeydownHandler);
     });
   }
 
@@ -3190,9 +3476,10 @@ loadHiddenColumns();
     });
     // Запрещаем редактирование названий категорий
     colTitles.forEach(h2 => {
-      h2.removeAttribute('contenteditable');
-      if (h2._titleInputHandler) h2.removeEventListener('input', h2._titleInputHandler);
-      if (h2._titleKeydownHandler) h2.removeEventListener('keydown', h2._titleKeydownHandler);
+      const el = getTitleEl(h2);
+      el.removeAttribute('contenteditable');
+      if (el._titleInputHandler) el.removeEventListener('input', el._titleInputHandler);
+      if (el._titleKeydownHandler) el.removeEventListener('keydown', el._titleKeydownHandler);
       saveTitle(h2);
     });
     if (save) {
@@ -3238,6 +3525,7 @@ loadHiddenColumns();
     applyHiddenColumns([]);
     saveHiddenColumns();
     updateGridCols();
+    if (typeof window._resetAllColors === 'function') window._resetAllColors();
   };
 })();
 
@@ -3479,10 +3767,10 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     animation: confirmIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
     text-align: center;
   ">
-    <div style="font-size:1.4rem; font-weight:900; letter-spacing:5px; text-transform:uppercase; background:linear-gradient(135deg,#00eeff,#cc44ff,#ffdd00); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 10px rgba(0,220,255,0.5)); font-family:monospace;">⚙ НАСТРОЙКИ ⚙</div>
-    <div style="font-size:0.68rem; font-weight:700; letter-spacing:6px; text-transform:uppercase; color:rgba(150,210,255,0.45); margin-top:-8px; font-family:monospace;">СБРОС ПО УМОЛЧАНИЮ</div>
+    <div style="font-size:1.4rem; font-weight:900; letter-spacing:5px; text-transform:uppercase; background:linear-gradient(135deg,#00eeff,#cc44ff,#ffdd00); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 10px rgba(0,220,255,0.5)); font-family: system-ui, -apple-system, Roboto, Arial, sans-serif;">⚙ НАСТРОЙКИ ⚙</div>
+    <div style="font-size:0.68rem; font-weight:700; letter-spacing:6px; text-transform:uppercase; color:rgba(150,210,255,0.45); margin-top:-8px; font-family: system-ui, -apple-system, Roboto, Arial, sans-serif;">СБРОС ПО УМОЛЧАНИЮ</div>
     <div style="width:100%; height:1px; background:linear-gradient(90deg,transparent,rgba(0,255,255,0.2),transparent); margin:4px 0;"></div>
-    <div style="font-size:0.82rem; font-weight:500; line-height:1.7; color:rgba(150,210,255,0.6); font-family:monospace; letter-spacing:0.5px;">Порядок заданий и переименованные категории вернутся к базовым настройкам <span style="color:rgba(255,215,80,0.9); font-weight:700; text-shadow:0 0 8px rgba(255,200,0,0.5);">на двух персонажах одновременно</span>. Выполненные задания не будут затронуты.</div>
+    <div style="font-size:0.82rem; font-weight:500; line-height:1.7; color:rgba(150,210,255,0.6); font-family: system-ui, -apple-system, Roboto, Arial, sans-serif; letter-spacing:0.5px;">Порядок заданий, переименованные категории и цвета вернутся к базовым настройкам <span style="color:rgba(255,215,80,0.9); font-weight:700; text-shadow:0 0 8px rgba(255,200,0,0.5);">на двух персонажах одновременно</span>. Выполненные задания не будут затронуты.</div>
     <div style="display:flex; gap:12px; justify-content:center; width:100%; margin-top:8px;">
       <button id="resetConfirmApply" style="
         flex:1;
@@ -3491,7 +3779,7 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
         border: 1.5px solid rgba(0,255,255,0.3);
         background: linear-gradient(135deg, rgba(0,238,255,0.18), rgba(204,68,255,0.18));
         color: #fff;
-        font-size: 0.82rem; font-weight: 900; font-family: monospace;
+        font-size: 0.82rem; font-weight: 900; font-family: system-ui, -apple-system, Roboto, Arial, sans-serif;
         letter-spacing: 3px;
         text-transform: uppercase;
         cursor: pointer;
@@ -3506,7 +3794,7 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
         border: 1.5px solid rgba(0,255,255,0.12);
         background: rgba(0,20,45,0.6);
         color: rgba(150,210,255,0.55);
-        font-size: 0.82rem; font-weight: 700; font-family: monospace;
+        font-size: 0.82rem; font-weight: 700; font-family: system-ui, -apple-system, Roboto, Arial, sans-serif;
         letter-spacing: 3px;
         text-transform: uppercase;
         cursor: pointer;
@@ -3550,6 +3838,379 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
 });
 </script>
 
+<!-- ── COLOR PICKER POPUP ── -->
+<div id="colorPickerPopup">
+  <div class="color-picker-title">Цвет категории</div>
+  <div class="color-picker-grid" id="colorSwatchGrid"></div>
+</div>
+
+<script>
+(function(){
+  // 10 цветов: 5 персонаж 1 + 5 персонаж 2
+  const COLOR_PALETTE = [
+    { hex: '#4ade80', label: 'Зелёный (Лёгкие П1)' },
+    { hex: '#fbbf24', label: 'Жёлтый (Средние П1)' },
+    { hex: '#60a5fa', label: 'Синий (Совместные П1)' },
+    { hex: '#94a3b8', label: 'Серый (Сложные П1)' },
+    { hex: '#c084fc', label: 'Фиолетовый (Фракцион. П1)' },
+    { hex: '#00d8c8', label: 'Бирюза (Лёгкие П2)' },
+    { hex: '#ffe500', label: 'Яркий жёлт. (Средние П2)' },
+    { hex: '#ff3380', label: 'Розовый (Совместные П2)' },
+    { hex: '#ff6420', label: 'Оранжевый (Сложные П2)' },
+    { hex: '#a8c8ff', label: 'Голубой (Фракцион. П2)' },
+  ];
+
+  const COLOR_KEY_PREFIX = 'col_color_v1_';
+
+  // Ключ с суффиксом текущего персонажа
+  function colorKey(colId) {
+    const char = typeof currentChar !== 'undefined' ? currentChar : 1;
+    return COLOR_KEY_PREFIX + colId + (char === 2 ? '_char2' : '');
+  }
+
+  const popup = document.getElementById('colorPickerPopup');
+  const grid = document.getElementById('colorSwatchGrid');
+
+  let activeDot = null;
+  let activeColId = null;
+
+  // Build swatch grid once
+  COLOR_PALETTE.forEach(({hex, label}) => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch';
+    sw.style.background = hex;
+    sw.title = label;
+    sw.dataset.hex = hex;
+    sw.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!activeColId) return;
+      applyColor(activeColId, hex);
+      saveColor(activeColId, hex);
+      updateDot(activeDot, hex);
+      markSelected(hex);
+      closePopup();
+    });
+    grid.appendChild(sw);
+  });
+
+  function getDefaultColor(colId) {
+    const defaults = {
+      'col-easy':     '#4ade80',
+      'col-medium':   '#fbbf24',
+      'col-joint':    '#60a5fa',
+      'col-avoid':    '#94a3b8',
+      'col-fraction': '#c084fc',
+    };
+    if (document.body.classList.contains('char2-active')) {
+      const defaults2 = {
+        'col-easy':     '#00d8c8',
+        'col-medium':   '#ffe500',
+        'col-joint':    '#ff3380',
+        'col-avoid':    '#ff6420',
+        'col-fraction': '#a8c8ff',
+      };
+      return defaults2[colId] || defaults[colId] || '#94a3b8';
+    }
+    return defaults[colId] || '#94a3b8';
+  }
+
+  function markSelected(selectedHex) {
+    grid.querySelectorAll('.color-swatch').forEach(sw => {
+      sw.classList.toggle('selected', sw.dataset.hex === selectedHex);
+    });
+  }
+
+  function updateDot(dot, hex) {
+    // Кружочек всегда остаётся радужным — ничего не меняем
+  }
+
+  function applyColor(colId, hex) {
+    const col = document.getElementById(colId);
+    if (!col) return;
+    col.dataset.customColor = hex;
+    injectColStyles(colId, hex);
+  }
+
+  function removeColor(colId) {
+    const col = document.getElementById(colId);
+    if (col) delete col.dataset.customColor;
+    localStorage.removeItem(colorKey(colId));
+    const old = document.getElementById('col-custom-style-' + colId);
+    if (old) old.remove();
+  }
+
+  function saveColor(colId, hex) {
+    localStorage.setItem(colorKey(colId), hex);
+  }
+
+  function injectColStyles(colId, hex) {
+    const styleId = 'col-custom-style-' + colId;
+    let el = document.getElementById(styleId);
+    if (!el) {
+      el = document.createElement('style');
+      el.id = styleId;
+      document.head.appendChild(el);
+    }
+    // Convert hex to rgb
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+
+    const colClass = {
+      'col-easy':     '.easy-col',
+      'col-medium':   '.medium-col',
+      'col-joint':    '.joint-col',
+      'col-avoid':    '.avoid-col',
+      'col-fraction': '.fraction-col',
+    }[colId] || '';
+
+    el.textContent = `
+      #${colId} {
+        border-color: rgba(${r},${g},${b},0.78) !important;
+        background: linear-gradient(0deg, rgba(${r},${g},${b},.22), transparent 45%), var(--card-surface) !important;
+      }
+      #${colId} .col-title {
+        color: ${hex} !important;
+        background: rgba(${r},${g},${b},0.10) !important;
+        border-color: rgba(${r},${g},${b},0.48) !important;
+        box-shadow: 0 0 12px rgba(${r},${g},${b},0.18), inset 0 0 8px rgba(${r},${g},${b},0.08) !important;
+        text-shadow: 0 0 8px rgba(${r},${g},${b},0.75) !important;
+      }
+      .filter-btn.active[data-col="${colId}"] {
+        background: rgba(${r},${g},${b},0.15) !important;
+        border-color: rgba(${r},${g},${b},0.62) !important;
+        color: ${hex} !important;
+        box-shadow: 0 0 10px rgba(${r},${g},${b},0.22) !important;
+      }
+    `;
+  }
+
+  // Load saved colors on init
+  function loadSavedColors() {
+    ['col-easy','col-medium','col-joint','col-avoid','col-fraction'].forEach(colId => {
+      const saved = localStorage.getItem(colorKey(colId));
+      if (saved) {
+        applyColor(colId, saved);
+        const dot = document.querySelector('.col-color-dot[data-col-id="' + colId + '"]');
+        if (dot) updateDot(dot, saved);
+      } else {
+        const dot = document.querySelector('.col-color-dot[data-col-id="' + colId + '"]');
+        if (dot) updateDot(dot, getDefaultColor(colId));
+      }
+    });
+  }
+
+  // Open/close popup on dot click
+  document.addEventListener('click', function(e) {
+    const dot = e.target.closest('.col-color-dot');
+    if (dot && document.body.classList.contains('edit-order-mode')) {
+      e.stopPropagation();
+      // Если попап уже открыт для этого же кружочка — закрываем
+      if (popup.classList.contains('show') && activeDot === dot) {
+        closePopup();
+        return;
+      }
+      const colId = dot.dataset.colId;
+      activeDot = dot;
+      activeColId = colId;
+      const currentColor = localStorage.getItem(colorKey(colId)) || getDefaultColor(colId);
+      markSelected(currentColor);
+      positionPopup(dot);
+      popup.classList.add('show');
+    }
+  });
+
+  function positionPopup(dot) {
+    popup.style.visibility = 'hidden';
+    popup.style.opacity = '0';
+    popup.classList.add('show');
+    const rect = dot.getBoundingClientRect();
+    const popupW = popup.offsetWidth || 220;
+    const popupH = popup.offsetHeight || 130;
+    let left = rect.left + rect.width / 2 - popupW / 2;
+    if (left < 8) left = 8;
+    if (left + popupW > window.innerWidth - 8) left = window.innerWidth - popupW - 8;
+    let top = rect.top - popupH - 12;
+    if (top < 8) top = rect.bottom + 10;
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    popup.style.visibility = '';
+    popup.style.opacity = '';
+  }
+
+  function closePopup() {
+    popup.classList.remove('show');
+    activeDot = null;
+    activeColId = null;
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!popup.classList.contains('show')) return;
+    if (popup.contains(e.target)) return;
+    if (e.target.closest('.col-color-dot')) return;
+    closePopup();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePopup();
+  });
+
+  // Dots should always reflect current color
+  function refreshDots() {
+    ['col-easy','col-medium','col-joint','col-avoid','col-fraction'].forEach(colId => {
+      const dot = document.querySelector('.col-color-dot[data-col-id="' + colId + '"]');
+      const saved = localStorage.getItem(colorKey(colId));
+      if (dot) updateDot(dot, saved || getDefaultColor(colId));
+    });
+  }
+
+  // Expose for char switch
+  window._colorPickerLoadSaved = loadSavedColors;
+  window._colorPickerRefreshDots = refreshDots;
+  window._resetAllColors = function() {
+    const cols = ['col-easy','col-medium','col-joint','col-avoid','col-fraction'];
+    // Сбрасываем для обоих персонажей
+    cols.forEach(colId => {
+      localStorage.removeItem(COLOR_KEY_PREFIX + colId);
+      localStorage.removeItem(COLOR_KEY_PREFIX + colId + '_char2');
+      // Убираем инжектированные стили
+      const old = document.getElementById('col-custom-style-' + colId);
+      if (old) old.remove();
+    });
+    // Сбрасываем подсветку заданий
+    if (typeof window._resetTaskHighlightColor === 'function') {
+      window._resetTaskHighlightColor();
+    }
+  };
+
+  // Init
+  loadSavedColors();
+  // Refresh dots when char changes (body class changes)
+  const charObs = new MutationObserver(() => {
+    // Сначала убираем все кастомные стили
+    ['col-easy','col-medium','col-joint','col-avoid','col-fraction'].forEach(colId => {
+      const old = document.getElementById('col-custom-style-' + colId);
+      if (old) old.remove();
+    });
+    // Затем грузим цвета текущего персонажа
+    refreshDots();
+    loadSavedColors();
+  });
+  charObs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+})();
+</script>
+
+<script>
+(function(){
+  const HL_KEY_PREFIX = 'task_highlight_color_v2_';
+  const COLORS = {
+    green:  { bg: 'rgba(34,197,94,.22)',   border: 'rgba(34,197,94,.50)',   text: '#b8f3d6', deco: '#34d399' },
+    blue:   { bg: 'rgba(59,130,246,.22)',   border: 'rgba(59,130,246,.50)',   text: '#bfdbfe', deco: '#60a5fa' },
+    yellow: { bg: 'rgba(251,191,36,.20)',  border: 'rgba(251,191,36,.50)',  text: '#fef08a', deco: '#fbbf24' },
+    red:    { bg: 'rgba(239,68,68,.20)',   border: 'rgba(239,68,68,.50)',   text: '#fecaca', deco: '#f87171' },
+    white:  { bg: 'rgba(255,255,255,.10)', border: 'rgba(255,255,255,.30)', text: '#f8fafc', deco: 'rgba(255,255,255,0.7)' }
+  };
+  const HL_CLASSES = ['blue','yellow','red','white'].map(c => 'task-hl-' + c);
+
+  function getCharKey() {
+    const isChar2 = document.body.classList.contains('char2-active');
+    return HL_KEY_PREFIX + (isChar2 ? 'char2' : 'char1');
+  }
+
+  function getCurrentColor() {
+    return localStorage.getItem(getCharKey()) || 'green';
+  }
+
+  function applyColor(color) {
+    HL_CLASSES.forEach(cls => document.body.classList.remove(cls));
+    if (color !== 'green') {
+      document.body.classList.add('task-hl-' + color);
+    }
+    updateTestRow(color);
+    updateSwatchSelection(color);
+  }
+
+  function updateTestRow(color) {
+    const c = COLORS[color] || COLORS.green;
+    const tds = ['thTestTd1','thTestTd2','thTestTd3'].map(id => document.getElementById(id));
+    tds.forEach(td => {
+      if (!td) return;
+      td.style.background = c.bg;
+      td.style.borderBottom = '1px solid ' + c.border;
+    });
+    const td1 = document.getElementById('thTestTd1');
+    if (td1) {
+      td1.style.color = c.text;
+      td1.style.textDecoration = 'line-through';
+      td1.style.textDecorationColor = c.deco;
+      td1.style.textDecorationThickness = '2px';
+    }
+  }
+
+  function updateSwatchSelection(color) {
+    document.querySelectorAll('.th-swatch').forEach(sw => {
+      sw.classList.toggle('selected', sw.dataset.color === color);
+    });
+  }
+
+  window.applyTaskHighlightColor = function(color) {
+    localStorage.setItem(getCharKey(), color);
+    applyColor(color);
+  };
+
+  // Сброс — вызывается кнопкой "По умолчанию" через resetAllColors
+  window._resetTaskHighlightColor = function() {
+    localStorage.removeItem(HL_KEY_PREFIX + 'char1');
+    localStorage.removeItem(HL_KEY_PREFIX + 'char2');
+    applyColor('green');
+  };
+
+  window.toggleTaskHighlightPopup = function(e) {
+    if (e) e.stopPropagation();
+    const popup = document.getElementById('taskHighlightPopup');
+    const btn = document.getElementById('taskHighlightBtn');
+    if (!popup || !btn) return;
+    const isOpen = popup.classList.contains('show');
+    if (!isOpen) {
+      updateTestRow(getCurrentColor());
+      updateSwatchSelection(getCurrentColor());
+    }
+    popup.classList.toggle('show', !isOpen);
+    btn.style.borderColor = !isOpen ? 'rgba(255,100,140,0.75)' : '';
+    btn.style.color = !isOpen ? 'rgba(255,160,180,1)' : '';
+    btn.style.background = !isOpen ? 'rgba(255,60,100,0.16)' : '';
+  };
+
+  document.addEventListener('click', function(e) {
+    const popup = document.getElementById('taskHighlightPopup');
+    const btn = document.getElementById('taskHighlightBtn');
+    if (!popup || !popup.classList.contains('show')) return;
+    if (popup.contains(e.target) || (btn && btn.contains(e.target))) return;
+    popup.classList.remove('show');
+    if (btn) { btn.style.borderColor = ''; btn.style.color = ''; btn.style.background = ''; }
+  });
+
+  // Применяем цвет при смене персонажа — только если изменился char2-active
+  let _lastIsChar2 = document.body.classList.contains('char2-active');
+  const charObs2 = new MutationObserver(() => {
+    const nowChar2 = document.body.classList.contains('char2-active');
+    if (nowChar2 !== _lastIsChar2) {
+      _lastIsChar2 = nowChar2;
+      applyColor(getCurrentColor());
+    }
+  });
+  charObs2.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+  // Инициализация
+  function init() { applyColor(getCurrentColor()); }
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
 <div class="cosmos-popup" id="cosmosPopup">
   <div class="cosmos-popup-text" id="cosmosPopupText">Включить анимацию космоса?</div>
   <div class="cosmos-popup-actions">
@@ -3586,13 +4247,17 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
     const count = Math.max(60, Math.floor((canvas.width * canvas.height) / 11000));
     stars = [];
     for (let i = 0; i < count; i++) {
+      const driftAngle = Math.random() * Math.PI * 2;
+      const driftSpeed = Math.random() * 0.08 + 0.02;
       stars.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         r: Math.random() * 1.4 + 0.3,
         baseAlpha: Math.random() * 0.5 + 0.25,
         speed: Math.random() * 0.02 + 0.006,
-        phase: Math.random() * Math.PI * 2
+        phase: Math.random() * Math.PI * 2,
+        vx: Math.cos(driftAngle) * driftSpeed,
+        vy: Math.sin(driftAngle) * driftSpeed
       });
     }
   }
@@ -3614,6 +4279,14 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (const s of stars) {
+      s.x += s.vx;
+      s.y += s.vy;
+      // wrap around edges
+      if (s.x < -2) s.x = canvas.width + 2;
+      else if (s.x > canvas.width + 2) s.x = -2;
+      if (s.y < -2) s.y = canvas.height + 2;
+      else if (s.y > canvas.height + 2) s.y = -2;
+
       const a = s.baseAlpha + Math.sin(frame * s.speed + s.phase) * 0.3;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
