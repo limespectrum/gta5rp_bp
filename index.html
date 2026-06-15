@@ -2069,7 +2069,8 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     'col_color_v1_col-avoid_char2',
     'col_color_v1_col-fraction_char2',
     'task_highlight_color_v2_char1',
-    'task_highlight_color_v2_char2'
+    'task_highlight_color_v2_char2',
+    'cosmos_active'
   ];
   const SYNC_KEY_SET = new Set(SYNC_KEYS);
   let currentUid = null;
@@ -2126,12 +2127,45 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
             if (data[k] !== undefined) _origSetItem(k, data[k]);
             else _origRemoveItem(k);
           });
-          return true; // есть изменения — нужен reload
+          return true; // есть изменения — нужно применить
         }
-        return false; // данные идентичны — reload не нужен
+        return false; // данные идентичны
       }
     } catch(e) {}
     return false;
+  }
+
+  // Применяем данные из облака без перезагрузки страницы
+  function applyCloudState() {
+    // Перерисовываем задачи
+    if (typeof refreshAll === 'function') refreshAll();
+
+    // Персонаж
+    const charVal = localStorage.getItem('active_char');
+    if (charVal !== null) {
+      const n = parseInt(charVal);
+      if (!isNaN(n) && typeof switchChar === 'function') switchChar(n);
+    }
+
+    // VIP / X2 чекбоксы
+    const vipEl = document.getElementById('vipCheckbox');
+    const x2El = document.getElementById('x2Checkbox');
+    if (vipEl) {
+      const suffix = document.body.classList.contains('char2-active') ? '_char2' : '';
+      const vipVal = localStorage.getItem('daily_tasks_vip_mode_v4' + suffix);
+      vipEl.checked = vipVal ? JSON.parse(vipVal) : false;
+    }
+    if (x2El) {
+      const suffix = document.body.classList.contains('char2-active') ? '_char2' : '';
+      const x2Val = localStorage.getItem('daily_tasks_x2_mode_v4' + suffix);
+      x2El.checked = x2Val ? JSON.parse(x2Val) : false;
+    }
+
+    // Космос
+    if (typeof window._restoreCosmos === 'function') window._restoreCosmos();
+
+    // Скрытые колонки
+    if (typeof applyHiddenColumns === 'function') applyHiddenColumns();
   }
 
   const overlay = document.getElementById('pinOverlay');
@@ -2152,22 +2186,25 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
-      setTimeout(() => {
-        overlay.style.display = 'none';
-        document.body.style.overflow = '';
-      }, 500);
+      // Сначала тянем данные из облака — оверлей остаётся открытым
       const nameEl = document.getElementById('userNameDisplay');
       if (nameEl) nameEl.textContent = getDisplayName(user.email);
 
       currentUid = user.uid;
       const hadCloud = await pullStateFromCloud(user.uid);
       if (hadCloud) {
-        location.reload();
-        return;
+        // Данные изменились — применяем без reload, просто скрываем оверлей
+        applyCloudState();
       } else {
         pushStateToCloud();
       }
+
+      // Скрываем оверлей только после того как данные готовы
+      overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 500);
     } else {
       loadingBox.style.display = 'none';
       loginBox.style.display = 'flex';
@@ -4404,10 +4441,12 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
     if (!cosmosActive) {
       cosmosActive = true;
       cosmosBtn.classList.add('active');
+      localStorage.setItem('cosmos_active', '1');
       startCosmos();
     } else {
       cosmosActive = false;
       cosmosBtn.classList.remove('active');
+      localStorage.setItem('cosmos_active', '0');
       stopCosmos();
     }
 
@@ -4416,6 +4455,19 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
       cosmosBtn.classList.remove('disabled');
     }, 1300);
   };
+
+  // Восстановление состояния при загрузке (уже после того как onAuthStateChanged применил облако)
+  window._restoreCosmos = function() {
+    const saved = localStorage.getItem('cosmos_active');
+    if (saved === '1' && !cosmosActive) {
+      cosmosActive = true;
+      cosmosBtn.classList.add('active');
+      startCosmos();
+    }
+  };
+  // Запускаем сразу (если данные уже были локально) — онлайн-синхронизация
+  // подтянет актуальный cosmos_active через applyCloudState при необходимости
+  window._restoreCosmos();
 
   document.addEventListener('click', function(e) {
     if (!cosmosPopup.classList.contains('show')) return;
