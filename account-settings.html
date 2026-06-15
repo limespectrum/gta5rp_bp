@@ -847,30 +847,12 @@
     if (el) el.textContent = name;
   }
 
-  // ── Auth state ──
-  let authResolved = false;
-  const fallback = setTimeout(() => {
-    if (!authResolved) window.location.href = 'index.html';
-  }, 6000);
-
-  onAuthStateChanged(auth, async (user) => {
-    authResolved = true;
-    window.__firebaseReady = true;
-    clearTimeout(fallback);
-
-    if (!user) {
-      window.location.href = 'index.html';
-      return;
-    }
-
-    currentUser = user;
-
-    // Логин
+  // ── Применить данные залогиненного пользователя на странице ──
+  async function applyUser(user) {
     const login = getLoginName(user.email);
     const loginEl = document.getElementById('currentLoginDisplay');
     if (loginEl) loginEl.textContent = login;
 
-    // Отображаемое имя (из Firebase или логин)
     const saved = await loadDisplayName(user.uid);
     const shown = saved || login;
     updateHeaderName(shown);
@@ -879,6 +861,41 @@
     if (input) input.value = saved || '';
 
     hideOverlay();
+  }
+
+  // ── Auth state ──
+  // ВАЖНО: сразу после смены persistence Firebase может в первый раз
+  // вызвать onAuthStateChanged с user === null — пока сохранённая
+  // сессия ещё восстанавливается из хранилища. Если в этот момент
+  // сразу редиректить на index.html, залогиненного пользователя
+  // выкинет обратно на главную, хотя сессия у него есть.
+  // Поэтому ждём auth.authStateReady() — он резолвится только когда
+  // реальное состояние (юзер или null) уже точно известно.
+  let authResolved = false;
+  const fallback = setTimeout(() => {
+    if (!authResolved) window.location.href = 'index.html';
+  }, 6000);
+
+  await auth.authStateReady();
+  authResolved = true;
+  clearTimeout(fallback);
+  window.__firebaseReady = true;
+
+  const initialUser = auth.currentUser;
+  if (!initialUser) {
+    window.location.href = 'index.html';
+  } else {
+    currentUser = initialUser;
+    await applyUser(currentUser);
+  }
+
+  // ── Реагируем на дальнейшие изменения (например, выход в другой вкладке) ──
+  onAuthStateChanged(auth, (user) => {
+    if (!user && currentUser) {
+      window.location.href = 'index.html';
+      return;
+    }
+    currentUser = user;
   });
 
   document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
