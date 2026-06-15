@@ -263,7 +263,7 @@
     border-radius: 0;
     border: none;
     box-shadow: none;
-    overflow: visible;
+    overflow: hidden;
     transition: none;
     background: transparent;
     backdrop-filter: none;
@@ -280,7 +280,7 @@
     border-radius: 16px;
     box-shadow: 0 0 15px rgba(0,255,255,0.2);
     margin-bottom: 0;
-    overflow: visible;
+    overflow: hidden;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     cursor: default;
     user-select: none;
@@ -2034,8 +2034,9 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   const authApp = initializeApp(firebaseConfig, "authApp");
   const auth = getAuth(authApp);
   const db = getDatabase(authApp);
+  // Ждём установки персистентности до подписки на auth state
   await setPersistence(auth, browserLocalPersistence);
-  // Ждём, пока Firebase точно восстановит сохранённую сессию из
+  // И ждём, пока Firebase точно восстановит сохранённую сессию из
   // хранилища — иначе onAuthStateChanged ниже может первый раз
   // сработать с user === null и на миг показать форму входа
   // уже залогиненному пользователю.
@@ -2117,7 +2118,11 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
   async function pullStateFromCloud(uid) {
     try {
-      const snap = await get(ref(db, 'users/' + uid + '/state'));
+      // Таймаут 6 секунд чтобы не зависать
+      const snap = await Promise.race([
+        get(ref(db, 'users/' + uid + '/state')),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000))
+      ]);
       if (snap.exists()) {
         const data = snap.val();
         // Проверяем есть ли реальные отличия от локального состояния
@@ -2189,27 +2194,43 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     return local;
   }
 
+  // Фоллбек: если Firebase не ответил за 5 секунд — показываем форму входа
+  let authResolved = false;
+  const authFallbackTimer = setTimeout(() => {
+    if (!authResolved) {
+      loadingBox.style.display = 'none';
+      loginBox.style.display = 'flex';
+      overlay.style.animation = '';
+      overlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  }, 5000);
+
+  function hideOverlay() {
+    overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }, 500);
+  }
+
   onAuthStateChanged(auth, async (user) => {
+    authResolved = true;
+    clearTimeout(authFallbackTimer);
     if (user) {
-      // Сначала тянем данные из облака — оверлей остаётся открытым
       const nameEl = document.getElementById('userNameDisplay');
       if (nameEl) nameEl.textContent = getDisplayName(user.email);
-
       currentUid = user.uid;
-      const hadCloud = await pullStateFromCloud(user.uid);
-      if (hadCloud) {
-        // Данные изменились — применяем без reload, просто скрываем оверлей
-        applyCloudState();
-      } else {
-        pushStateToCloud();
-      }
-
-      // Скрываем оверлей только после того как данные готовы
-      overlay.style.animation = 'fadeOutOverlay 0.5s ease forwards';
-      setTimeout(() => {
-        overlay.style.display = 'none';
-        document.body.style.overflow = '';
-      }, 500);
+      try {
+        const hadCloud = await pullStateFromCloud(user.uid);
+        if (hadCloud) {
+          applyCloudState();
+        } else {
+          pushStateToCloud();
+        }
+      } catch(e) {}
+      // Скрываем оверлей — всегда, даже если что-то пошло не так
+      hideOverlay();
     } else {
       loadingBox.style.display = 'none';
       loginBox.style.display = 'flex';
@@ -2488,32 +2509,191 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         cursor: default;
         white-space: nowrap;
       "></span>
-      <button id="logoutBtn" title="Выйти из аккаунта" style="
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        background: linear-gradient(135deg, rgba(255,50,50,0.12), rgba(180,0,0,0.10));
-        border: 1.5px solid rgba(255,80,80,0.4);
-        color: rgba(255,120,120,0.85);
-        padding: 7px 16px;
-        border-radius: 40px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        cursor: pointer;
-        user-select: none;
-        white-space: nowrap;
-        transition: all 0.2s ease;
-        box-shadow: 0 0 8px rgba(255,50,50,0.12);
-      " onmouseover="this.style.boxShadow='0 0 18px rgba(255,50,50,0.4)';this.style.borderColor='rgba(255,80,80,0.7)';this.style.color='#ff9999';" onmouseout="this.style.boxShadow='0 0 8px rgba(255,50,50,0.12)';this.style.borderColor='rgba(255,80,80,0.4)';this.style.color='rgba(255,120,120,0.85)';">
-        <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.9;flex-shrink:0;">
-          <rect x="0" y="0.5" width="14" height="1.5" rx="0.75" fill="currentColor"/>
-          <rect x="0" y="5" width="14" height="1.5" rx="0.75" fill="currentColor"/>
-          <rect x="0" y="9.5" width="14" height="1.5" rx="0.75" fill="currentColor"/>
-        </svg>
-        Выйти
-      </button>
+      <!-- Profile dropdown wrapper -->
+      <div id="profileDropdownWrap" style="position:relative;display:inline-block;">
+        <button id="profileBtn" title="Профиль" style="
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          background: rgba(255,255,255,0.08);
+          border: 1.5px solid rgba(255,255,255,0.35);
+          color: #ffffff;
+          padding: 7px 16px;
+          border-radius: 40px;
+          font-size: 0.78rem;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          cursor: pointer;
+          user-select: none;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+          box-shadow: 0 0 8px rgba(255,255,255,0.08);
+        "
+        onmouseover="this.style.boxShadow='0 0 18px rgba(255,255,255,0.2)';this.style.borderColor='rgba(255,255,255,0.65)';this.style.background='rgba(255,255,255,0.14)';"
+        onmouseout="if(!document.getElementById('profileMenu').classList.contains('open')){this.style.boxShadow='0 0 8px rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.35)';this.style.background='rgba(255,255,255,0.08)';}"
+        onclick="toggleProfileMenu(event)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.9;flex-shrink:0;">
+            <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M1.5 12.5c0-2.485 2.462-4.5 5.5-4.5s5.5 2.015 5.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          Профиль
+          <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.7;flex-shrink:0;transition:transform 0.2s;" id="profileChevron">
+            <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- Dropdown menu -->
+        <div id="profileMenu" style="
+          display: none;
+          position: absolute;
+          top: calc(100% + 8px);
+          right: 0;
+          min-width: 170px;
+          background: rgba(10,18,36,0.96);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1.5px solid rgba(255,255,255,0.20);
+          border-radius: 14px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06) inset;
+          overflow: hidden;
+          z-index: 9999;
+          animation: profileMenuIn 0.18s ease;
+        ">
+          <button onclick="openSettings(event)" class="profile-settings-btn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.75;flex-shrink:0;">
+              <path d="M1.5 11.5l2.5-1 6-6-1.5-1.5-6 6-1 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M9 3.5l1-1a1 1 0 011.5 1.5l-1 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Настройки
+          </button>
+          <div id="profileDivider" style="height:1px;background:rgba(255,255,255,0.12);"></div>
+          <button id="logoutBtn" class="profile-logout-btn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.85;flex-shrink:0;">
+              <path d="M5 2H2.5A1.5 1.5 0 001 3.5v6A1.5 1.5 0 002.5 11H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M8.5 9l3-2.5L8.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M11.5 6.5H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            Выйти
+          </button>
+        </div>
+      </div>
+
+      <style>
+        .profile-settings-btn,
+        .profile-logout-btn {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          width: 100%;
+          background: transparent !important;
+          border: none !important;
+          border-radius: 0 !important;
+          outline: none !important;
+          box-shadow: none !important;
+          padding: 11px 18px;
+          font-size: 0.82rem !important;
+          font-weight: 700 !important;
+          letter-spacing: 1.2px !important;
+          text-transform: uppercase;
+          cursor: pointer;
+          text-align: left;
+          -webkit-appearance: none;
+          appearance: none;
+          transition: transform 0.18s ease, opacity 0.18s ease;
+          transform-origin: center center;
+          -webkit-font-smoothing: antialiased;
+        }
+        .profile-settings-btn { color: #ffffff !important; }
+        .profile-logout-btn  { color: rgba(255,90,90,0.95) !important; }
+
+        .profile-settings-btn:hover,
+        .profile-logout-btn:hover {
+          background: transparent !important;
+          outline: none !important;
+          box-shadow: none !important;
+          border: none !important;
+          transform: scale(1.06);
+          opacity: 1;
+          font-size: 0.82rem !important;
+          font-weight: 700 !important;
+          letter-spacing: 1.2px !important;
+        }
+        .profile-settings-btn:focus,
+        .profile-settings-btn:active,
+        .profile-settings-btn:focus-visible,
+        .profile-logout-btn:focus,
+        .profile-logout-btn:active,
+        .profile-logout-btn:focus-visible {
+          background: transparent !important;
+          outline: none !important;
+          box-shadow: none !important;
+          border: none !important;
+          transform: scale(1);
+          font-size: 0.82rem !important;
+          font-weight: 700 !important;
+          letter-spacing: 1.2px !important;
+        }
+        @keyframes profileMenuIn {
+          from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      </style>
+
+      <script>
+        function toggleProfileMenu(e) {
+          if (e) e.stopPropagation();
+          const menu = document.getElementById('profileMenu');
+          const chevron = document.getElementById('profileChevron');
+          const btn = document.getElementById('profileBtn');
+          const isOpen = menu.classList.contains('open');
+          if (isOpen) {
+            menu.classList.remove('open');
+            menu.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+            btn.style.boxShadow = '0 0 8px rgba(255,255,255,0.08)';
+            btn.style.borderColor = 'rgba(255,255,255,0.35)';
+            btn.style.background = 'rgba(255,255,255,0.08)';
+          } else {
+            menu.classList.add('open');
+            menu.style.display = 'block';
+            chevron.style.transform = 'rotate(180deg)';
+            btn.style.boxShadow = '0 0 18px rgba(255,255,255,0.2)';
+            btn.style.borderColor = 'rgba(255,255,255,0.65)';
+            btn.style.background = 'rgba(255,255,255,0.14)';
+          }
+        }
+
+        function openSettings(e) {
+          if (e) e.stopPropagation();
+          // Закрываем меню
+          const menu = document.getElementById('profileMenu');
+          const chevron = document.getElementById('profileChevron');
+          const btn = document.getElementById('profileBtn');
+          menu.classList.remove('open');
+          menu.style.display = 'none';
+          chevron.style.transform = 'rotate(0deg)';
+          btn.style.boxShadow = '0 0 8px rgba(255,255,255,0.08)';
+          btn.style.borderColor = 'rgba(255,255,255,0.35)';
+          btn.style.background = 'rgba(255,255,255,0.08)';
+          // TODO: функционал настроек
+        }
+
+        document.addEventListener('click', function(e) {
+          const wrap = document.getElementById('profileDropdownWrap');
+          const menu = document.getElementById('profileMenu');
+          if (!wrap.contains(e.target) && menu.classList.contains('open')) {
+            const chevron = document.getElementById('profileChevron');
+            const btn = document.getElementById('profileBtn');
+            menu.classList.remove('open');
+            menu.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+            btn.style.boxShadow = '0 0 8px rgba(255,255,255,0.08)';
+            btn.style.borderColor = 'rgba(255,255,255,0.35)';
+            btn.style.background = 'rgba(255,255,255,0.08)';
+          }
+        });
+      </script>
     </div>
   </div>
 </div>
@@ -2590,7 +2770,10 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     transition: all 0.2s ease;
     box-shadow: none;
   " onmouseover="this.style.borderColor='rgba(255,255,255,0.55)';this.style.color='rgba(240,245,255,0.92)';this.style.boxShadow='0 0 14px rgba(255,255,255,0.1)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.18)';this.style.color='rgba(200,210,225,0.55)';this.style.boxShadow='none';">
-    ⚙️ Настройка
+    <svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.75;vertical-align:middle;margin-right:2px;">
+      <circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.3"/>
+      <path d="M6.5 1v1M6.5 11v1M1 6.5h1M11 6.5h1M2.636 2.636l.707.707M9.657 9.657l.707.707M2.636 10.364l.707-.707M9.657 3.343l.707-.707" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    </svg> Кастомизация
   </button>
   </div>
 </div>
@@ -3510,7 +3693,7 @@ loadHiddenColumns();
   function exitEditMode(save) {
     isEditMode = false;
     editBtn.classList.remove('active');
-    editBtn.textContent = '⚙️ Настройка';
+    editBtn.textContent = '⚙ Кастомизация';
     document.body.classList.remove('edit-order-mode');
     updateGridCols();
     // Отключаем перетаскивание
