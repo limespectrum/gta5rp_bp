@@ -4027,19 +4027,40 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
   }
 
   // Слушаем онлайн в реальном времени
+  // Считаем уникальных пользователей (по uid, не по вкладкам)
   onValue(onlineRef, (snapshot) => {
-    updateTooltip(snapshot);
+    if (!snapshot.exists()) {
+      updateTooltip(snapshot);
+      return;
+    }
+    // Схлопываем несколько вкладок одного пользователя в одну запись для отображения
+    const raw = snapshot.val();
+    const byUid = {};
+    for (const key of Object.keys(raw)) {
+      const entry = raw[key];
+      const uid = entry.uid || key;
+      if (!byUid[uid]) byUid[uid] = entry;
+    }
+    // Создаём псевдо-снапшот через обёртку
+    updateTooltip({ exists: () => true, val: () => byUid });
   });
 
-  // Регистрируем себя по UID (уникальный пользователь, не устройство)
+  // Регистрируем себя с уникальным ключом на вкладку (tabId)
+  // Это позволяет нескольким вкладкам одного пользователя существовать независимо:
+  // закрытие одной вкладки удаляет только её запись, остальные остаются
+  const tabId = Math.random().toString(36).slice(2, 10);
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
     const uid = user.uid;
     const nick = getNick(user.email);
-    const userRef = ref(db, `online/${uid}`);
 
-    await set(userRef, { nick, t: serverTimestamp() });
-    onDisconnect(userRef).remove();
+    // Ключ: uid_tabId — уникален для каждой вкладки
+    const tabRef = ref(db, `online/${uid}_${tabId}`);
+
+    await set(tabRef, { uid, nick, t: serverTimestamp() });
+    // При закрытии вкладки удаляется только эта запись
+    onDisconnect(tabRef).remove();
   });
 </script>
 
