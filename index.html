@@ -2034,7 +2034,12 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   const authApp = initializeApp(firebaseConfig, "authApp");
   const auth = getAuth(authApp);
   const db = getDatabase(authApp);
-  setPersistence(auth, browserLocalPersistence);
+  await setPersistence(auth, browserLocalPersistence);
+  // Ждём, пока Firebase точно восстановит сохранённую сессию из
+  // хранилища — иначе onAuthStateChanged ниже может первый раз
+  // сработать с user === null и на миг показать форму входа
+  // уже залогиненному пользователю.
+  await auth.authStateReady();
 
   // === Синхронизация прогресса между устройствами через Firebase ===
   const SYNC_KEYS = [
