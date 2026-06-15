@@ -702,7 +702,9 @@
               class="field-input"
               id="currentPassInput"
               placeholder="••••••••"
-              autocomplete="current-password"
+              autocomplete="off"
+              readonly
+              onfocus="this.removeAttribute('readonly')"
             >
           </div>
 
