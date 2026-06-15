@@ -2461,10 +2461,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <span class="date-day" id="dateDayName"></span>
       <span class="date-main" id="dateMainText">—</span>
       <span class="date-online"><span class="online-dot-mini"></span><span id="onlineCount">—</span> онлайн
-        <div class="online-tooltip" id="onlineTooltip">
-          <div class="online-tooltip-title">В сети сейчас</div>
-          <div class="online-tooltip-list" id="onlineNickList"><div class="online-tooltip-empty">...</div></div>
-        </div>
+
       </span>
     </div>
     <div class="right-group" style="display:flex; align-items:center; gap: 14px;">
@@ -3827,10 +3824,7 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
 
 /* Попап с никами */
 .online-tooltip {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  position: fixed;
   min-width: 160px;
   max-width: 260px;
   padding: 12px 16px;
@@ -3847,13 +3841,12 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
   white-space: nowrap;
 }
-.date-online:hover .online-tooltip {
+.online-tooltip.tooltip-visible {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(0);
 }
 .online-tooltip::after {
   content: '';
@@ -3961,6 +3954,39 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     listEl.innerHTML = entries
       .map(e => `<div class="online-tooltip-nick">${e.nick || '???'}</div>`)
       .join('');
+  }
+
+  // Позиционирование тултипа: fixed поверх всего, строго над счётчиком онлайна
+  const _onlineEl = document.querySelector('.date-online');
+  const _tooltip = document.getElementById('onlineTooltip');
+  if (_onlineEl && _tooltip) {
+    function _positionTooltip() {
+      const rect = _onlineEl.getBoundingClientRect();
+      // Сначала сбрасываем top чтобы offsetHeight был актуален
+      _tooltip.style.top = '-9999px';
+      _tooltip.style.left = '-9999px';
+      const ttW = _tooltip.offsetWidth || 180;
+      const ttH = _tooltip.offsetHeight || 80;
+      let left = rect.left + rect.width / 2 - ttW / 2;
+      if (left < 8) left = 8;
+      if (left + ttW > window.innerWidth - 8) left = window.innerWidth - ttW - 8;
+      const top = rect.top - ttH - 10;
+      _tooltip.style.left = left + 'px';
+      _tooltip.style.top = top + 'px';
+    }
+    _onlineEl.addEventListener('mouseenter', () => {
+      _positionTooltip();
+      _tooltip.classList.add('tooltip-visible');
+    });
+    _onlineEl.addEventListener('mouseleave', () => {
+      _tooltip.classList.remove('tooltip-visible');
+    });
+    window.addEventListener('scroll', () => {
+      if (_tooltip.classList.contains('tooltip-visible')) _positionTooltip();
+    }, true);
+    window.addEventListener('resize', () => {
+      if (_tooltip.classList.contains('tooltip-visible')) _positionTooltip();
+    });
   }
 
   // Слушаем онлайн в реальном времени
@@ -4672,5 +4698,10 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
 })();
 </script>
 
+
+<div class="online-tooltip" id="onlineTooltip">
+  <div class="online-tooltip-title">В сети сейчас</div>
+  <div class="online-tooltip-list" id="onlineNickList"><div class="online-tooltip-empty">...</div></div>
+</div>
 </body>
 </html>
