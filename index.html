@@ -3979,7 +3979,13 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     }
 
     const data = snapshot.val();
-    const entries = Object.values(data);
+    // Дедупликация по uid (ключ формата uid_sessionId)
+    const seenUids = new Map();
+    for (const [key, val] of Object.entries(data)) {
+      const uid = key.includes('_') ? key.split('_')[0] : key;
+      if (!seenUids.has(uid)) seenUids.set(uid, val);
+    }
+    const entries = Array.from(seenUids.values());
     const count = entries.length;
     countEl.textContent = count;
 
@@ -4031,17 +4037,21 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     updateTooltip(snapshot);
   });
 
-  // Регистрируем себя по UID (уникальный пользователь, не устройство)
+  // Уникальный ID сессии для каждой вкладки
+  const sessionId = Math.random().toString(36).slice(2, 9);
+
+  // Регистрируем себя по UID_sessionId (одна запись на вкладку, дедупликация в UI)
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
     const uid = user.uid;
-    const userRef = ref(db, `online/${uid}`);
+    const sessionKey = uid + '_' + sessionId;
+    const userRef = ref(db, `online/${sessionKey}`);
 
     // Берём displayName из базы, если не задан — используем логин из email
     const dnSnap = await get(ref(db, 'users/' + uid + '/displayName'));
     const nick = (dnSnap.exists() && dnSnap.val()) ? dnSnap.val() : getNick(user.email);
 
-    await set(userRef, { nick, t: serverTimestamp() });
+    await set(userRef, { nick, uid, t: serverTimestamp() });
     onDisconnect(userRef).remove();
   });
 </script>
