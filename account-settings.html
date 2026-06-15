@@ -866,15 +866,12 @@
     const input = document.getElementById('displayNameInput');
     if (input) input.value = saved || '';
 
-    // Резервируем логин пользователя в индексе displayNames,
-    // чтобы никто другой не мог занять его как отображаемое имя.
-    // Пишем только если запись пустая или уже наша.
+    // Резервируем логин в отдельном индексе loginNames — всегда перезаписываем своим uid.
+    // Это защищает логин ALICE даже если она ещё не заходила в настройки:
+    // при первом входе на сайт loginNames/{ALICE} = uid будет записан,
+    // и saveDisplayName проверяет оба индекса.
     try {
-      const loginKey = login; // уже UPPER из getLoginName
-      const loginIndexSnap = await get(ref(db, 'displayNames/' + loginKey));
-      if (!loginIndexSnap.exists()) {
-        await dbSet(ref(db, 'displayNames/' + loginKey), user.uid);
-      }
+      await dbSet(ref(db, 'loginNames/' + login), user.uid);
     } catch(e) {}
 
     hideOverlay();
@@ -953,14 +950,24 @@
     msg.className = 'field-message';
 
     try {
-      // 1. Проверка: не пытается ли кто-то занять чужой логин?
-      //    Перебираем всех юзеров нам не нужно — храним индекс displayNames/{NAME} = uid
+      // 1. Проверка по индексу кастомных имён
       const indexSnap = await get(ref(db, 'displayNames/' + nameKey));
       if (indexSnap.exists() && indexSnap.val() !== currentUser.uid) {
         msg.textContent = '✕ Это имя уже занято';
         msg.className = 'field-message error';
         btn.disabled = false;
         return;
+      }
+      // 2. Проверка по индексу логинов — защищает имена тех кто ещё не заходил в настройки
+      const myLogin = getLoginName(currentUser.email);
+      if (nameKey !== myLogin) {
+        const loginSnap = await get(ref(db, 'loginNames/' + nameKey));
+        if (loginSnap.exists() && loginSnap.val() !== currentUser.uid) {
+          msg.textContent = '✕ Это имя уже занято';
+          msg.className = 'field-message error';
+          btn.disabled = false;
+          return;
+        }
       }
 
       // 2. Освобождаем старое имя из индекса (если было)
