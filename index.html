@@ -2258,10 +2258,19 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         const takenSnap = await get(ref(db, 'displayNames/' + loginKey));
         if (takenSnap.exists() && takenSnap.val() !== user.uid) {
           const thiefUid = takenSnap.val();
-          // Сбрасываем displayName у того кто занял наш логин
-          await dbSet(ref(db, 'users/' + thiefUid + '/displayName'), null);
-          // Освобождаем имя из индекса
+          await dbSet(ref(db, 'evictions/' + thiefUid), loginKey);
           await dbSet(ref(db, 'displayNames/' + loginKey), null);
+        }
+      } catch(e) {}
+      // Проверяем: не нужно ли сбросить наше собственное displayName (нас выгнали)?
+      try {
+        const evictSnap = await get(ref(db, 'evictions/' + user.uid));
+        if (evictSnap.exists()) {
+          // Сбрасываем своё displayName
+          await dbSet(ref(db, 'users/' + user.uid + '/displayName'), null);
+          await dbSet(ref(db, 'evictions/' + user.uid), null);
+          // Обновляем отображение
+          if (nameEl) nameEl.textContent = getDisplayName(user.email);
         }
       } catch(e) {}
       // Скрываем оверлей — всегда, даже если что-то пошло не так
