@@ -946,11 +946,6 @@
       msg.className = 'field-message error';
       return;
     }
-    if (val.length < 2) {
-      msg.textContent = '✕ Минимум 2 символа';
-      msg.className = 'field-message error';
-      return;
-    }
     if (val.length > 12) {
       msg.textContent = '✕ Максимум 12 символов';
       msg.className = 'field-message error';
@@ -958,6 +953,11 @@
     }
     if (!/^[A-Za-z0-9_]+$/.test(val)) {
       msg.textContent = '✕ Только латинские буквы, цифры и _';
+      msg.className = 'field-message error';
+      return;
+    }
+    if ((val.match(/[A-Za-z]/g) || []).length < 3) {
+      msg.textContent = '✕ Минимум 3 буквы в имени';
       msg.className = 'field-message error';
       return;
     }
