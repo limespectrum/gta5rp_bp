@@ -866,6 +866,17 @@
     const input = document.getElementById('displayNameInput');
     if (input) input.value = saved || '';
 
+    // Резервируем логин пользователя в индексе displayNames,
+    // чтобы никто другой не мог занять его как отображаемое имя.
+    // Пишем только если запись пустая или уже наша.
+    try {
+      const loginKey = login; // уже UPPER из getLoginName
+      const loginIndexSnap = await get(ref(db, 'displayNames/' + loginKey));
+      if (!loginIndexSnap.exists()) {
+        await dbSet(ref(db, 'displayNames/' + loginKey), user.uid);
+      }
+    } catch(e) {}
+
     hideOverlay();
   }
 
