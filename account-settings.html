@@ -557,7 +557,7 @@
   <div class="top-inner">
 
     <div class="top-left">
-      <a href="index.html" class="back-btn">
+      <a href="./" class="back-btn">
         <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M11 5H1M1 5L5 1M1 5L5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -873,7 +873,7 @@
   // реальное состояние (юзер или null) уже точно известно.
   let authResolved = false;
   const fallback = setTimeout(() => {
-    if (!authResolved) window.location.href = 'index.html';
+    if (!authResolved) window.location.href = './';
   }, 6000);
 
   await auth.authStateReady();
@@ -883,7 +883,7 @@
 
   const initialUser = auth.currentUser;
   if (!initialUser) {
-    window.location.href = 'index.html';
+    window.location.href = './';
   } else {
     currentUser = initialUser;
     await applyUser(currentUser);
@@ -892,7 +892,7 @@
   // ── Реагируем на дальнейшие изменения (например, выход в другой вкладке) ──
   onAuthStateChanged(auth, (user) => {
     if (!user && currentUser) {
-      window.location.href = 'index.html';
+      window.location.href = './';
       return;
     }
     currentUser = user;
