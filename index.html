@@ -19,6 +19,7 @@
   }
   * { cursor: default; }
   a, button, [onclick], label, .toggle-switch, .toggle-btn, .char-btn, .cosmos-btn, .filter-btn, .legend-filter, .profile-settings-btn, #profileBtn, #logoutBtn, .pmenu-btn, .back-btn { cursor: pointer; }
+  a *, button *, [onclick] *, label *, .toggle-switch *, .toggle-btn *, .char-btn *, .cosmos-btn *, .filter-btn *, .legend-filter *, .profile-settings-btn *, #profileBtn *, #logoutBtn *, .pmenu-btn *, .back-btn * { cursor: pointer; }
   input, textarea { cursor: text; }
   :root{
     --easy-bg: #e9f7ef;
@@ -78,7 +79,7 @@
   }
   .controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding: 14px 24px; }
   .controls button:not(.char-btn):not(.cosmos-btn) { background: linear-gradient(135deg, #ff3366, #cc0044); border: none; color: white; padding: 10px 24px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 0 6px #ff3366; user-select: none; }
-  .controls button:not(.char-btn):not(.cosmos-btn):hover { transform: scale(1.05); box-shadow: 0 0 18px #ff3366; background: linear-gradient(135deg, #ff5577, #ee2255); }
+  .controls button:not(.char-btn):not(.cosmos-btn):hover { box-shadow: 0 0 18px #ff3366; background: linear-gradient(135deg, #ff5577, #ee2255); }
   .center-actions {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -547,10 +548,12 @@
   /* Edit mode banner */
   .edit-mode-banner {
     display: none;
-    grid-column: 1 / -1;
+    width: 100%;
+    box-sizing: border-box;
     text-align: center;
-    padding: 9px 28px;
-    margin-bottom: 0;
+    padding: 11px 28px;
+    margin-top: 12px;
+    margin-bottom: 10px;
     border-radius: 6px;
     background: rgba(8, 16, 28, 0.82);
     border: 1px solid rgba(255, 60, 100, 0.38);
@@ -558,7 +561,7 @@
       0 0 18px rgba(255, 40, 80, 0.18),
       0 0 0 1px rgba(255, 60, 100, 0.10) inset;
     font-family: monospace;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -586,9 +589,33 @@
     background: rgba(0,200,255,0.16);
   }
 
+  /* Плавное скрытие ВЫПОЛНЕНО/ОСТАЛОСЬ и коннектора в режиме редактирования */
+  .total {
+    max-height: 200px;
+    overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.35s ease,
+                margin 0.4s ease;
+  }
+  .panel-connector {
+    overflow: hidden;
+    max-height: 40px;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.3s ease;
+  }
+  body.edit-order-mode .total {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    margin-bottom: 0 !important;
+    pointer-events: none;
+  }
+  body.edit-order-mode .panel-connector {
+    max-height: 0 !important;
+    opacity: 0 !important;
+  }
+
   /* Затемнение всех блоков кроме столбиков с заданиями и логотипа в режиме редактирования */
   body.edit-order-mode .controls,
-  body.edit-order-mode .total,
   body.edit-order-mode .char-switcher {
     opacity: 0.35;
     filter: grayscale(0.8);
@@ -749,9 +776,7 @@
     font-weight: 700;
     letter-spacing: 0.5px;
     color: #7df0ff;
-    padding: 8px 14px 8px 18px;
-    transition: color 0.25s;
-    pointer-events: none;
+    display: none;
   }
   .ctp-circle {
     display: inline-flex;
@@ -765,7 +790,7 @@
     font-size: 0.95rem;
     font-weight: 900;
     color: #7df0ff;
-    margin: 4px 5px 4px 0;
+    margin: 4px 5px 4px 5px;
     flex-shrink: 0;
     transition: all 0.25s;
     pointer-events: none;
@@ -833,11 +858,6 @@
     box-shadow: none !important;
   }
   body.char2-active #editOrderBtn:hover {
-    box-shadow: 0 0 14px rgba(255,255,255,0.1) !important;
-    border-color: rgba(255,255,255,0.55) !important;
-    color: rgba(240,245,255,0.92) !important;
-  }
-  body.char2-active #resetBtn:hover {
     box-shadow: 0 0 14px rgba(255,255,255,0.1) !important;
     border-color: rgba(255,255,255,0.55) !important;
     color: rgba(240,245,255,0.92) !important;
@@ -1059,19 +1079,9 @@
       0 0 18px rgba(180,80,255,0.25);
     transition: background 0.4s ease, box-shadow 0.4s ease;
   }
-  /* Узел-ромб по центру разделителя */
+  /* Узел-ромб по центру разделителя — заменён кнопкой сброса прогресса */
   .total-divider::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
-    width: 8px;
-    height: 8px;
-    background: rgba(220,120,255,0.95);
-    box-shadow: 0 0 10px rgba(180,80,255,0.9), 0 0 24px rgba(180,80,255,0.45);
-    border-radius: 2px;
-    transition: background 0.4s ease, box-shadow 0.4s ease;
+    display: none;
   }
 
   /* Левый индикатор-полоска — убран, заменён обводкой всей панели */
@@ -1178,9 +1188,17 @@
     );
     box-shadow: 0 0 6px rgba(0,220,210,0.6), 0 0 18px rgba(0,220,210,0.25);
   }
-  body.char2-active .total-divider::before {
-    background: rgba(0,225,215,0.95);
-    box-shadow: 0 0 10px rgba(0,220,210,0.9), 0 0 24px rgba(0,220,210,0.45);
+  body.char2-active #resetBtn {
+    background: radial-gradient(circle, rgba(0,225,215,0.30), rgba(0,210,200,0.14));
+    border-color: rgba(0,225,215,0.75);
+    color: #d0fff8;
+    box-shadow: 0 0 10px rgba(0,220,210,0.65), 0 0 24px rgba(0,220,210,0.3);
+  }
+  body.char2-active #resetBtn:hover {
+    background: radial-gradient(circle, rgba(0,225,215,0.45), rgba(0,210,200,0.22));
+    border-color: rgba(0,255,245,1);
+    box-shadow: 0 0 16px rgba(0,220,210,0.85), 0 0 36px rgba(0,220,210,0.4);
+    color: #fff;
   }
   body.char2-active .total {
     background: linear-gradient(90deg, rgba(57,255,100,0.85) 0%, rgba(0,210,200,0.6) 50%, rgba(0,180,170,0.85) 100%);
@@ -1243,25 +1261,57 @@
 /* Выполнено — зелёная подсветка онлайн-задания */
 
 
+/* Кнопка сброса прогресса — кружок на месте бывшего ромба-разделителя */
 #resetBtn {
-  background: rgba(30, 40, 60, 0.7);
-  border: 1px solid rgba(0, 255, 255, 0.4);
-  color: #ccf4ff;
-  font-size: 1rem;
-  font-weight: bold;
-  padding: 10px 24px;
-  border-radius: 40px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220,120,255,0.30), rgba(180,80,255,0.14));
+  border: 1.5px solid rgba(220,120,255,0.75);
+  color: #f0d9ff;
+  box-shadow: 0 0 10px rgba(180,80,255,0.65), 0 0 24px rgba(180,80,255,0.3);
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: all 0.25s ease;
+  /* Перекрываем линию-разделитель: псевдоэлемент-заглушка под кнопкой */
+  isolation: isolate;
+}
+/* Непрозрачный круг-«пробка», скрывающий линию разделителя внутри кнопки */
+#resetBtn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: #0b1220;
+  z-index: -1;
+}
+body.char2-active #resetBtn::before {
+  background: #0b1220;
+}
+#resetBtn svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+  pointer-events: none;
 }
 #resetBtn:hover {
-  transform: scale(1.02);
-  background: rgba(0, 255, 255, 0.15);
-  border-color: #0ff;
-  box-shadow: 0 0 12px cyan;
-  color: #ffffff;
+  transform: translate(-50%, -50%) scale(1.12);
+  background: radial-gradient(circle, rgba(220,120,255,0.45), rgba(180,80,255,0.22));
+  border-color: rgba(230,150,255,1);
+  box-shadow: 0 0 16px rgba(180,80,255,0.85), 0 0 36px rgba(180,80,255,0.4);
+  color: #fff;
+}
+#resetBtn:active {
+  transform: translate(-50%, -50%) scale(0.95);
 }
 
 /* ── ЗАВЕРШЕНО оверлей столбца ── */
@@ -1623,7 +1673,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     content: '';
     position: absolute;
     bottom: -7px;
-    left: 50%;
+    left: var(--arrow-offset, 50%);
     transform: translateX(-50%) rotate(45deg);
     width: 12px;
     height: 12px;
@@ -1676,6 +1726,15 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   .cosmos-popup-btn-no:hover {
     border-color: rgba(255,255,255,0.4);
     color: rgba(240,245,255,0.95);
+  }
+  .cosmos-popup-btn-yes-danger {
+    background: linear-gradient(135deg, rgba(255,60,100,0.35), rgba(220,0,60,0.22));
+    border-color: rgba(255,90,130,0.65);
+    color: #ffd9e2;
+  }
+  .cosmos-popup-btn-yes-danger:hover {
+    box-shadow: 0 0 14px rgba(255,60,100,0.55);
+    transform: scale(1.05);
   }
 
 
@@ -1837,12 +1896,13 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
   /* Кнопка подсветки видна только в режиме редактирования */
   #taskHighlightBtn {
-    opacity: 0.85;
+    opacity: 1;
   }
   #taskHighlightBtn:hover {
-    border-color: rgba(255,100,140,0.75) !important;
-    color: rgba(255,160,180,1) !important;
-    background: rgba(255,60,100,0.16) !important;
+    border-color: rgba(255,110,150,1) !important;
+    color: #ffe2ea !important;
+    background: rgba(255,50,100,0.32) !important;
+    box-shadow: 0 0 18px rgba(255,60,100,0.65);
     opacity: 1;
   }
 </style>
@@ -2160,10 +2220,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
   // Применяем данные из облака без перезагрузки страницы
   function applyCloudState() {
-    // Перерисовываем задачи
-    if (typeof refreshAll === 'function') refreshAll();
-
-    // Персонаж
+    // Персонаж — применяем первым, чтобы остальные настройки знали активного персонажа
     const charVal = localStorage.getItem('active_char');
     if (charVal !== null) {
       const n = parseInt(charVal);
@@ -2184,11 +2241,39 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       x2El.checked = x2Val ? JSON.parse(x2Val) : false;
     }
 
+    // Перерисовываем задачи (чекбоксы + счётчики)
+    if (typeof refreshAll === 'function') refreshAll();
+
+    // Скрытые колонки — читаем из localStorage и применяем
+    if (typeof applyHiddenColumns === 'function') {
+      try {
+        const raw = localStorage.getItem('hidden_columns_v1');
+        applyHiddenColumns(raw ? JSON.parse(raw) : []);
+      } catch(e) { applyHiddenColumns([]); }
+    }
+
+    // Порядок заданий
+    if (typeof window._applyAllSavedOrders === 'function') window._applyAllSavedOrders();
+
+    // Заголовки колонок
+    if (typeof window._applySavedTitles === 'function') window._applySavedTitles();
+
+    // Цвета категорий
+    if (typeof window._colorPickerLoadSaved === 'function') window._colorPickerLoadSaved();
+
+    // Подсветка выполненных заданий
+    (function() {
+      const HL_KEY_PREFIX = 'task_highlight_color_v2_';
+      const isChar2 = document.body.classList.contains('char2-active');
+      const key = HL_KEY_PREFIX + (isChar2 ? 'char2' : 'char1');
+      const color = localStorage.getItem(key) || 'green';
+      if (typeof window.applyTaskHighlightColor === 'function') {
+        window.applyTaskHighlightColor(color);
+      }
+    })();
+
     // Космос
     if (typeof window._restoreCosmos === 'function') window._restoreCosmos();
-
-    // Скрытые колонки
-    if (typeof applyHiddenColumns === 'function') applyHiddenColumns();
   }
 
   const overlay = document.getElementById('pinOverlay');
@@ -2287,13 +2372,12 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     }
   });
 
-  // Logout button
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
+  // Logout button — используем делегирование т.к. элемент в конце DOM
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.closest('#logoutBtn')) {
       signOut(auth);
-    });
-  }
+    }
+  });
 
   function clearError() {
     errEl.textContent = '';
@@ -2483,6 +2567,10 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 <div class="controls" style="position:relative;">
   <div class="center-actions">
     <div class="left-group">
+      <div class="char-toggle-pill" id="charTogglePill" onclick="toggleCharPopup(event)" title="Переключить персонажа">
+        <span class="ctp-label" id="ctpLabel">Персонаж 1</span>
+        <span class="ctp-circle" id="ctpCircle">1</span>
+      </div>
     <label class="toggle-switch">
       <input id="vipCheckbox" type="checkbox">
       <span class="switch-slider"></span>
@@ -2502,39 +2590,6 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       </span>
     </div>
     <div class="right-group" style="display:flex; align-items:center; gap: 14px;">
-      <div class="cosmos-btn-wrap">
-        <button class="cosmos-btn" id="cosmosBtn" type="button" title="Анимация космоса" onclick="toggleCosmosPopup(event)">
-          <svg class="galaxy-icon" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Outer spiral arm 1 -->
-            <path d="M13 13 Q18 7 22 5 Q20 10 18 13" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none" opacity="0.7"/>
-            <!-- Outer spiral arm 2 -->
-            <path d="M13 13 Q8 19 4 21 Q6 16 8 13" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none" opacity="0.7"/>
-            <!-- Inner spiral arm 1 -->
-            <path d="M13 13 Q16 10 19 9" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.5"/>
-            <!-- Inner spiral arm 2 -->
-            <path d="M13 13 Q10 16 7 17" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.5"/>
-            <!-- Cross arms -->
-            <path d="M13 13 Q9 9 6 7" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.45"/>
-            <path d="M13 13 Q17 17 20 19" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.45"/>
-            <!-- Halo ring -->
-            <ellipse cx="13" cy="13" rx="9.5" ry="3.5" transform="rotate(-30 13 13)" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.22"/>
-            <!-- Stars / dust dots -->
-            <circle cx="20.5" cy="5.5" r="0.9" fill="currentColor" opacity="0.65"/>
-            <circle cx="5.5" cy="20" r="0.75" fill="currentColor" opacity="0.55"/>
-            <circle cx="22" cy="14" r="0.6" fill="currentColor" opacity="0.45"/>
-            <circle cx="4.5" cy="10" r="0.55" fill="currentColor" opacity="0.4"/>
-            <circle cx="17" cy="4" r="0.55" fill="currentColor" opacity="0.4"/>
-            <circle cx="8" cy="22" r="0.5" fill="currentColor" opacity="0.35"/>
-            <!-- Bright core -->
-            <circle cx="13" cy="13" r="2" fill="currentColor" opacity="0.9"/>
-            <circle cx="13" cy="13" r="1" fill="white" opacity="0.6"/>
-          </svg>
-        </button>
-      </div>
-      <div class="char-toggle-pill" id="charTogglePill" onclick="switchChar(currentChar === 1 ? 2 : 1)" title="Переключить персонажа">
-        <span class="ctp-label" id="ctpLabel">Персонаж 1</span>
-        <span class="ctp-circle" id="ctpCircle">2</span>
-      </div>
       <span id="userNameDisplay" style="
         font-family: monospace;
         font-size: 1.15rem;
@@ -2571,8 +2626,6 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
           transition: all 0.2s ease;
           box-shadow: 0 0 8px rgba(255,255,255,0.08);
         "
-        onmouseover="this.style.boxShadow='0 0 18px rgba(255,255,255,0.2)';this.style.borderColor='rgba(255,255,255,0.65)';this.style.background='rgba(255,255,255,0.14)';"
-        onmouseout="if(!document.getElementById('profileMenu').classList.contains('open')){this.style.boxShadow='0 0 8px rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.35)';this.style.background='rgba(255,255,255,0.08)';}"
         onclick="toggleProfileMenu(event)">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.9;flex-shrink:0;">
             <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.4"/>
@@ -2585,39 +2638,36 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         </button>
 
         <!-- Dropdown menu -->
-        <div id="profileMenu" style="
-          display: none;
-          position: absolute;
-          top: calc(100% + 8px);
-          right: 0;
-          min-width: 170px;
-          background: rgba(10,18,36,0.96);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1.5px solid rgba(255,255,255,0.20);
-          border-radius: 14px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06) inset;
-          overflow: hidden;
-          z-index: 9999;
-          animation: profileMenuIn 0.18s ease;
-        ">
-          <button onclick="openSettings(event)" class="profile-settings-btn">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.75;flex-shrink:0;">
-              <path d="M1.5 11.5l2.5-1 6-6-1.5-1.5-6 6-1 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-              <path d="M9 3.5l1-1a1 1 0 011.5 1.5l-1 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-            Настройки
-          </button>
-          <div id="profileDivider" style="height:1px;background:rgba(255,255,255,0.12);"></div>
-          <button id="logoutBtn" class="profile-logout-btn">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.85;flex-shrink:0;">
-              <path d="M5 2H2.5A1.5 1.5 0 001 3.5v6A1.5 1.5 0 002.5 11H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-              <path d="M8.5 9l3-2.5L8.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M11.5 6.5H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-            Выйти
-          </button>
-        </div>
+      </div>
+
+      <div class="cosmos-btn-wrap">
+        <button class="cosmos-btn" id="cosmosBtn" type="button" title="Анимация космоса" onclick="toggleCosmosPopup(event)">
+          <svg class="galaxy-icon" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer spiral arm 1 -->
+            <path d="M13 13 Q18 7 22 5 Q20 10 18 13" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none" opacity="0.7"/>
+            <!-- Outer spiral arm 2 -->
+            <path d="M13 13 Q8 19 4 21 Q6 16 8 13" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none" opacity="0.7"/>
+            <!-- Inner spiral arm 1 -->
+            <path d="M13 13 Q16 10 19 9" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.5"/>
+            <!-- Inner spiral arm 2 -->
+            <path d="M13 13 Q10 16 7 17" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.5"/>
+            <!-- Cross arms -->
+            <path d="M13 13 Q9 9 6 7" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.45"/>
+            <path d="M13 13 Q17 17 20 19" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.45"/>
+            <!-- Halo ring -->
+            <ellipse cx="13" cy="13" rx="9.5" ry="3.5" transform="rotate(-30 13 13)" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.22"/>
+            <!-- Stars / dust dots -->
+            <circle cx="20.5" cy="5.5" r="0.9" fill="currentColor" opacity="0.65"/>
+            <circle cx="5.5" cy="20" r="0.75" fill="currentColor" opacity="0.55"/>
+            <circle cx="22" cy="14" r="0.6" fill="currentColor" opacity="0.45"/>
+            <circle cx="4.5" cy="10" r="0.55" fill="currentColor" opacity="0.4"/>
+            <circle cx="17" cy="4" r="0.55" fill="currentColor" opacity="0.4"/>
+            <circle cx="8" cy="22" r="0.5" fill="currentColor" opacity="0.35"/>
+            <!-- Bright core -->
+            <circle cx="13" cy="13" r="2" fill="currentColor" opacity="0.9"/>
+            <circle cx="13" cy="13" r="1" fill="white" opacity="0.6"/>
+          </svg>
+        </button>
       </div>
 
       <style>
@@ -2679,9 +2729,31 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
           from { opacity: 0; transform: translateY(-6px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
+        #profileBtn:hover:not(.open-state) {
+          box-shadow: 0 0 18px rgba(255,255,255,0.2) !important;
+          border-color: rgba(255,255,255,0.65) !important;
+          background: rgba(255,255,255,0.14) !important;
+        }
+        #profileBtn.open-state {
+          box-shadow: 0 0 18px rgba(255,255,255,0.2) !important;
+          border-color: rgba(255,255,255,0.65) !important;
+          background: rgba(255,255,255,0.14) !important;
+        }
       </style>
 
       <script>
+        function positionProfileMenu() {
+          const menu = document.getElementById('profileMenu');
+          const btn = document.getElementById('profileBtn');
+          const rect = btn.getBoundingClientRect();
+          const menuW = 180;
+          let left = rect.right - menuW;
+          if (left < 8) left = 8;
+          const top = rect.bottom + 8;
+          menu.style.top = top + 'px';
+          menu.style.left = left + 'px';
+        }
+
         function toggleProfileMenu(e) {
           if (e) e.stopPropagation();
           const menu = document.getElementById('profileMenu');
@@ -2692,32 +2764,48 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
             menu.classList.remove('open');
             menu.style.display = 'none';
             chevron.style.transform = 'rotate(0deg)';
-            btn.style.boxShadow = '0 0 8px rgba(255,255,255,0.08)';
-            btn.style.borderColor = 'rgba(255,255,255,0.35)';
-            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.classList.remove('open-state');
           } else {
+            positionProfileMenu();
             menu.classList.add('open');
             menu.style.display = 'block';
             chevron.style.transform = 'rotate(180deg)';
-            btn.style.boxShadow = '0 0 18px rgba(255,255,255,0.2)';
-            btn.style.borderColor = 'rgba(255,255,255,0.65)';
-            btn.style.background = 'rgba(255,255,255,0.14)';
+            btn.classList.add('open-state');
           }
         }
 
+        window.addEventListener('scroll', function() {
+          const menu = document.getElementById('profileMenu');
+          if (menu && menu.classList.contains('open')) positionProfileMenu();
+        }, true);
+        window.addEventListener('resize', function() {
+          const menu = document.getElementById('profileMenu');
+          if (menu && menu.classList.contains('open')) positionProfileMenu();
+        });
+
         function openSettings(e) {
           if (e) e.stopPropagation();
-          // Закрываем меню
           const menu = document.getElementById('profileMenu');
           const chevron = document.getElementById('profileChevron');
           const btn = document.getElementById('profileBtn');
           menu.classList.remove('open');
           menu.style.display = 'none';
           chevron.style.transform = 'rotate(0deg)';
-          btn.style.boxShadow = '0 0 8px rgba(255,255,255,0.08)';
-          btn.style.borderColor = 'rgba(255,255,255,0.35)';
-          btn.style.background = 'rgba(255,255,255,0.08)';
+          btn.classList.remove('open-state');
           window.location.href = './account-settings';
+        }
+
+        function openCustomization(e) {
+          if (e) e.stopPropagation();
+          const menu = document.getElementById('profileMenu');
+          const chevron = document.getElementById('profileChevron');
+          const btn = document.getElementById('profileBtn');
+          menu.classList.remove('open');
+          menu.style.display = 'none';
+          chevron.style.transform = 'rotate(0deg)';
+          btn.classList.remove('open-state');
+          const editBtn = document.getElementById('editOrderBtn');
+          if (editBtn) editBtn.click();
         }
 
         document.addEventListener('click', function(e) {
@@ -2729,9 +2817,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
             menu.classList.remove('open');
             menu.style.display = 'none';
             chevron.style.transform = 'rotate(0deg)';
-            btn.style.boxShadow = '0 0 8px rgba(255,255,255,0.08)';
-            btn.style.borderColor = 'rgba(255,255,255,0.35)';
-            btn.style.background = 'rgba(255,255,255,0.08)';
+            btn.classList.remove('open-state');
           }
         });
       </script>
@@ -2743,25 +2829,6 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
 <div class="legend">
   <div class="legend-left">
-  <button id="resetBtn" title="Сбросить прогресс" style="
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: rgba(255,255,255,0.04);
-    border: 1.5px solid rgba(255,255,255,0.18);
-    color: rgba(200,210,225,0.55);
-    padding: 7px 16px;
-    border-radius: 40px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    transition: all 0.2s ease;
-    box-shadow: none;
-  " onmouseover="this.style.borderColor='rgba(255,255,255,0.55)';this.style.color='rgba(240,245,255,0.92)';this.style.boxShadow='0 0 14px rgba(255,255,255,0.1)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.18)';this.style.color='rgba(200,210,225,0.55)';this.style.boxShadow='none';">⟳ Сбросить прогресс</button>
   </div>
   <div class="legend-filters">
   <button class="filter-btn active" data-col="col-easy">ЛЁГКИЕ</button>
@@ -2771,51 +2838,6 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   <button class="filter-btn active" data-col="col-fraction">ФРАКЦИОННЫЕ</button>
   </div>
   <div class="legend-settings">
-  <button class="reset-order-btn" id="resetOrderBtn" title="Сбросить порядок заданий по умолчанию" style="
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(100,116,139,0.10));
-    border: 1.5px solid rgba(148,163,184,0.4);
-    color: rgba(190,205,225,0.85);
-    padding: 7px 16px;
-    border-radius: 40px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    transition: all 0.2s ease;
-    box-shadow: 0 0 8px rgba(148,163,184,0.12);
-  " onmouseover="this.style.boxShadow='0 0 18px rgba(148,163,184,0.4)';this.style.borderColor='rgba(180,195,215,0.7)';this.style.color='#e5edf7';" onmouseout="this.style.boxShadow='0 0 8px rgba(148,163,184,0.12)';this.style.borderColor='rgba(148,163,184,0.4)';this.style.color='rgba(190,205,225,0.85)';">
-    ↺ По умолчанию
-  </button>
-  <button class="edit-order-btn" id="editOrderBtn" title="Редактировать порядок заданий" style="
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: rgba(255,255,255,0.04);
-    border: 1.5px solid rgba(255,255,255,0.18);
-    color: rgba(200,210,225,0.55);
-    padding: 7px 16px;
-    border-radius: 40px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    transition: all 0.2s ease;
-    box-shadow: none;
-  " onmouseover="this.style.borderColor='rgba(255,255,255,0.55)';this.style.color='rgba(240,245,255,0.92)';this.style.boxShadow='0 0 14px rgba(255,255,255,0.1)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.18)';this.style.color='rgba(200,210,225,0.55)';this.style.boxShadow='none';">
-    <svg width="14" height="14" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.75;vertical-align:middle;margin-right:2px;">
-      <circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.3"/>
-      <path d="M6.5 1v1M6.5 11v1M1 6.5h1M11 6.5h1M2.636 2.636l.707.707M9.657 9.657l.707.707M2.636 10.364l.707-.707M9.657 3.343l.707-.707" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-    </svg> Кастомизация
-  </button>
   </div>
 </div>
 </div> <!-- /super-panel -->
@@ -2835,7 +2857,16 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         <div class="task-progress-label" id="taskProgressLabel">0 / 0 заданий</div>
       </div>
     </div>
-    <div class="total-divider"></div>
+    <div class="total-divider">
+      <button id="resetBtn" title="Сбросить прогресс заданий">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 11a9 9 0 0 1 15.5-5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M21 13a9 9 0 0 1-15.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M21 3v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 21v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
     <div class="total-card card-left">
       <div class="card-label">Осталось</div>
       <div class="card-value-row">
@@ -2845,21 +2876,23 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   </div>
 </div>
 
-<div class="grid" id="tasksGrid">
-  <div class="edit-mode-banner" id="editModeBanner">
-    <div style="display:inline-flex;align-items:center;gap:14px;position:relative;">
-      <!-- Кнопка подсветки заданий (левее карандашика) -->
+<div class="edit-mode-banner" id="editModeBanner">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:14px;position:relative;flex-wrap:wrap;">
+      <span>✏️ &nbsp; РЕЖИМ РЕДАКТИРОВАНИЯ — ПЕРЕТАЩИТЕ ЗАДАНИЯ ДЛЯ ИЗМЕНЕНИЯ ПОРЯДКА</span>
+      <div style="display:inline-flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <!-- Кнопка подсветки заданий (левее кнопки «По умолчанию») -->
       <div style="position:relative;display:inline-flex;align-items:center;">
         <button id="taskHighlightBtn" title="Подсветка заданий" onclick="toggleTaskHighlightPopup(event)" style="
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(255,60,100,0.08);
-          border: 1.5px solid rgba(255,60,100,0.35);
-          color: rgba(255,120,150,0.75);
-          padding: 5px 13px;
+          background: rgba(255,40,90,0.20);
+          border: 1.5px solid rgba(255,70,120,0.75);
+          color: rgba(255,185,205,1);
+          box-shadow: 0 0 12px rgba(255,60,100,0.45);
+          padding: 8px 18px;
           border-radius: 30px;
-          font-size: 0.68rem;
+          font-size: 0.78rem;
           font-weight: 700;
           letter-spacing: 1.5px;
           text-transform: uppercase;
@@ -2869,7 +2902,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
           transition: all 0.2s ease;
           font-family: monospace;
         ">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
             <circle cx="4.5" cy="4.5" r="3" fill="rgba(34,197,94,0.9)"/>
             <circle cx="11.5" cy="4.5" r="3" fill="rgba(59,130,246,0.9)"/>
             <circle cx="4.5" cy="11.5" r="3" fill="rgba(251,191,36,0.9)"/>
@@ -2881,7 +2914,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         <div id="taskHighlightPopup" style="
           position: absolute;
           bottom: calc(100% + 10px);
-          left: 0;
+          right: 0;
           z-index: 10001;
           min-width: 220px;
           background: rgba(14,20,38,0.97);
@@ -2897,7 +2930,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
           -webkit-user-select: none;
         ">
           <!-- Стрелка вниз — указывает на кнопку -->
-          <div style="position:absolute;bottom:-7px;left:24px;width:12px;height:12px;background:rgba(14,20,38,0.97);border-right:1.5px solid rgba(120,130,255,0.4);border-bottom:1.5px solid rgba(120,130,255,0.4);transform:rotate(45deg);"></div>
+          <div style="position:absolute;bottom:-7px;right:24px;width:12px;height:12px;background:rgba(14,20,38,0.97);border-right:1.5px solid rgba(120,130,255,0.4);border-bottom:1.5px solid rgba(120,130,255,0.4);transform:rotate(45deg);"></div>
           <div style="font-size:0.7rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:rgba(180,190,220,0.6);text-align:center;margin-bottom:12px;font-family:monospace;">Цвет выполненных заданий</div>
           <!-- Тестовое задание -->
           <div style="margin-bottom:12px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
@@ -2921,9 +2954,54 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
           </div>
         </div>
       </div>
-      <span>✏️ &nbsp; РЕЖИМ РЕДАКТИРОВАНИЯ — ПЕРЕТАЩИТЕ ЗАДАНИЯ ДЛЯ ИЗМЕНЕНИЯ ПОРЯДКА</span>
+      <button class="reset-order-btn" id="resetOrderBtn" title="Сбросить порядок заданий по умолчанию" style="
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(100,116,139,0.10));
+        border: 1.5px solid rgba(148,163,184,0.4);
+        color: rgba(190,205,225,0.85);
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        font-family: monospace;
+        box-shadow: 0 0 8px rgba(148,163,184,0.12);
+      " onmouseover="this.style.boxShadow='0 0 14px rgba(148,163,184,0.4)';this.style.borderColor='rgba(180,195,215,0.7)';this.style.color='#e5edf7';" onmouseout="this.style.boxShadow='0 0 8px rgba(148,163,184,0.12)';this.style.borderColor='rgba(148,163,184,0.4)';this.style.color='rgba(190,205,225,0.85)';">
+        ↺ По умолчанию
+      </button>
+      <button class="edit-order-btn" id="editOrderBtn" title="Сохранить порядок заданий" style="
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0,200,255,0.12);
+        border: 1.5px solid rgba(0,200,255,0.5);
+        color: rgba(120,230,255,0.9);
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        font-family: monospace;
+      " onmouseover="this.style.boxShadow='0 0 14px rgba(0,200,255,0.5)';this.style.borderColor='rgba(0,220,255,0.8)';this.style.color='#aaf0ff';" onmouseout="this.style.boxShadow='none';this.style.borderColor='rgba(0,200,255,0.5)';this.style.color='rgba(120,230,255,0.9)';">
+        💾 Сохранить
+      </button>
+      </div>
     </div>
   </div>
+
+<div class="grid" id="tasksGrid">
   <!-- Легкие -->
   <div class="column easy-col" id="col-easy">
     <div class="col-done-overlay" id="overlay-col-easy">
@@ -3091,7 +3169,7 @@ function updateCharUI() {
   const label = document.getElementById('ctpLabel');
   const circle = document.getElementById('ctpCircle');
   if (label) label.textContent = 'Персонаж ' + currentChar;
-  if (circle) circle.textContent = currentChar === 1 ? '2' : '1';
+  if (circle) circle.textContent = currentChar;
   const icons = ['⚔️', '🛡️'];
   const names = ['Персонаж 1', 'Персонаж 2'];
   const idx = currentChar - 1;
@@ -3258,10 +3336,6 @@ attachCheckboxListeners();
 attachRowClickListeners();
 vipCheckbox.addEventListener('change', ()=>{ localStorage.setItem(getVipStorageKey(), JSON.stringify(!!vipCheckbox.checked)); refreshAll(); });
 x2Checkbox.addEventListener('change', ()=>{ localStorage.setItem(getX2StorageKey(), JSON.stringify(!!x2Checkbox.checked)); refreshAll(); });
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  qa('.tasks-column input[type="checkbox"]').forEach(cb => cb.checked = false);
-  saveState();
-});
 loadState();
 
 // ── Проверка завершения каждого столбца ──
@@ -3780,6 +3854,10 @@ loadHiddenColumns();
 
   // Применяем сохранённые порядки при загрузке
   applyAllSavedOrders();
+
+  // Экспортируем для вызова из applyCloudState
+  window._applyAllSavedOrders = applyAllSavedOrders;
+  window._applySavedTitles = applySavedTitles;
 
   // Обновляем порядок при смене персонажа
   const _origSwitchChar = window.switchChar;
@@ -4533,6 +4611,22 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
   </div>
 </div>
 
+<div class="cosmos-popup char-popup" id="charPopup">
+  <div class="cosmos-popup-text" id="charPopupText"></div>
+  <div class="cosmos-popup-actions">
+    <button type="button" class="cosmos-popup-btn" id="charPopupYesBtn" onclick="confirmCharSwitch(event)">Да</button>
+    <button type="button" class="cosmos-popup-btn cosmos-popup-btn-no" onclick="closeCharPopup(event)">Нет</button>
+  </div>
+</div>
+
+<div class="cosmos-popup" id="resetProgressPopup">
+  <div class="cosmos-popup-text">СБРОСИТЬ <span style="color:#ff5577;font-weight:900;text-shadow:0 0 8px rgba(255,60,100,0.6);">ПРОГРЕСС ЗАДАНИЙ</span>?</div>
+  <div class="cosmos-popup-actions">
+    <button type="button" class="cosmos-popup-btn cosmos-popup-btn-yes-danger" onclick="confirmResetProgress(event)">Да</button>
+    <button type="button" class="cosmos-popup-btn cosmos-popup-btn-no" onclick="closeResetProgressPopup(event)">Нет</button>
+  </div>
+</div>
+
 <script>
 (function(){
   const canvas = document.getElementById('cosmosCanvas');
@@ -4686,6 +4780,10 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
     const top = rect.top - popupH - 12;
     cosmosPopup.style.left = left + 'px';
     cosmosPopup.style.top = top + 'px';
+    // Стрелка указывает на центр кнопки
+    const btnCenterX = rect.left + rect.width / 2;
+    const arrowOffset = btnCenterX - left;
+    cosmosPopup.style.setProperty('--arrow-offset', arrowOffset + 'px');
   }
 
   // Обновлять позицию при скролле и ресайзе пока попап открыт
@@ -4753,5 +4851,201 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
   <div class="online-tooltip-title">В сети сейчас</div>
   <div class="online-tooltip-list" id="onlineNickList"><div class="online-tooltip-empty">...</div></div>
 </div>
+
+<div id="profileMenu" style="
+  display: none;
+  position: fixed;
+  min-width: 175px;
+  background: rgba(10,18,36,0.97);
+  border: 1.5px solid rgba(255,255,255,0.20);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06) inset;
+  overflow: hidden;
+  z-index: 999999;
+">
+  <button onclick="openSettings(event)" class="profile-settings-btn">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.75;flex-shrink:0;">
+      <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M1.5 12.5c0-2.485 2.462-4.5 5.5-4.5s5.5 2.015 5.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    Аккаунт
+  </button>
+  <div style="height:1px;background:rgba(255,255,255,0.12);"></div>
+  <button onclick="openCustomization(event)" class="profile-settings-btn">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.75;flex-shrink:0;">
+      <circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.3"/>
+      <path d="M6.5 1v1M6.5 11v1M1 6.5h1M11 6.5h1M2.636 2.636l.707.707M9.657 9.657l.707.707M2.636 10.364l.707-.707M9.657 3.343l.707-.707" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    Кастомизация
+  </button>
+  <div style="height:1px;background:rgba(255,255,255,0.12);"></div>
+  <button id="logoutBtn" class="profile-logout-btn">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.85;flex-shrink:0;">
+      <path d="M5 2H2.5A1.5 1.5 0 001 3.5v6A1.5 1.5 0 002.5 11H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M8.5 9l3-2.5L8.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M11.5 6.5H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    Выйти
+  </button>
+</div>
+
+<style>
+  /* Цвет кнопки Да — синий (переключение на персонажа 1) */
+  .char-popup .char-popup-yes-blue {
+    background: linear-gradient(135deg, rgba(0,160,255,0.35), rgba(0,90,200,0.25));
+    border-color: rgba(0,200,255,0.65);
+    color: #aaf0ff;
+  }
+  .char-popup .char-popup-yes-blue:hover {
+    box-shadow: 0 0 14px rgba(0,200,255,0.55);
+    transform: scale(1.05);
+  }
+  /* Цвет кнопки Да — зелёный (переключение на персонажа 2) */
+  .char-popup .char-popup-yes-green {
+    background: linear-gradient(135deg, rgba(30,200,80,0.30), rgba(0,160,50,0.22));
+    border-color: rgba(57,255,100,0.65);
+    color: #aaffc0;
+  }
+  .char-popup .char-popup-yes-green:hover {
+    box-shadow: 0 0 14px rgba(57,255,100,0.5);
+    transform: scale(1.05);
+  }
+  /* Стрелка попапа — переопределяем для char-popup (берёт стиль cosmos-popup::after) */
+  .char-popup::after {
+    border-right-color: rgba(120,130,255,0.35);
+    border-bottom-color: rgba(120,130,255,0.35);
+    left: var(--arrow-offset, 50%);
+  }
+</style>
+
+<script>
+(function(){
+  const charPopup = document.getElementById('charPopup');
+  const charPopupText = document.getElementById('charPopupText');
+  const charPopupYesBtn = document.getElementById('charPopupYesBtn');
+  const charTogglePill = document.getElementById('charTogglePill');
+
+  function positionCharPopup() {
+    const rect = charTogglePill.getBoundingClientRect();
+    const popupW = charPopup.offsetWidth || 240;
+    const popupH = charPopup.offsetHeight || 96;
+    let left = rect.left + rect.width / 2 - popupW / 2;
+    if (left < 8) left = 8;
+    if (left + popupW > window.innerWidth - 8) left = window.innerWidth - popupW - 8;
+    const top = rect.top - popupH - 12;
+    charPopup.style.left = left + 'px';
+    charPopup.style.top = top + 'px';
+    // Стрелка указывает на центр кнопки
+    const btnCenterX = rect.left + rect.width / 2;
+    const arrowOffset = btnCenterX - left;
+    charPopup.style.setProperty('--arrow-offset', arrowOffset + 'px');
+  }
+
+  window.addEventListener('scroll', function() {
+    if (charPopup.classList.contains('show')) positionCharPopup();
+  }, true);
+  window.addEventListener('resize', function() {
+    if (charPopup.classList.contains('show')) positionCharPopup();
+  });
+
+  window.toggleCharPopup = function(e) {
+    if (e) e.stopPropagation();
+    const willShow = !charPopup.classList.contains('show');
+    if (willShow) {
+      const targetChar = (typeof currentChar !== 'undefined' ? currentChar : 1) === 1 ? 2 : 1;
+      if (targetChar === 2) {
+        charPopupText.innerHTML = 'ВЫБРАТЬ <span style="color:#39ff64;font-weight:900;text-shadow:0 0 8px rgba(57,255,100,0.7);">ПЕРСОНАЖ 2</span>';
+        charPopupYesBtn.className = 'cosmos-popup-btn char-popup-yes-green';
+      } else {
+        charPopupText.innerHTML = 'ВЫБРАТЬ <span style="color:#00d2ff;font-weight:900;text-shadow:0 0 8px rgba(0,200,255,0.7);">ПЕРСОНАЖ 1</span>';
+        charPopupYesBtn.className = 'cosmos-popup-btn char-popup-yes-blue';
+      }
+      positionCharPopup();
+      charPopup.classList.add('show');
+    } else {
+      charPopup.classList.remove('show');
+    }
+  };
+
+  window.closeCharPopup = function(e) {
+    if (e) e.stopPropagation();
+    charPopup.classList.remove('show');
+  };
+
+  window.confirmCharSwitch = function(e) {
+    if (e) e.stopPropagation();
+    const targetChar = (typeof currentChar !== 'undefined' ? currentChar : 1) === 1 ? 2 : 1;
+    charPopup.classList.remove('show');
+    if (typeof switchChar === 'function') switchChar(targetChar);
+  };
+
+  document.addEventListener('click', function(e) {
+    if (!charPopup.classList.contains('show')) return;
+    if (charPopup.contains(e.target) || charTogglePill.contains(e.target)) return;
+    charPopup.classList.remove('show');
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const resetBtn = document.getElementById('resetBtn');
+  const resetPopup = document.getElementById('resetProgressPopup');
+  if (!resetBtn || !resetPopup) return;
+
+  function positionResetPopup() {
+    const rect = resetBtn.getBoundingClientRect();
+    const popupW = resetPopup.offsetWidth || 230;
+    const popupH = resetPopup.offsetHeight || 90;
+    let left = rect.left + rect.width / 2 - popupW / 2;
+    if (left < 8) left = 8;
+    if (left + popupW > window.innerWidth - 8) left = window.innerWidth - popupW - 8;
+    const top = rect.top - popupH - 12;
+    resetPopup.style.left = left + 'px';
+    resetPopup.style.top = top + 'px';
+    const btnCenterX = rect.left + rect.width / 2;
+    const arrowOffset = btnCenterX - left;
+    resetPopup.style.setProperty('--arrow-offset', arrowOffset + 'px');
+  }
+
+  window.addEventListener('scroll', function() {
+    if (resetPopup.classList.contains('show')) positionResetPopup();
+  }, true);
+  window.addEventListener('resize', function() {
+    if (resetPopup.classList.contains('show')) positionResetPopup();
+  });
+
+  resetBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const willShow = !resetPopup.classList.contains('show');
+    if (willShow) {
+      positionResetPopup();
+      resetPopup.classList.add('show');
+    } else {
+      resetPopup.classList.remove('show');
+    }
+  });
+
+  window.closeResetProgressPopup = function(e) {
+    if (e) e.stopPropagation();
+    resetPopup.classList.remove('show');
+  };
+
+  window.confirmResetProgress = function(e) {
+    if (e) e.stopPropagation();
+    resetPopup.classList.remove('show');
+    if (typeof qa === 'function' && typeof saveState === 'function') {
+      qa('.tasks-column input[type="checkbox"]').forEach(cb => cb.checked = false);
+      saveState();
+    }
+  };
+
+  document.addEventListener('click', function(e) {
+    if (!resetPopup.classList.contains('show')) return;
+    if (resetPopup.contains(e.target) || resetBtn.contains(e.target)) return;
+    resetPopup.classList.remove('show');
+  });
+})();
+</script>
 </body>
 </html>
