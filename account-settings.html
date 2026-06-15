@@ -806,7 +806,7 @@
     EmailAuthProvider, reauthenticateWithCredential, updatePassword,
     setPersistence, browserLocalPersistence
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getDatabase, ref, get, set as dbSet } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, get, set as dbSet, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCMVd8slq6gc6lD1noTW0DDW8VkALJcZao",
@@ -932,10 +932,40 @@
       return;
     }
 
+    const nameKey = val.toUpperCase();
+
+    // Проверяем: имя зарезервировано за логином другого игрока?
+    // Логин из email (часть до @) тоже считается зарезервированным именем
+    // Проверяем индекс занятых имён
     btn.disabled = true;
+    msg.textContent = '...';
+    msg.className = 'field-message';
+
     try {
+      // 1. Проверка: не пытается ли кто-то занять чужой логин?
+      //    Перебираем всех юзеров нам не нужно — храним индекс displayNames/{NAME} = uid
+      const indexSnap = await get(ref(db, 'displayNames/' + nameKey));
+      if (indexSnap.exists() && indexSnap.val() !== currentUser.uid) {
+        msg.textContent = '✕ Это имя уже занято';
+        msg.className = 'field-message error';
+        btn.disabled = false;
+        return;
+      }
+
+      // 2. Освобождаем старое имя из индекса (если было)
+      const oldSnap = await get(ref(db, 'users/' + currentUser.uid + '/displayName'));
+      if (oldSnap.exists() && oldSnap.val()) {
+        const oldKey = oldSnap.val().toUpperCase();
+        if (oldKey !== nameKey) {
+          await remove(ref(db, 'displayNames/' + oldKey));
+        }
+      }
+
+      // 3. Сохраняем новое имя и занимаем его в индексе
       await dbSet(ref(db, 'users/' + currentUser.uid + '/displayName'), val);
-      updateHeaderName(val.toUpperCase());
+      await dbSet(ref(db, 'displayNames/' + nameKey), currentUser.uid);
+
+      updateHeaderName(nameKey);
       msg.textContent = '✓ Сохранено';
       msg.className = 'field-message success';
     } catch {
@@ -952,6 +982,11 @@
     const msg   = document.getElementById('displayNameMsg');
     msg.className = 'field-message';
     try {
+      // Освобождаем имя из индекса
+      const oldSnap = await get(ref(db, 'users/' + currentUser.uid + '/displayName'));
+      if (oldSnap.exists() && oldSnap.val()) {
+        await remove(ref(db, 'displayNames/' + oldSnap.val().toUpperCase()));
+      }
       await dbSet(ref(db, 'users/' + currentUser.uid + '/displayName'), null);
       input.value = '';
       updateHeaderName(getLoginName(currentUser.email));
