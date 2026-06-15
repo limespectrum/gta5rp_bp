@@ -2229,6 +2229,13 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
           pushStateToCloud();
         }
       } catch(e) {}
+      // Подгружаем кастомное имя персонажа из базы (если задано в настройках)
+      try {
+        const nameSnap = await get(ref(db, 'users/' + user.uid + '/displayName'));
+        if (nameEl && nameSnap.exists() && nameSnap.val()) {
+          nameEl.textContent = nameSnap.val().toUpperCase();
+        }
+      } catch(e) {}
       // Скрываем оверлей — всегда, даже если что-то пошло не так
       hideOverlay();
     } else {
