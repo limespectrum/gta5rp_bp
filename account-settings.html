@@ -870,14 +870,22 @@
     try {
       await dbSet(ref(db, 'loginNames/' + login), user.uid);
 
-      // Проверяем: не занял ли кто-то наш логин как displayName?
       const takenSnap = await get(ref(db, 'displayNames/' + login));
       if (takenSnap.exists() && takenSnap.val() !== user.uid) {
         const thiefUid = takenSnap.val();
-        // Сбрасываем displayName у того кто занял наш логин
-        await dbSet(ref(db, 'users/' + thiefUid + '/displayName'), null);
-        // Освобождаем имя из индекса
+        await dbSet(ref(db, 'evictions/' + thiefUid), login);
         await dbSet(ref(db, 'displayNames/' + login), null);
+      }
+    } catch(e) {}
+    // Проверяем: не нужно ли сбросить наше собственное displayName (нас выгнали)?
+    try {
+      const evictSnap = await get(ref(db, 'evictions/' + user.uid));
+      if (evictSnap.exists()) {
+        await dbSet(ref(db, 'users/' + user.uid + '/displayName'), null);
+        await dbSet(ref(db, 'evictions/' + user.uid), null);
+        const input = document.getElementById('displayNameInput');
+        if (input) input.value = '';
+        updateHeaderName(login);
       }
     } catch(e) {}
 
