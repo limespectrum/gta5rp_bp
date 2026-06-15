@@ -7,6 +7,19 @@
 <title>ФАРМ BP</title>
 <link rel="icon" type="image/png" href="https://psv4.userapi.com/s/v1/d2/OS1XuRQbrcwb45XOpQZ3lzZEOnFKmLQhQ-QIga0mxOtLC5nKBS-kWnJ4x13j3wIbtya2vNiAuhxKZg_F5n4RcOzLh3SCJCCNgw4scYil3cy3L8SN2IfuZDqEepVggECnhAAh-t7wuWh8/LIME_COIN.png">
 <style>
+  *, *::before, *::after {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+  }
+  input, textarea {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+  }
+  * { cursor: default; }
+  a, button, [onclick], label, .toggle-switch, .toggle-btn, .char-btn, .cosmos-btn, .filter-btn, .legend-filter, .profile-settings-btn, #profileBtn, #logoutBtn, .pmenu-btn, .back-btn { cursor: pointer; }
+  input, textarea { cursor: text; }
   :root{
     --easy-bg: #e9f7ef;
     --easy-border: #b7e0c9;
@@ -2235,6 +2248,11 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         if (nameEl && nameSnap.exists() && nameSnap.val()) {
           nameEl.textContent = nameSnap.val().toUpperCase();
         }
+      } catch(e) {}
+      // Резервируем логин в loginNames чтобы никто не мог занять чужое имя
+      try {
+        const loginKey = getDisplayName(user.email);
+        await dbSet(ref(db, 'loginNames/' + loginKey), user.uid);
       } catch(e) {}
       // Скрываем оверлей — всегда, даже если что-то пошло не так
       hideOverlay();
