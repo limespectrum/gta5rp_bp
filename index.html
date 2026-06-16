@@ -3380,8 +3380,6 @@ attachCheckboxListeners();
 attachRowClickListeners();
 vipCheckbox.addEventListener('change', ()=>{ localStorage.setItem(getVipStorageKey(), JSON.stringify(!!vipCheckbox.checked)); refreshAll(); });
 x2Checkbox.addEventListener('change', ()=>{ localStorage.setItem(getX2StorageKey(), JSON.stringify(!!x2Checkbox.checked)); refreshAll(); });
-loadState();
-
 // ── Проверка завершения каждого столбца ──
 function checkColumnCompletion() {
   const columns = [
@@ -3900,6 +3898,9 @@ loadHiddenColumns();
 
   // Применяем сохранённые порядки при загрузке
   applyAllSavedOrders();
+  // loadState() перенесён сюда: data-row-key уже проставлены,
+  // порядок строк восстановлен — состояние чекбоксов ляжет правильно
+  loadState();
 
   // Экспортируем для вызова из applyCloudState
   window._applyAllSavedOrders = applyAllSavedOrders;
