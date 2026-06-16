@@ -277,10 +277,13 @@
     border-radius: 0;
     border: none;
     box-shadow: none;
-    overflow: hidden;
+    overflow: visible;
     transition: none;
     background: transparent;
     backdrop-filter: none;
+    padding: 0 6px;
+    margin-left: -6px;
+    margin-right: -6px;
   }
   body.char2-active .super-panel {
     border: none;
@@ -294,7 +297,7 @@
     border-radius: 16px;
     box-shadow: 0 0 15px rgba(0,255,255,0.2);
     margin-bottom: 0;
-    overflow: hidden;
+    overflow: clip;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     cursor: default;
     user-select: none;
@@ -592,13 +595,13 @@
   /* Плавное скрытие ВЫПОЛНЕНО/ОСТАЛОСЬ и коннектора в режиме редактирования */
   .total {
     max-height: 200px;
-    overflow: hidden;
+    overflow: clip;
     transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1),
                 opacity 0.35s ease,
                 margin 0.4s ease;
   }
   .panel-connector {
-    overflow: hidden;
+    overflow: clip;
     max-height: 40px;
     transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1),
                 opacity 0.3s ease;
@@ -1001,7 +1004,7 @@
      ЕДИНАЯ SPLIT-ПАНЕЛЬ: ВЫПОЛНЕНО / ОСТАЛОСЬ
      ══════════════════════════════════════════ */
   .total {
-    margin: 0 0 14px 0;
+    margin: 0 6px 14px 6px;
     position: relative;
     border-radius: 17px;
     padding: 1.5px;
@@ -1013,16 +1016,14 @@
     transition: background 0.4s ease, box-shadow 0.4s ease;
     cursor: default;
     user-select: none;
+    opacity: 0.82;
   }
-
-  /* Общий контейнер-капсула */
   .total-split {
     position: relative;
     display: flex;
     align-items: stretch;
     border-radius: 16px;
-    overflow: hidden;
-    backdrop-filter: blur(16px);
+    overflow: clip;
     background: rgba(6, 14, 28, 0.88);
     box-shadow:
       0 0 40px rgba(0,0,0,0.5);
@@ -2218,50 +2219,69 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     return false;
   }
 
+  // Ждём, пока на странице зарегистрируются функции, от которых зависит
+  // applyCloudState (они объявляются в обычных <script> блоках ниже по
+  // документу). В норме к моменту вызова они уже готовы, но порядок
+  // выполнения <script type="module"> относительно обычных скриптов
+  // не во всех браузерах одинаков — поэтому явно подождём вместо того,
+  // чтобы тихо пропустить вызов через typeof === 'function'.
+  function waitForFns(names, timeoutMs) {
+    return new Promise(resolve => {
+      const start = Date.now();
+      (function check() {
+        const ready = names.every(n => typeof window[n] === 'function');
+        if (ready || Date.now() - start > timeoutMs) { resolve(ready); return; }
+        setTimeout(check, 50);
+      })();
+    });
+  }
+
   // Применяем данные из облака без перезагрузки страницы
-  function applyCloudState() {
-    // Персонаж — применяем первым, чтобы остальные настройки знали активного персонажа
+  async function applyCloudState() {
+    const ready = await waitForFns(['switchChar', 'loadState', 'refreshAll', 'applyHiddenColumns'], 4000);
+    if (!ready) {
+      // Функции страницы так и не появились вовремя — пробуем ещё раз
+      // чуть позже, не блокируя остальной код входа.
+      setTimeout(applyCloudState, 1000);
+      return;
+    }
+
+    // 1. Персонаж — применяем первым, чтобы остальные настройки (суффиксы
+    // ключей localStorage, цвета, заголовки) знали актуального персонажа.
     const charVal = localStorage.getItem('active_char');
     if (charVal !== null) {
-      const n = parseInt(charVal);
-      if (!isNaN(n) && typeof switchChar === 'function') switchChar(n);
+      const n = parseInt(charVal, 10);
+      if (!isNaN(n)) switchChar(n);
     }
 
-    // VIP / X2 чекбоксы
-    const vipEl = document.getElementById('vipCheckbox');
-    const x2El = document.getElementById('x2Checkbox');
-    if (vipEl) {
-      const suffix = document.body.classList.contains('char2-active') ? '_char2' : '';
-      const vipVal = localStorage.getItem('daily_tasks_vip_mode_v4' + suffix);
-      vipEl.checked = vipVal ? JSON.parse(vipVal) : false;
-    }
-    if (x2El) {
-      const suffix = document.body.classList.contains('char2-active') ? '_char2' : '';
-      const x2Val = localStorage.getItem('daily_tasks_x2_mode_v4' + suffix);
-      x2El.checked = x2Val ? JSON.parse(x2Val) : false;
-    }
+    // 2. Скрытые колонки — структурное изменение, применяем раньше
+    // восстановления порядка строк и состояния чекбоксов.
+    try {
+      const raw = localStorage.getItem('hidden_columns_v1');
+      applyHiddenColumns(raw ? JSON.parse(raw) : []);
+    } catch(e) { applyHiddenColumns([]); }
 
-    // Перерисовываем задачи (чекбоксы + счётчики)
-    if (typeof refreshAll === 'function') refreshAll();
-
-    // Скрытые колонки — читаем из localStorage и применяем
-    if (typeof applyHiddenColumns === 'function') {
-      try {
-        const raw = localStorage.getItem('hidden_columns_v1');
-        applyHiddenColumns(raw ? JSON.parse(raw) : []);
-      } catch(e) { applyHiddenColumns([]); }
-    }
-
-    // Порядок заданий
+    // 3. Порядок заданий — переставляем строки ДО загрузки массива
+    // "выполнено/не выполнено". Этот массив позиционный (по индексу
+    // чекбокса в DOM), поэтому применять его можно только когда DOM
+    // уже в финальном (сохранённом) порядке — иначе статус "выполнено"
+    // присвоится не тем строкам.
     if (typeof window._applyAllSavedOrders === 'function') window._applyAllSavedOrders();
 
-    // Заголовки колонок
+    // 4. Заголовки колонок
     if (typeof window._applySavedTitles === 'function') window._applySavedTitles();
 
-    // Цвета категорий
+    // 5. Цвета категорий
     if (typeof window._colorPickerLoadSaved === 'function') window._colorPickerLoadSaved();
 
-    // Подсветка выполненных заданий
+    // 6. Теперь, когда структура DOM (порядок строк, видимость колонок)
+    // окончательная — загружаем чекбоксы и VIP/x2 из localStorage.
+    // loadState() сам в конце вызывает refreshAll(), так что суммы,
+    // классы .done и оверлеи завершения столбцов считаются уже по
+    // финальному DOM, а не по промежуточному.
+    loadState();
+
+    // 7. Подсветка выполненных заданий
     (function() {
       const HL_KEY_PREFIX = 'task_highlight_color_v2_';
       const isChar2 = document.body.classList.contains('char2-active');
@@ -2272,7 +2292,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       }
     })();
 
-    // Космос
+    // 8. Космос
     if (typeof window._restoreCosmos === 'function') window._restoreCosmos();
   }
 
@@ -2322,7 +2342,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       try {
         const hadCloud = await pullStateFromCloud(user.uid);
         if (hadCloud) {
-          applyCloudState();
+          await applyCloudState();
         } else {
           pushStateToCloud();
         }
