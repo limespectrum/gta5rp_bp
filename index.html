@@ -3236,8 +3236,14 @@ function updateTaskProgressBar() {
 
 function saveStateForChar(charNum) {
   const suffix = charSuffix(charNum);
-  const arr = qa('.tasks-column input[type="checkbox"]').map(cb => !!cb.checked);
-  localStorage.setItem(storageKey + suffix, JSON.stringify(arr));
+  // FIX: сохраняем по data-row-key, а не по позиции
+  const state = {};
+  qa('.tasks-column input[type="checkbox"]').forEach(cb => {
+    const row = cb.closest('tr');
+    const key = row && row.dataset.rowKey;
+    if (key) state[key] = !!cb.checked;
+  });
+  localStorage.setItem(storageKey + suffix, JSON.stringify(state));
   localStorage.setItem(vipStorageKey + suffix, JSON.stringify(!!vipCheckbox.checked));
   localStorage.setItem(x2StorageKey + suffix, JSON.stringify(!!x2Checkbox.checked));
 }
@@ -3310,18 +3316,36 @@ function refreshAll() {
 }
 function loadState() {
   const raw = localStorage.getItem(getStorageKey());
-  let arr = null;
-  try { arr = JSON.parse(raw); } catch(e){ arr = null; }
-  if(!Array.isArray(arr) || arr.length !== N) arr = new Array(N).fill(false);
-  for(let i=0;i<N;i++){ const cb = checkboxes[i]; if (cb) cb.checked = !!arr[i]; }
+  let state = null;
+  try { state = JSON.parse(raw); } catch(e) { state = null; }
+  // FIX: поддержка нового формата {rowKey: bool} и старого позиционного [bool, ...]
+  const isArray = Array.isArray(state);
+  const cbs = qa('.tasks-column input[type="checkbox"]');
+  cbs.forEach((cb, i) => {
+    const row = cb.closest('tr');
+    const key = row && row.dataset.rowKey;
+    if (state && !isArray && key && key in state) {
+      cb.checked = !!state[key];
+    } else if (isArray && i < state.length) {
+      cb.checked = !!state[i];
+    } else {
+      cb.checked = false;
+    }
+  });
   const vipMode = !!JSON.parse(localStorage.getItem(getVipStorageKey()) || 'false');
   const x2Mode = !!JSON.parse(localStorage.getItem(getX2StorageKey()) || 'false');
   vipCheckbox.checked = vipMode; x2Checkbox.checked = x2Mode;
   refreshAll();
 }
 function saveState() {
-  const arr = qa('.tasks-column input[type="checkbox"]').map(cb => !!cb.checked);
-  localStorage.setItem(getStorageKey(), JSON.stringify(arr));
+  // FIX: сохраняем по data-row-key, а не по позиции — порядок строк не влияет
+  const state = {};
+  qa('.tasks-column input[type="checkbox"]').forEach(cb => {
+    const row = cb.closest('tr');
+    const key = row && row.dataset.rowKey;
+    if (key) state[key] = !!cb.checked;
+  });
+  localStorage.setItem(getStorageKey(), JSON.stringify(state));
   localStorage.setItem(getVipStorageKey(), JSON.stringify(!!vipCheckbox.checked));
   localStorage.setItem(getX2StorageKey(), JSON.stringify(!!x2Checkbox.checked));
   refreshAll();
@@ -3719,6 +3743,8 @@ loadHiddenColumns();
     document.querySelectorAll('.drag-over-zone').forEach(el => el.classList.remove('drag-over-zone'));
     dragSrc = null;
     updateEmptyTbodies();
+    // FIX: автосохранение порядка после каждого перетаскивания
+    saveAllOrders();
   }
 
   // Обновляем статус пустых tbody
