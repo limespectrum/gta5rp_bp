@@ -4705,16 +4705,22 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     // Базовое значение, на случай если данных в Firebase ещё нет
     _onlineMode = _localMode(uid) || 'login';
 
+    // Флаги: ждём оба значения перед первой записью ника, чтобы не было гонки
+    let _dnLoaded = false;
+    let _modeLoaded = false;
+
     // Подписка на displayName в реальном времени
     onValue(ref(db, 'users/' + uid + '/displayName'), (snap) => {
       _onlineDn = (snap.exists() && snap.val()) ? snap.val() : null;
-      _refreshOnlineNick(user);
+      _dnLoaded = true;
+      if (_dnLoaded && _modeLoaded) _refreshOnlineNick(user);
     });
 
     // Подписка на displayMode в реальном времени
     onValue(ref(db, 'users/' + uid + '/displayMode'), (snap) => {
       _onlineMode = snap.exists() ? snap.val() : (_localMode(uid) || 'login');
-      _refreshOnlineNick(user);
+      _modeLoaded = true;
+      if (_dnLoaded && _modeLoaded) _refreshOnlineNick(user);
     });
   });
 </script>
