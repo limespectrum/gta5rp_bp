@@ -2547,7 +2547,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getDatabase, ref, get, set as dbSet } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, get, set as dbSet, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCMVd8slq6gc6lD1noTW0DDW8VkALJcZao",
@@ -2807,26 +2807,38 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         }
       } catch(e) {}
       // Подгружаем кастомное имя персонажа из базы (если задано в настройках)
-      // и учитываем выбранный режим отображения (логин / отображаемое имя)
+      // и учитываем выбранный режим отображения (логин / отображаемое имя).
+      // Подписка в реальном времени — шапка обновится сразу, даже если режим
+      // меняется в другой вкладке (например, на странице настроек аккаунта).
+      let _hdrDn = null;
+      let _hdrMode = 'login';
       try {
-        const nameSnap = await get(ref(db, 'users/' + user.uid + '/displayName'));
-        const dn = nameSnap.exists() ? nameSnap.val() : null;
+        const local = localStorage.getItem('displayMode_' + user.uid);
+        if (local === 'display') _hdrMode = 'display';
+      } catch(e) {}
 
-        let mode = 'login';
-        try {
-          const modeSnap = await get(ref(db, 'users/' + user.uid + '/displayMode'));
-          if (modeSnap.exists()) mode = modeSnap.val();
-        } catch(e) {}
-        if (mode === 'login') {
-          try {
-            const local = localStorage.getItem('displayMode_' + user.uid);
-            if (local === 'display') mode = 'display';
-          } catch(e) {}
-        }
-
+      function _refreshHeaderName() {
         if (nameEl) {
-          nameEl.textContent = (mode === 'display' && dn) ? dn.toUpperCase() : getDisplayName(user.email);
+          nameEl.textContent = (_hdrMode === 'display' && _hdrDn) ? _hdrDn.toUpperCase() : getDisplayName(user.email);
         }
+      }
+
+      try {
+        onValue(ref(db, 'users/' + user.uid + '/displayName'), (snap) => {
+          _hdrDn = snap.exists() ? snap.val() : null;
+          _refreshHeaderName();
+        });
+        onValue(ref(db, 'users/' + user.uid + '/displayMode'), (snap) => {
+          if (snap.exists()) {
+            _hdrMode = snap.val();
+          } else {
+            try {
+              const local = localStorage.getItem('displayMode_' + user.uid);
+              _hdrMode = (local === 'display') ? 'display' : 'login';
+            } catch(e) { _hdrMode = 'login'; }
+          }
+          _refreshHeaderName();
+        });
       } catch(e) {}
       // Резервируем логин в loginNames + выгоняем того кто занял наш логин как кастомное имя
       try {
@@ -4661,32 +4673,49 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
   const sessionId = Math.random().toString(36).slice(2, 9);
 
   // Регистрируем себя по UID_sessionId (одна запись на вкладку, дедупликация в UI)
-  onAuthStateChanged(auth, async (user) => {
+  // Ник пересчитывается и обновляется в реальном времени при любом изменении
+  // displayName / displayMode — не только при логине/перезагрузке страницы.
+  let _onlineUid = null;
+  let _onlineDn = null;
+  let _onlineMode = 'login';
+  let _onlineUserRef = null;
+
+  function _localMode(uid) {
+    try {
+      return localStorage.getItem('displayMode_' + uid) === 'display' ? 'display' : null;
+    } catch(e) { return null; }
+  }
+
+  async function _refreshOnlineNick(user) {
+    if (!_onlineUserRef) return;
+    const nick = (_onlineMode === 'display' && _onlineDn) ? _onlineDn : getNick(user.email);
+    try {
+      await set(_onlineUserRef, { nick, uid: user.uid, t: serverTimestamp() });
+    } catch(e) {}
+  }
+
+  onAuthStateChanged(auth, (user) => {
     if (!user) return;
     const uid = user.uid;
+    _onlineUid = uid;
     const sessionKey = uid + '_' + sessionId;
-    const userRef = ref(db, `online/${sessionKey}`);
+    _onlineUserRef = ref(db, `online/${sessionKey}`);
+    onDisconnect(_onlineUserRef).remove();
 
-    // Берём displayName из базы и учитываем выбранный режим отображения
-    const dnSnap = await get(ref(db, 'users/' + uid + '/displayName'));
-    const dn = (dnSnap.exists() && dnSnap.val()) ? dnSnap.val() : null;
+    // Базовое значение, на случай если данных в Firebase ещё нет
+    _onlineMode = _localMode(uid) || 'login';
 
-    let mode = 'login';
-    try {
-      const modeSnap = await get(ref(db, 'users/' + uid + '/displayMode'));
-      if (modeSnap.exists()) mode = modeSnap.val();
-    } catch(e) {}
-    if (mode === 'login') {
-      try {
-        const local = localStorage.getItem('displayMode_' + uid);
-        if (local === 'display') mode = 'display';
-      } catch(e) {}
-    }
+    // Подписка на displayName в реальном времени
+    onValue(ref(db, 'users/' + uid + '/displayName'), (snap) => {
+      _onlineDn = (snap.exists() && snap.val()) ? snap.val() : null;
+      _refreshOnlineNick(user);
+    });
 
-    const nick = (mode === 'display' && dn) ? dn : getNick(user.email);
-
-    await set(userRef, { nick, uid, t: serverTimestamp() });
-    onDisconnect(userRef).remove();
+    // Подписка на displayMode в реальном времени
+    onValue(ref(db, 'users/' + uid + '/displayMode'), (snap) => {
+      _onlineMode = snap.exists() ? snap.val() : (_localMode(uid) || 'login');
+      _refreshOnlineNick(user);
+    });
   });
 </script>
 
