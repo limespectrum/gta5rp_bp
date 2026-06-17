@@ -2807,10 +2807,25 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         }
       } catch(e) {}
       // Подгружаем кастомное имя персонажа из базы (если задано в настройках)
+      // и учитываем выбранный режим отображения (логин / отображаемое имя)
       try {
         const nameSnap = await get(ref(db, 'users/' + user.uid + '/displayName'));
-        if (nameEl && nameSnap.exists() && nameSnap.val()) {
-          nameEl.textContent = nameSnap.val().toUpperCase();
+        const dn = nameSnap.exists() ? nameSnap.val() : null;
+
+        let mode = 'login';
+        try {
+          const modeSnap = await get(ref(db, 'users/' + user.uid + '/displayMode'));
+          if (modeSnap.exists()) mode = modeSnap.val();
+        } catch(e) {}
+        if (mode === 'login') {
+          try {
+            const local = localStorage.getItem('displayMode_' + user.uid);
+            if (local === 'display') mode = 'display';
+          } catch(e) {}
+        }
+
+        if (nameEl) {
+          nameEl.textContent = (mode === 'display' && dn) ? dn.toUpperCase() : getDisplayName(user.email);
         }
       } catch(e) {}
       // Резервируем логин в loginNames + выгоняем того кто занял наш логин как кастомное имя
@@ -4652,9 +4667,23 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     const sessionKey = uid + '_' + sessionId;
     const userRef = ref(db, `online/${sessionKey}`);
 
-    // Берём displayName из базы, если не задан — используем логин из email
+    // Берём displayName из базы и учитываем выбранный режим отображения
     const dnSnap = await get(ref(db, 'users/' + uid + '/displayName'));
-    const nick = (dnSnap.exists() && dnSnap.val()) ? dnSnap.val() : getNick(user.email);
+    const dn = (dnSnap.exists() && dnSnap.val()) ? dnSnap.val() : null;
+
+    let mode = 'login';
+    try {
+      const modeSnap = await get(ref(db, 'users/' + uid + '/displayMode'));
+      if (modeSnap.exists()) mode = modeSnap.val();
+    } catch(e) {}
+    if (mode === 'login') {
+      try {
+        const local = localStorage.getItem('displayMode_' + uid);
+        if (local === 'display') mode = 'display';
+      } catch(e) {}
+    }
+
+    const nick = (mode === 'display' && dn) ? dn : getNick(user.email);
 
     await set(userRef, { nick, uid, t: serverTimestamp() });
     onDisconnect(userRef).remove();
