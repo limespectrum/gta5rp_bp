@@ -4611,11 +4611,13 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     }
 
     const data = snapshot.val();
-    // Дедупликация по uid (ключ формата uid_sessionId)
+    // Дедупликация по uid (структура online/<uid>/<sessionId>)
     const seenUids = new Map();
-    for (const [key, val] of Object.entries(data)) {
-      const uid = key.includes('_') ? key.split('_')[0] : key;
-      if (!seenUids.has(uid)) seenUids.set(uid, val);
+    for (const [uid, sessions] of Object.entries(data)) {
+      if (sessions && typeof sessions === 'object') {
+        const firstSession = Object.values(sessions)[0];
+        if (firstSession) seenUids.set(uid, firstSession);
+      }
     }
     const entries = Array.from(seenUids.values());
     const count = entries.length;
@@ -4698,8 +4700,7 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     if (!user) return;
     const uid = user.uid;
     _onlineUid = uid;
-    const sessionKey = uid + '_' + sessionId;
-    _onlineUserRef = ref(db, `online/${sessionKey}`);
+    _onlineUserRef = ref(db, `online/${uid}/${sessionId}`);
     onDisconnect(_onlineUserRef).remove();
 
     // Базовое значение, на случай если данных в Firebase ещё нет
