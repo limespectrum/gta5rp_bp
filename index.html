@@ -18,8 +18,8 @@
     -moz-user-select: text;
   }
   * { cursor: default; }
-  a, button, [onclick], label, .toggle-switch, .toggle-btn, .char-btn, .cosmos-btn, .filter-btn, .legend-filter, .profile-settings-btn, #profileBtn, #logoutBtn, .pmenu-btn, .back-btn { cursor: pointer; }
-  a *, button *, [onclick] *, label *, .toggle-switch *, .toggle-btn *, .char-btn *, .cosmos-btn *, .filter-btn *, .legend-filter *, .profile-settings-btn *, #profileBtn *, #logoutBtn *, .pmenu-btn *, .back-btn * { cursor: pointer; }
+  a, button, [onclick], label, .toggle-switch, .toggle-btn, .char-btn, .cosmos-btn, .online-monitor-btn, .filter-btn, .legend-filter, .profile-settings-btn, #profileBtn, #logoutBtn, .pmenu-btn, .back-btn, #pinnedServer { cursor: pointer; }
+  a *, button *, [onclick] *, label *, .toggle-switch *, .toggle-btn *, .char-btn *, .cosmos-btn *, .online-monitor-btn *, .filter-btn *, .legend-filter *, .profile-settings-btn *, #profileBtn *, #logoutBtn *, .pmenu-btn *, .back-btn *, #pinnedServer * { cursor: pointer; }
   input, textarea { cursor: text; }
   :root{
     --easy-bg: #e9f7ef;
@@ -1906,6 +1906,460 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     box-shadow: 0 0 18px rgba(255,60,100,0.65);
     opacity: 1;
   }
+
+  /* ══════════════════════════════════════════
+     ONLINE MONITOR BUTTON
+  ══════════════════════════════════════════ */
+  .online-monitor-btn {
+    color: #00eeff;
+    border-color: rgba(0,220,255,0.5) !important;
+    background: rgba(0,200,255,0.07) !important;
+    animation: onlineBtnPulse 2.5s ease-in-out infinite alternate;
+  }
+  .online-monitor-btn:hover {
+    border-color: rgba(0,220,255,0.9) !important;
+    background: rgba(0,200,255,0.14) !important;
+    box-shadow: 0 0 22px rgba(0,220,255,0.55), 0 2px 10px rgba(0,0,0,0.5) !important;
+  }
+  body.char2-active .online-monitor-btn {
+    color: #39ff6a;
+    border-color: rgba(57,255,100,0.5) !important;
+    background: rgba(57,255,100,0.07) !important;
+    animation: onlineBtnPulseGreen 2.5s ease-in-out infinite alternate;
+  }
+  body.char2-active .online-monitor-btn:hover {
+    border-color: rgba(57,255,100,0.9) !important;
+    background: rgba(57,255,100,0.14) !important;
+    box-shadow: 0 0 22px rgba(57,255,100,0.5), 0 2px 10px rgba(0,0,0,0.5) !important;
+  }
+  @keyframes onlineBtnPulseGreen {
+    0%  { box-shadow: 0 0 6px rgba(57,255,100,0.2), 0 0 12px rgba(0,255,80,0.08); }
+    100%{ box-shadow: 0 0 16px rgba(57,255,100,0.42), 0 0 28px rgba(0,255,80,0.18); }
+  }
+
+  /* ══════════════════════════════════════════
+     ONLINE MONITOR MODAL
+  ══════════════════════════════════════════ */
+  #onlineMonitorModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    align-items: center;
+    justify-content: center;
+  }
+  #onlineMonitorModal.show {
+    display: flex;
+  }
+  .om-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 10, 24, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .om-box {
+    position: relative;
+    z-index: 1;
+    width: min(1020px, calc(100vw - 32px));
+    max-height: min(88vh, calc(100vh - 40px));
+    background: rgba(10, 16, 34, 0.97);
+    border: 1.5px solid rgba(0, 220, 255, 0.45);
+    border-radius: 24px;
+    box-shadow:
+      0 0 0 1px rgba(0,220,255,0.08) inset,
+      0 0 50px rgba(0,200,255,0.2),
+      0 24px 70px rgba(0,0,0,0.75);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: omSlideIn 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+  body.char2-active .om-box {
+    border-color: rgba(57,255,100,0.45);
+    box-shadow:
+      0 0 0 1px rgba(57,255,100,0.08) inset,
+      0 0 40px rgba(57,255,100,0.18),
+      0 20px 60px rgba(0,0,0,0.7);
+  }
+  @keyframes omSlideIn {
+    from { opacity: 0; transform: scale(0.93) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .om-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 26px 30px 22px;
+    border-bottom: 1px solid rgba(0,220,255,0.15);
+    flex-shrink: 0;
+  }
+  body.char2-active .om-header {
+    border-bottom-color: rgba(57,255,100,0.15);
+  }
+  .om-title-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .om-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,220,255,0.55);
+    background: rgba(0,180,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 14px rgba(0,200,255,0.3);
+    color: #00eeff;
+  }
+  body.char2-active .om-icon {
+    border-color: rgba(57,255,100,0.55);
+    background: rgba(57,255,100,0.1);
+    box-shadow: 0 0 10px rgba(57,255,100,0.22);
+    color: #39ff6a;
+  }
+  .om-title {
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #00eeff, #7df0ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 6px rgba(0,220,255,0.5));
+  }
+  body.char2-active .om-title {
+    background: linear-gradient(135deg, #39ff6a, #afffcc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 6px rgba(57,255,100,0.5));
+  }
+  .om-total-badge {
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba(0,220,255,0.6);
+    font-family: monospace;
+    margin-top: 4px;
+  }
+  body.char2-active .om-total-badge {
+    color: rgba(57,255,100,0.6);
+  }
+  .om-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .om-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: 1.5px solid rgba(0,220,255,0.45);
+    background: rgba(0,180,255,0.1);
+    color: #7df0ff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  .om-refresh-btn:hover {
+    border-color: rgba(0,220,255,0.8);
+    background: rgba(0,180,255,0.2);
+    box-shadow: 0 0 14px rgba(0,200,255,0.35);
+    transform: scale(1.04);
+  }
+  .om-refresh-btn.spinning svg {
+    animation: omSpin 0.7s linear infinite;
+  }
+  @keyframes omSpin {
+    to { transform: rotate(360deg); }
+  }
+  body.char2-active .om-refresh-btn {
+    border-color: rgba(57,255,100,0.45);
+    background: rgba(57,255,100,0.08);
+    color: #39ff6a;
+  }
+  body.char2-active .om-refresh-btn:hover {
+    border-color: rgba(57,255,100,0.8);
+    background: rgba(57,255,100,0.16);
+    box-shadow: 0 0 14px rgba(57,255,100,0.3);
+  }
+  .om-close-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,80,80,0.55);
+    background: rgba(255,50,50,0.1);
+    color: #ff7070;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    font-size: 1.3rem;
+    font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 0 8px rgba(255,50,50,0.18);
+  }
+  .om-close-btn:hover {
+    border-color: rgba(255,60,60,1);
+    background: rgba(255,50,50,0.25);
+    color: #ff3333;
+    box-shadow: 0 0 18px rgba(255,50,50,0.55);
+    transform: scale(1.1) rotate(90deg);
+  }
+  .om-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 22px 24px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,200,255,0.25) transparent;
+  }
+  .om-body::-webkit-scrollbar { width: 4px; }
+  .om-body::-webkit-scrollbar-track { background: transparent; }
+  .om-body::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.25); border-radius: 4px; }
+  body.char2-active .om-body { scrollbar-color: rgba(57,255,100,0.25) transparent; }
+  body.char2-active .om-body::-webkit-scrollbar-thumb { background: rgba(57,255,100,0.25); }
+  .om-status-text {
+    font-family: monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(0,200,255,0.45);
+    text-align: center;
+    padding: 36px 0;
+  }
+  body.char2-active .om-status-text {
+    color: rgba(57,255,100,0.45);
+  }
+  .om-error-text {
+    color: rgba(255,100,100,0.75);
+  }
+  .om-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 600px) {
+    .om-list { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 380px) {
+    .om-list { grid-template-columns: 1fr; }
+  }
+  .om-server-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+    cursor: default;
+  }
+  .om-server-row:hover {
+    background: rgba(0,200,255,0.07);
+    border-color: rgba(0,200,255,0.22);
+    box-shadow: 0 0 12px rgba(0,200,255,0.12);
+  }
+  body.char2-active .om-server-row:hover {
+    background: rgba(57,255,100,0.07);
+    border-color: rgba(57,255,100,0.22);
+    box-shadow: 0 0 12px rgba(57,255,100,0.1);
+  }
+  /* ── PINNED SERVER WIDGET ── */
+  #pinnedServer {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px;
+    border-radius: 40px;
+    background: rgba(0,180,255,0.07);
+    border: 1.5px solid rgba(0,200,255,0.25);
+    box-shadow: 0 0 10px rgba(0,200,255,0.1);
+    cursor: pointer;
+    transition: all 0.2s ease, opacity 0.2s ease, visibility 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #pinnedServer:hover {
+    background: rgba(0,200,255,0.13);
+    border-color: rgba(0,200,255,0.5);
+    box-shadow: 0 0 16px rgba(0,200,255,0.22);
+  }
+  body.char2-active #pinnedServer {
+    background: rgba(57,255,100,0.07);
+    border-color: rgba(57,255,100,0.25);
+    box-shadow: 0 0 10px rgba(57,255,100,0.1);
+  }
+  body.char2-active #pinnedServer:hover {
+    background: rgba(57,255,100,0.13);
+    border-color: rgba(57,255,100,0.5);
+    box-shadow: 0 0 16px rgba(57,255,100,0.22);
+  }
+  #pinnedServer.visible { visibility: visible; opacity: 1; pointer-events: auto; }
+  .pinned-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .pinned-server-name {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(180,220,255,0.75);
+  }
+  .pinned-server-sep {
+    width: 1px;
+    height: 14px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+  .pinned-server-count {
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+  .pinned-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 0.62rem;
+    line-height: 1;
+    color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(0,200,255,0.25);
+    box-shadow: 0 0 6px rgba(0,200,255,0.15);
+    margin-left: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  #pinnedServer:hover .pinned-close {
+    color: rgba(255,255,255,0.9);
+    border-color: rgba(0,220,255,0.7);
+    box-shadow: 0 0 8px rgba(0,200,255,0.55), 0 0 14px rgba(0,200,255,0.25);
+    background: rgba(0,200,255,0.12);
+  }
+  body.char2-active .pinned-close {
+    border-color: rgba(57,255,100,0.25);
+    box-shadow: 0 0 6px rgba(57,255,100,0.15);
+  }
+  body.char2-active #pinnedServer:hover .pinned-close {
+    border-color: rgba(57,255,100,0.7);
+    box-shadow: 0 0 8px rgba(57,255,100,0.55), 0 0 14px rgba(57,255,100,0.25);
+    background: rgba(57,255,100,0.12);
+  }
+
+  .om-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .om-dot.tier-red    { background: rgba(255,60,70,0.85);   box-shadow: 0 0 7px 1px rgba(255,40,60,0.6),  0 0 16px rgba(220,0,30,0.25);  border: 1.5px solid rgba(255,80,80,0.5); }
+  .om-dot.tier-orange { background: rgba(255,145,40,0.85);  box-shadow: 0 0 7px 1px rgba(255,130,20,0.6), 0 0 16px rgba(220,90,0,0.25);  border: 1.5px solid rgba(255,160,60,0.5); }
+  .om-dot.tier-yellow { background: rgba(255,225,50,0.85);  box-shadow: 0 0 7px 1px rgba(255,210,20,0.6), 0 0 16px rgba(200,170,0,0.25); border: 1.5px solid rgba(255,230,60,0.5); }
+  .om-dot.tier-cyan   { background: rgba(0,210,245,0.85);   box-shadow: 0 0 7px 1px rgba(0,210,255,0.6),  0 0 16px rgba(0,170,220,0.25);  border: 1.5px solid rgba(0,215,255,0.5); }
+  .om-dot.tier-green  { background: rgba(50,230,100,0.85);  box-shadow: 0 0 7px 1px rgba(40,230,90,0.6),  0 0 16px rgba(0,180,50,0.25);   border: 1.5px solid rgba(57,255,100,0.5); }
+  .om-row-sep {
+    width: 1px;
+    height: 18px;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent);
+    flex-shrink: 0;
+    margin: 0 2px;
+  }
+  .om-server-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .om-server-name {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: rgba(210,220,240,0.95);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .om-server-num {
+    font-family: monospace;
+    font-size: 0.72rem;
+    color: rgba(0,220,255,0.38);
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  body.char2-active .om-server-num {
+    color: rgba(57,255,100,0.38);
+  }
+  .om-server-online {
+    font-family: monospace;
+    font-size: 1.12rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .om-server-online.tier-red    { color: rgba(255,80,90,0.95);   text-shadow: 0 0 10px rgba(255,40,60,0.6); }
+  .om-server-online.tier-orange { color: rgba(255,160,50,0.95);  text-shadow: 0 0 10px rgba(255,130,20,0.6); }
+  .om-server-online.tier-yellow { color: rgba(255,230,60,0.95);  text-shadow: 0 0 10px rgba(255,210,20,0.6); }
+  .om-server-online.tier-cyan   { color: rgba(0,215,250,0.95);   text-shadow: 0 0 10px rgba(0,210,255,0.65); }
+  .om-server-online.tier-green  { color: rgba(57,235,105,0.95);  text-shadow: 0 0 10px rgba(40,230,90,0.65); }
+  .om-footer {
+    border-top: 1px solid rgba(0,220,255,0.1);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  body.char2-active .om-footer {
+    border-top-color: rgba(57,255,100,0.1);
+  }
+  .om-footer-total {
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #00eeff;
+    text-shadow: 0 0 8px rgba(0,220,255,0.5);
+  }
+  body.char2-active .om-footer-total {
+    color: #39ff6a;
+    text-shadow: 0 0 8px rgba(57,255,100,0.5);
+  }
+  .om-footer-hint {
+    font-size: 0.7rem;
+    color: rgba(100,120,150,0.55);
+    letter-spacing: 1px;
+    font-family: monospace;
+  }
+  }
 </style>
 </head>
 <body>
@@ -2150,7 +2604,8 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     'col_color_v1_col-fraction_char2',
     'task_highlight_color_v2_char1',
     'task_highlight_color_v2_char2',
-    'cosmos_active'
+    'cosmos_active',
+    'pinned_server_v1'
   ];
   const SYNC_KEY_SET = new Set(SYNC_KEYS);
   let currentUid = null;
@@ -2294,6 +2749,25 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
     // 8. Космос
     if (typeof window._restoreCosmos === 'function') window._restoreCosmos();
+
+    // 9. Закреплённый сервер мониторинга
+    (function() {
+      try {
+        const raw = localStorage.getItem('pinned_server_v1');
+        if (raw) {
+          const { name, emoji } = JSON.parse(raw);
+          if (name) {
+            window._pinnedServerName = name;
+            const widget = document.getElementById('pinnedServer');
+            const nameEl = document.getElementById('pinnedServerName');
+            if (nameEl) nameEl.textContent = emoji + ' ' + name;
+            if (widget) widget.classList.add('visible');
+            // Подтягиваем актуальный онлайн при первой же загрузке данных
+            if (typeof omLoad === 'function') omLoad();
+          }
+        }
+      } catch(e) {}
+    })();
   }
 
   const overlay = document.getElementById('pinOverlay');
@@ -2591,6 +3065,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
         <span class="ctp-label" id="ctpLabel">Персонаж 1</span>
         <span class="ctp-circle" id="ctpCircle">1</span>
       </div>
+
     <label class="toggle-switch">
       <input id="vipCheckbox" type="checkbox">
       <span class="switch-slider"></span>
@@ -2602,6 +3077,7 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       <span class="toggle-btn toggle-btn-x2">✦ Акция ×2</span>
     </label>
     </div>
+
     <div class="date-display" id="currentDate">
       <span class="date-day" id="dateDayName"></span>
       <span class="date-main" id="dateMainText">—</span>
@@ -2659,6 +3135,17 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
         <!-- Dropdown menu -->
       </div>
+
+      <!-- ── КНОПКА МОНИТОРИНГА ОНЛАЙНА ── -->
+      <button class="cosmos-btn online-monitor-btn" id="onlineMonitorBtn" type="button" title="Онлайн серверов GTA5RP" onclick="toggleOnlineMonitor(event)">
+        <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px;display:block;pointer-events:none;">
+          <rect x="3" y="14" width="4" height="8" rx="1.2" fill="currentColor" opacity="0.55"/>
+          <rect x="9" y="9" width="4" height="13" rx="1.2" fill="currentColor" opacity="0.75"/>
+          <rect x="15" y="5" width="4" height="17" rx="1.2" fill="currentColor" opacity="0.9"/>
+          <circle cx="17" cy="4" r="2" fill="currentColor" opacity="1"/>
+          <circle cx="17" cy="4" r="3.5" stroke="currentColor" stroke-width="1" opacity="0.4" fill="none"/>
+        </svg>
+      </button>
 
       <div class="cosmos-btn-wrap">
         <button class="cosmos-btn" id="cosmosBtn" type="button" title="Анимация космоса" onclick="toggleCosmosPopup(event)">
@@ -2858,6 +3345,14 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   <button class="filter-btn active" data-col="col-fraction">ФРАКЦИОННЫЕ</button>
   </div>
   <div class="legend-settings">
+  <!-- PINNED SERVER WIDGET -->
+  <div id="pinnedServer" title="Нажмите для обновления">
+    <div class="pinned-dot" id="pinnedDot"></div>
+    <span class="pinned-server-name" id="pinnedServerName">—</span>
+    <div class="pinned-server-sep"></div>
+    <span class="pinned-server-count" id="pinnedServerCount">—</span>
+    <span class="pinned-close" id="pinnedCloseBtn" title="Открепить">✕</span>
+  </div>
   </div>
 </div>
 </div> <!-- /super-panel -->
@@ -4893,6 +5388,201 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
 })();
 </script>
 
+
+<!-- ══════════════════════════════════════════
+     ONLINE MONITOR MODAL
+══════════════════════════════════════════ -->
+<div id="onlineMonitorModal">
+  <div class="om-backdrop" onclick="closeOnlineMonitor()"></div>
+  <div class="om-box">
+    <div class="om-header">
+      <div class="om-title-block">
+        <div class="om-icon">
+          <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="26">
+            <rect x="2" y="12" width="3.5" height="7" rx="1" fill="currentColor" opacity="0.55"/>
+            <rect x="7.5" y="8" width="3.5" height="11" rx="1" fill="currentColor" opacity="0.75"/>
+            <rect x="13" y="4" width="3.5" height="15" rx="1" fill="currentColor" opacity="0.9"/>
+            <circle cx="14.75" cy="3" r="1.8" fill="currentColor"/>
+            <circle cx="14.75" cy="3" r="3" stroke="currentColor" stroke-width="0.9" fill="none" opacity="0.4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="om-title">GTA5RP ОНЛАЙН</div>
+          <div class="om-total-badge" id="omTotalBadge" style="display:none"></div>
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;color:rgba(180,210,255,0.5);text-transform:uppercase;margin-top:3px;">МОНИТОРИНГ СЕРВЕРОВ</div>
+        </div>
+      </div>
+      <div class="om-header-right">
+        <button class="om-refresh-btn" id="omRefreshBtn" onclick="omLoad()" type="button">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+            <path d="M10.5 2A5 5 0 1 0 11 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M10.5 2V5H7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Обновить
+        </button>
+        <button class="om-close-btn" onclick="closeOnlineMonitor()" type="button" title="Закрыть">
+          ✕
+        </button>
+      </div>
+    </div>
+    <div class="om-body" id="omBody">
+      <div class="om-status-text">ЗАГРУЗКА ДАННЫХ...</div>
+    </div>
+    <div class="om-footer">
+      <div class="om-footer-total" id="omFooterTotal">—</div>
+      <div class="om-footer-hint">ОБНОВЛЯЕТСЯ КАЖДЫЕ 30 СЕК</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const emojis = {'Downtown':'🌆','Strawberry':'🍓','Vinewood':'🏰','Blackberry':'🍇','Insquad':'🎭','Sunrise':'🌅','Rainbow':'🌈','Richman':'🤵','Eclipse':'🌘','La Mesa':'🌵','Burton':'🏛','Rockford':'💎','Alta':'🍀','Del Perro':'🎡','Davis':'🏀','Harmony':'🌸','Redwood':'🌲','Hawick':'💵','Grapeseed':'🌱','Murrieta':'🌹','Vespucci':'🛶','Milton':'🍸','La Puerta':'🪇','Senora':'🦂'};
+  const order = ['Downtown','Strawberry','Vinewood','Blackberry','Insquad','Sunrise','Rainbow','Richman','Eclipse','La Mesa','Burton','Rockford','Alta','Del Perro','Davis','Harmony','Redwood','Hawick','Grapeseed','Murrieta','Vespucci','Milton','La Puerta','Senora'];
+
+  let omOpen = false;
+
+  window.toggleOnlineMonitor = function(e) {
+    if (e) e.stopPropagation();
+    const modal = document.getElementById('onlineMonitorModal');
+    if (omOpen) {
+      closeOnlineMonitor();
+    } else {
+      omOpen = true;
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      omLoad();
+    }
+  };
+
+  window.closeOnlineMonitor = function() {
+    omOpen = false;
+    document.getElementById('onlineMonitorModal').classList.remove('show');
+    document.body.style.overflow = '';
+  };
+
+  window.omLoad = async function() {
+    const body = document.getElementById('omBody');
+    const totalBadge = document.getElementById('omTotalBadge');
+    const footerTotal = document.getElementById('omFooterTotal');
+    const refreshBtn = document.getElementById('omRefreshBtn');
+
+    refreshBtn.classList.add('spinning');
+
+    try {
+      const _d = (s) => s.split('').map((c,i) => String.fromCharCode(c.charCodeAt(0) ^ ((i % 7) + 3))).join('');
+      const res = await fetch(_d("\x6b\x70\x71\x76\x74\x32\x26\x2c\x63\x71\x67\x32\x7a\x79\x2d\x67\x6a\x6b\x28\x69\x79\x6a\x2b\x76\x72\x66\x7c\x7a"));
+      const data = await res.json();
+
+      let servers = [];
+      order.forEach((name, i) => {
+        if (data[name]) {
+          servers.push({ id: i+1, name, emoji: emojis[name] || '●', online: data[name].online, max: data[name].max || 1000 });
+        }
+      });
+
+      const total = servers.reduce((s, x) => s + x.online, 0);
+      totalBadge.textContent = '👥 ВСЕГО ОНЛАЙН: ' + total.toLocaleString('ru-RU');
+      footerTotal.innerHTML = `<svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-2px;margin-right:6px;color:rgba(255,255,255,0.85);filter:drop-shadow(0 0 4px rgba(255,255,255,0.5));"><circle cx="6" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 13c0-2.761 2.239-5 5-5h.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="12" cy="9" r="2" stroke="currentColor" stroke-width="1.2" opacity="0.75"/><path d="M9 14.5c0-1.657 1.343-3 3-3s3 1.343 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/><line x1="10.5" y1="9" x2="13.5" y2="9" stroke="currentColor" stroke-width="0.8" opacity="0.4"/><line x1="12" y1="7.5" x2="12" y2="10.5" stroke="currentColor" stroke-width="0.8" opacity="0.4"/></svg><span style="color:#ffe033;text-shadow:0 0 8px rgba(255,210,0,0.5);">${total.toLocaleString('ru-RU')}</span> <span style="color:rgba(255,255,255,0.85);text-shadow:0 0 6px rgba(255,255,255,0.5);">ИГРОКОВ</span>`;
+
+      body.innerHTML = '<div class="om-list">' + servers.map(s => {
+        const ratio = s.online / s.max;
+        let dotClass = s.online < 25 ? 'tier-red' : s.online < 500 ? 'tier-orange' : s.online < 1000 ? 'tier-yellow' : s.online < 2000 ? 'tier-cyan' : 'tier-green';
+        return `<div class="om-server-row" style="cursor:pointer;" onclick="pinServer('${s.name}','${s.emoji}',${s.online},'${dotClass}')" title="Закрепить на панели">
+          <div class="om-dot ${dotClass}"></div>
+          <div class="om-row-sep"></div>
+          <div class="om-server-info">
+            <div class="om-server-name">${s.emoji} ${s.name}<span class="om-server-num">#${s.id}</span></div>
+          </div>
+          <div class="om-server-online ${dotClass}">${s.online.toLocaleString('ru-RU')}</div>
+        </div>`;
+      }).join('') + '</div>';
+
+      // Обновляем пин если он активен
+      if (window._pinnedServerName) {
+        const pinned = servers.find(s => s.name === window._pinnedServerName);
+        if (pinned) {
+          let dc = pinned.online < 25 ? 'tier-red' : pinned.online < 500 ? 'tier-orange' : pinned.online < 1000 ? 'tier-yellow' : pinned.online < 2000 ? 'tier-cyan' : 'tier-green';
+          updatePinnedWidget(pinned.online, dc);
+        }
+      }
+
+    } catch(err) {
+      body.innerHTML = '<div class="om-status-text om-error-text">❌ ОШИБКА ЗАГРУЗКИ</div>';
+      totalBadge.textContent = 'ОШИБКА';
+      footerTotal.textContent = '—';
+    }
+
+    refreshBtn.classList.remove('spinning');
+  };
+
+  // Автообновление данных раз в 30 секунд — работает всегда, даже если
+  // окно мониторинга закрыто (нужно, чтобы закреплённый сервер на панели
+  // всегда показывал актуальный онлайн)
+  setInterval(omLoad, 30000);
+
+  // ── PINNED SERVER ──
+  const TIER_COLORS = {
+    'tier-red':    { color: 'rgba(255,80,90,0.95)',  shadow: 'rgba(255,40,60,0.6)',   bg: 'rgba(255,60,70,0.85)',  bgShadow: '0 0 7px 1px rgba(255,40,60,0.6)' },
+    'tier-orange': { color: 'rgba(255,160,50,0.95)', shadow: 'rgba(255,130,20,0.6)',  bg: 'rgba(255,145,40,0.85)', bgShadow: '0 0 7px 1px rgba(255,130,20,0.6)' },
+    'tier-yellow': { color: 'rgba(255,230,60,0.95)', shadow: 'rgba(255,210,20,0.6)',  bg: 'rgba(255,225,50,0.85)', bgShadow: '0 0 7px 1px rgba(255,210,20,0.6)' },
+    'tier-cyan':   { color: 'rgba(0,215,250,0.95)',  shadow: 'rgba(0,210,255,0.65)',  bg: 'rgba(0,210,245,0.85)',  bgShadow: '0 0 7px 1px rgba(0,210,255,0.6)' },
+    'tier-green':  { color: 'rgba(57,235,105,0.95)', shadow: 'rgba(40,230,90,0.65)',  bg: 'rgba(50,230,100,0.85)', bgShadow: '0 0 7px 1px rgba(40,230,90,0.6)' },
+  };
+
+  window.updatePinnedWidget = function(online, dotClass) {
+    const tc = TIER_COLORS[dotClass] || TIER_COLORS['tier-cyan'];
+    const dot = document.getElementById('pinnedDot');
+    const count = document.getElementById('pinnedServerCount');
+    if (dot) { dot.style.background = tc.bg; dot.style.boxShadow = tc.bgShadow; }
+    if (count) { count.style.color = tc.color; count.style.textShadow = `0 0 10px ${tc.shadow}`; count.textContent = online.toLocaleString('ru-RU'); }
+  };
+
+  window.pinServer = function(name, emoji, online, dotClass) {
+    window._pinnedServerName = name;
+    const widget = document.getElementById('pinnedServer');
+    const nameEl = document.getElementById('pinnedServerName');
+    if (nameEl) nameEl.textContent = emoji + ' ' + name;
+    updatePinnedWidget(online, dotClass);
+    widget.classList.add('visible');
+    localStorage.setItem('pinned_server_v1', JSON.stringify({ name, emoji }));
+    closeOnlineMonitor();
+  };
+
+  // Клик по виджету закреплённого сервера — обновить данные (не открывать монитор)
+  document.getElementById('pinnedServer').addEventListener('click', function(e) {
+    if (document.getElementById('pinnedCloseBtn').contains(e.target)) return; // крестик обрабатывается ниже
+    e.stopPropagation();
+    if (!window._pinnedServerName) return;
+    // Анимация "обновления" — мигаем счётчиком
+    const countEl = document.getElementById('pinnedServerCount');
+    if (countEl) {
+      countEl.style.transition = 'opacity 0.15s';
+      countEl.style.opacity = '0.3';
+      setTimeout(() => { countEl.style.opacity = '1'; }, 300);
+    }
+    omLoad();
+  });
+
+  // Кнопка ✕ — открепить (не открывать монитор)
+  document.getElementById('pinnedCloseBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    window._pinnedServerName = null;
+    document.getElementById('pinnedServer').classList.remove('visible');
+    localStorage.removeItem('pinned_server_v1');
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && omOpen) closeOnlineMonitor();
+  });
+
+  // Block Ctrl+wheel zoom while modal is open
+  document.addEventListener('wheel', function(e) {
+    if (omOpen && e.ctrlKey) e.preventDefault();
+  }, { passive: false });
+})();
+</script>
 
 <div class="online-tooltip" id="onlineTooltip">
   <div class="online-tooltip-title">В сети сейчас</div>
