@@ -993,6 +993,13 @@
       const modeSnap = await get(ref(db, 'users/' + user.uid + '/displayMode'));
       if (modeSnap.exists()) mode = modeSnap.val();
     } catch(e) {}
+    // Fallback: localStorage
+    if (mode === 'login') {
+      try {
+        const local = localStorage.getItem('displayMode_' + user.uid);
+        if (local === 'display') mode = 'display';
+      } catch(e) {}
+    }
     applyDisplayModeUI(mode);
     updateHeaderName(login, saved, mode);
 
@@ -1040,28 +1047,35 @@
     if (!currentUser) return;
     const msg = document.getElementById('displayModeMsg');
     msg.className = 'field-message';
-    if (mode === 'display') {
-      const input = document.getElementById('displayNameInput');
-      const dn = input ? input.value.trim() : '';
-      if (!dn) {
-        msg.textContent = '✕ Сначала сохрани отображаемое имя';
-        msg.className = 'field-message error';
-        return;
-      }
+
+    const login = getLoginName(currentUser.email);
+    const inputEl = document.getElementById('displayNameInput');
+    const currentDN = inputEl ? inputEl.value.trim() : '';
+
+    if (mode === 'display' && !currentDN) {
+      msg.textContent = '✕ Сначала сохрани отображаемое имя';
+      msg.className = 'field-message error';
+      return;
     }
+
+    // Сразу обновляем UI — не ждём Firebase
+    applyDisplayModeUI(mode);
+    // Для шапки берём displayName из Firebase (актуальное сохранённое)
+    let dn = null;
+    try {
+      const snap = await get(ref(db, 'users/' + currentUser.uid + '/displayName'));
+      dn = snap.exists() ? snap.val() : null;
+    } catch(e) {}
+    updateHeaderName(login, dn, mode);
+
+    msg.textContent = mode === 'display' ? '✓ Показывается отображаемое имя' : '✓ Показывается логин';
+    msg.className = 'field-message success';
+
+    // Сохраняем в Firebase в фоне + localStorage как fallback
     try {
       await dbSet(ref(db, 'users/' + currentUser.uid + '/displayMode'), mode);
-      applyDisplayModeUI(mode);
-      const login = getLoginName(currentUser.email);
-      const snap = await get(ref(db, 'users/' + currentUser.uid + '/displayName'));
-      const dn = snap.exists() ? snap.val() : null;
-      updateHeaderName(login, dn, mode);
-      msg.textContent = mode === 'display' ? '✓ Показывается отображаемое имя' : '✓ Показывается логин';
-      msg.className = 'field-message success';
-    } catch {
-      msg.textContent = '✕ Ошибка сохранения';
-      msg.className = 'field-message error';
-    }
+    } catch(e) {}
+    try { localStorage.setItem('displayMode_' + currentUser.uid, mode); } catch(e) {}
   };
 
   // ── Auth state ──
