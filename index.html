@@ -2750,8 +2750,9 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     // 8. Космос
     if (typeof window._restoreCosmos === 'function') window._restoreCosmos();
 
-    // 9. Закреплённый сервер мониторинга — восстанавливается отдельно
-    // внутри IIFE онлайн-монитора (после определения omLoad), поэтому здесь ничего не делаем.
+    // 9. Закреплённый сервер мониторинга — перечитываем из localStorage
+    // (к этому моменту pullStateFromCloud уже записал актуальные данные из облака)
+    if (typeof window.restorePinnedServer === 'function') window.restorePinnedServer();
   }
 
   const overlay = document.getElementById('pinOverlay');
@@ -5557,21 +5558,26 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
   });
 
   // Восстановление закреплённого сервера из localStorage (всегда, при загрузке)
-  (function restorePinnedServer() {
+  window.restorePinnedServer = function() {
     try {
       const raw = localStorage.getItem('pinned_server_v1');
-      if (!raw) return;
+      const widget = document.getElementById('pinnedServer');
+      const nameEl = document.getElementById('pinnedServerName');
+      if (!raw) {
+        // Если в облаке пин был удалён — скрываем виджет
+        window._pinnedServerName = null;
+        if (widget) widget.classList.remove('visible');
+        return;
+      }
       const { name, emoji } = JSON.parse(raw);
       if (!name) return;
       window._pinnedServerName = name;
-      const widget = document.getElementById('pinnedServer');
-      const nameEl = document.getElementById('pinnedServerName');
       if (nameEl) nameEl.textContent = emoji + ' ' + name;
       if (widget) widget.classList.add('visible');
-      // Небольшая задержка — дать странице полностью отрисоваться, потом подтянуть онлайн
       setTimeout(omLoad, 300);
     } catch(e) {}
-  })();
+  };
+  window.restorePinnedServer();
 
   // Close on Escape
   document.addEventListener('keydown', function(e) {
