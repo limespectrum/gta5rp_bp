@@ -1189,9 +1189,11 @@
       await dbSet(ref(db, 'users/' + currentUser.uid + '/displayName'), val);
       await dbSet(ref(db, 'displayNames/' + nameKey), currentUser.uid);
 
-      const modeSnap = await get(ref(db, 'users/' + currentUser.uid + '/displayMode'));
-      const mode = modeSnap.exists() ? modeSnap.val() : 'login';
-      updateHeaderName(getLoginName(currentUser.email), val, mode);
+      // Автоматически переключаем режим на отображаемое имя
+      await dbSet(ref(db, 'users/' + currentUser.uid + '/displayMode'), 'display');
+      try { localStorage.setItem('displayMode_' + currentUser.uid, 'display'); } catch(e) {}
+      applyDisplayModeUI('display');
+      updateHeaderName(getLoginName(currentUser.email), val, 'display');
       msg.textContent = '✓ Сохранено';
       msg.className = 'field-message success';
     } catch {
