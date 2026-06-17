@@ -2750,24 +2750,8 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     // 8. Космос
     if (typeof window._restoreCosmos === 'function') window._restoreCosmos();
 
-    // 9. Закреплённый сервер мониторинга
-    (function() {
-      try {
-        const raw = localStorage.getItem('pinned_server_v1');
-        if (raw) {
-          const { name, emoji } = JSON.parse(raw);
-          if (name) {
-            window._pinnedServerName = name;
-            const widget = document.getElementById('pinnedServer');
-            const nameEl = document.getElementById('pinnedServerName');
-            if (nameEl) nameEl.textContent = emoji + ' ' + name;
-            if (widget) widget.classList.add('visible');
-            // Подтягиваем актуальный онлайн при первой же загрузке данных
-            if (typeof omLoad === 'function') omLoad();
-          }
-        }
-      } catch(e) {}
-    })();
+    // 9. Закреплённый сервер мониторинга — восстанавливается отдельно
+    // внутри IIFE онлайн-монитора (после определения omLoad), поэтому здесь ничего не делаем.
   }
 
   const overlay = document.getElementById('pinOverlay');
@@ -5571,6 +5555,23 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
     document.getElementById('pinnedServer').classList.remove('visible');
     localStorage.removeItem('pinned_server_v1');
   });
+
+  // Восстановление закреплённого сервера из localStorage (всегда, при загрузке)
+  (function restorePinnedServer() {
+    try {
+      const raw = localStorage.getItem('pinned_server_v1');
+      if (!raw) return;
+      const { name, emoji } = JSON.parse(raw);
+      if (!name) return;
+      window._pinnedServerName = name;
+      const widget = document.getElementById('pinnedServer');
+      const nameEl = document.getElementById('pinnedServerName');
+      if (nameEl) nameEl.textContent = emoji + ' ' + name;
+      if (widget) widget.classList.add('visible');
+      // Небольшая задержка — дать странице полностью отрисоваться, потом подтянуть онлайн
+      setTimeout(omLoad, 300);
+    } catch(e) {}
+  })();
 
   // Close on Escape
   document.addEventListener('keydown', function(e) {
