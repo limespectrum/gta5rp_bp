@@ -4479,19 +4479,277 @@ loadHiddenColumns();
 }
 body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
 
-/* Онлайн-счётчик — интерактивный */
+/* Онлайн-счётчик — кликабельный */
 .date-online {
   position: relative;
-  cursor: default;
+  cursor: pointer;
   pointer-events: auto !important;
   z-index: 2147483646;
   isolation: isolate;
+  transition: color 0.18s ease;
 }
 .date-online:hover {
-  color: rgba(130, 255, 170, 0.85);
+  color: rgba(130, 255, 170, 0.95);
 }
 
-/* Попап с никами */
+/* ══════════════════════════════════════════
+   ОНЛАЙН ПОЛЬЗОВАТЕЛЕЙ — МОДАЛЬНОЕ ОКНО
+══════════════════════════════════════════ */
+#onlineUsersModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+}
+#onlineUsersModal.show {
+  display: flex;
+}
+.oum-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 10, 24, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+/* ── Персонаж 1: синий ── */
+.oum-box {
+  position: relative;
+  z-index: 1;
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(80vh, calc(100vh - 40px));
+  background: rgba(10, 16, 34, 0.97);
+  border: 1.5px solid rgba(0, 220, 255, 0.45);
+  border-radius: 24px;
+  box-shadow:
+    0 0 0 1px rgba(0,220,255,0.08) inset,
+    0 0 50px rgba(0,200,255,0.2),
+    0 24px 70px rgba(0,0,0,0.75);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: omSlideIn 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+/* ── Персонаж 2: зелёный ── */
+body.char2-active .oum-box {
+  border-color: rgba(57, 255, 100, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(57,255,100,0.08) inset,
+    0 0 45px rgba(57,255,100,0.18),
+    0 24px 70px rgba(0,0,0,0.75);
+}
+.oum-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid rgba(0,220,255,0.15);
+  flex-shrink: 0;
+}
+body.char2-active .oum-header {
+  border-bottom-color: rgba(57,255,100,0.12);
+}
+.oum-title-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.oum-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,220,255,0.55);
+  background: rgba(0,180,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(0,200,255,0.3);
+  color: #00eeff;
+}
+body.char2-active .oum-icon {
+  border-color: rgba(57,255,100,0.5);
+  background: rgba(57,255,100,0.1);
+  box-shadow: 0 0 12px rgba(57,255,100,0.22);
+  color: #39ff6a;
+}
+.oum-title {
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #00eeff, #7df0ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 6px rgba(0,220,255,0.5));
+}
+body.char2-active .oum-title {
+  background: linear-gradient(135deg, #39ff6a, #afffcc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 6px rgba(57,255,100,0.5));
+}
+.oum-subtitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(0,220,255,0.45);
+  text-transform: uppercase;
+  margin-top: 3px;
+  font-family: monospace;
+}
+body.char2-active .oum-subtitle {
+  color: rgba(100,255,150,0.45);
+}
+.oum-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,80,80,0.5);
+  background: rgba(255,50,50,0.08);
+  color: #ff7070;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0 8px rgba(255,50,50,0.15);
+}
+.oum-close-btn:hover {
+  border-color: rgba(255,60,60,1);
+  background: rgba(255,50,50,0.22);
+  color: #ff3333;
+  box-shadow: 0 0 16px rgba(255,50,50,0.5);
+  transform: scale(1.1) rotate(90deg);
+}
+.oum-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 20px 22px 22px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,200,255,0.25) transparent;
+}
+body.char2-active .oum-body {
+  scrollbar-color: rgba(57,255,100,0.22) transparent;
+}
+.oum-body::-webkit-scrollbar { width: 4px; }
+.oum-body::-webkit-scrollbar-track { background: transparent; }
+.oum-body::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.25); border-radius: 4px; }
+body.char2-active .oum-body::-webkit-scrollbar-thumb { background: rgba(57,255,100,0.22); }
+.oum-empty {
+  font-family: monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(0,200,255,0.35);
+  text-align: center;
+  padding: 30px 0;
+}
+body.char2-active .oum-empty {
+  color: rgba(100,255,150,0.35);
+}
+.oum-nick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 520px) {
+  .oum-nick-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 340px) {
+  .oum-nick-grid { grid-template-columns: 1fr; }
+}
+.oum-nick-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(0,200,255,0.04);
+  border: 1px solid rgba(0,200,255,0.1);
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.oum-nick-item:hover {
+  background: rgba(0,200,255,0.08);
+  border-color: rgba(0,220,255,0.25);
+  box-shadow: 0 0 10px rgba(0,200,255,0.1);
+}
+body.char2-active .oum-nick-item {
+  background: rgba(57,255,100,0.04);
+  border-color: rgba(57,255,100,0.1);
+}
+body.char2-active .oum-nick-item:hover {
+  background: rgba(57,255,100,0.09);
+  border-color: rgba(57,255,100,0.22);
+  box-shadow: 0 0 10px rgba(57,255,100,0.1);
+}
+.oum-nick-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(0,220,255,0.9);
+  box-shadow: 0 0 6px rgba(0,220,255,0.9);
+  flex-shrink: 0;
+  animation: dotPulse 2s ease-in-out infinite alternate;
+}
+body.char2-active .oum-nick-dot {
+  background: rgba(57,255,100,0.9);
+  box-shadow: 0 0 6px rgba(57,255,100,0.9);
+}
+.oum-nick-name {
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(180,240,255,0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.char2-active .oum-nick-name {
+  color: rgba(190,255,210,0.9);
+}
+.oum-footer {
+  border-top: 1px solid rgba(0,220,255,0.12);
+  padding: 14px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+body.char2-active .oum-footer {
+  border-top-color: rgba(57,255,100,0.1);
+}
+.oum-footer-count {
+  font-family: monospace;
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #00eeff;
+  text-shadow: 0 0 8px rgba(0,220,255,0.5);
+}
+body.char2-active .oum-footer-count {
+  color: #39ff6a;
+  text-shadow: 0 0 8px rgba(57,255,100,0.5);
+}
+.oum-footer-hint {
+  font-size: 0.68rem;
+  color: rgba(80,120,140,0.45);
+  letter-spacing: 1px;
+  font-family: monospace;
+}
+body.char2-active .oum-footer-hint {
+  color: rgba(100,140,110,0.45);
+}
+
 .online-tooltip {
   position: fixed;
   min-width: 160px;
@@ -4602,11 +4860,12 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
   function updateTooltip(snapshot) {
     const listEl = document.getElementById('onlineNickList');
     const countEl = document.getElementById('onlineCount');
-    if (!listEl || !countEl) return;
+    if (!countEl) return;
 
     if (!snapshot.exists()) {
       countEl.textContent = '0';
-      listEl.innerHTML = '<div class="online-tooltip-empty">никого нет</div>';
+      if (listEl) listEl.innerHTML = '<div class="online-tooltip-empty">никого нет</div>';
+      if (typeof window._setOumNicks === 'function') window._setOumNicks([]);
       return;
     }
 
@@ -4623,46 +4882,25 @@ body.char2-active .date-online { color: rgba(100, 255, 140, 0.55); }
     const count = entries.length;
     countEl.textContent = count;
 
+    const nicks = entries.map(e => e.nick || '???');
+    if (typeof window._setOumNicks === 'function') window._setOumNicks(nicks);
+
     if (count === 0) {
-      listEl.innerHTML = '<div class="online-tooltip-empty">никого нет</div>';
+      if (listEl) listEl.innerHTML = '<div class="online-tooltip-empty">никого нет</div>';
       return;
     }
 
-    listEl.innerHTML = entries
+    if (listEl) listEl.innerHTML = entries
       .map(e => `<div class="online-tooltip-nick">${e.nick || '???'}</div>`)
       .join('');
   }
 
-  // Позиционирование тултипа: fixed поверх всего, строго над счётчиком онлайна
+  // Клик по счётчику онлайна — открыть модальное окно с именами
   const _onlineEl = document.querySelector('.date-online');
-  const _tooltip = document.getElementById('onlineTooltip');
-  if (_onlineEl && _tooltip) {
-    function _positionTooltip() {
-      const rect = _onlineEl.getBoundingClientRect();
-      // Сначала сбрасываем top чтобы offsetHeight был актуален
-      _tooltip.style.top = '-9999px';
-      _tooltip.style.left = '-9999px';
-      const ttW = _tooltip.offsetWidth || 180;
-      const ttH = _tooltip.offsetHeight || 80;
-      let left = rect.left + rect.width / 2 - ttW / 2;
-      if (left < 8) left = 8;
-      if (left + ttW > window.innerWidth - 8) left = window.innerWidth - ttW - 8;
-      const top = rect.top - ttH - 10;
-      _tooltip.style.left = left + 'px';
-      _tooltip.style.top = top + 'px';
-    }
-    _onlineEl.addEventListener('mouseenter', () => {
-      _positionTooltip();
-      _tooltip.classList.add('tooltip-visible');
-    });
-    _onlineEl.addEventListener('mouseleave', () => {
-      _tooltip.classList.remove('tooltip-visible');
-    });
-    window.addEventListener('scroll', () => {
-      if (_tooltip.classList.contains('tooltip-visible')) _positionTooltip();
-    }, true);
-    window.addEventListener('resize', () => {
-      if (_tooltip.classList.contains('tooltip-visible')) _positionTooltip();
+  if (_onlineEl) {
+    _onlineEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof window.openOnlineUsersModal === 'function') window.openOnlineUsersModal();
     });
   }
 
@@ -5656,10 +5894,94 @@ document.getElementById('resetConfirmApply').addEventListener('click', () => {
 })();
 </script>
 
-<div class="online-tooltip" id="onlineTooltip">
-  <div class="online-tooltip-title">В сети сейчас</div>
-  <div class="online-tooltip-list" id="onlineNickList"><div class="online-tooltip-empty">...</div></div>
+<!-- ══════════════════════════════════════════
+     ОНЛАЙН ПОЛЬЗОВАТЕЛЕЙ — МОДАЛЬНОЕ ОКНО
+══════════════════════════════════════════ -->
+<div id="onlineUsersModal">
+  <div class="oum-backdrop" onclick="closeOnlineUsersModal()"></div>
+  <div class="oum-box">
+    <div class="oum-header">
+      <div class="oum-title-block">
+        <div class="oum-icon">
+          <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+            <circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M1 18c0-3.314 2.686-6 6-6h.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="15" cy="9" r="2.3" stroke="currentColor" stroke-width="1.3" opacity="0.75"/>
+            <path d="M11 19c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.75"/>
+          </svg>
+        </div>
+        <div>
+          <div class="oum-title">В СЕТИ СЕЙЧАС</div>
+          <div class="oum-subtitle" id="oumSubtitle">УЧАСТНИКИ ОНЛАЙН</div>
+        </div>
+      </div>
+      <button class="oum-close-btn" onclick="closeOnlineUsersModal()" type="button" title="Закрыть">✕</button>
+    </div>
+    <div class="oum-body" id="oumBody">
+      <div class="oum-empty">загрузка...</div>
+    </div>
+    <div class="oum-footer">
+      <div class="oum-footer-count" id="oumFooterCount">— онлайн</div>
+      <div class="oum-footer-hint">ОБНОВЛЯЕТСЯ В РЕАЛЬНОМ ВРЕМЕНИ</div>
+    </div>
+  </div>
 </div>
+
+<script>
+(function(){
+  let _oumNicks = [];
+
+  window.openOnlineUsersModal = function() {
+    const modal = document.getElementById('onlineUsersModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    renderOumNicks();
+  };
+
+  window.closeOnlineUsersModal = function() {
+    document.getElementById('onlineUsersModal').classList.remove('show');
+    document.body.style.overflow = '';
+  };
+
+  window._setOumNicks = function(nicks) {
+    _oumNicks = nicks || [];
+    // Обновить модалку если открыта
+    if (document.getElementById('onlineUsersModal').classList.contains('show')) {
+      renderOumNicks();
+    }
+  };
+
+  function renderOumNicks() {
+    const body = document.getElementById('oumBody');
+    const footer = document.getElementById('oumFooterCount');
+    const subtitle = document.getElementById('oumSubtitle');
+    const count = _oumNicks.length;
+
+    footer.textContent = count + (count === 1 ? ' участник онлайн' : count >= 2 && count <= 4 ? ' участника онлайн' : ' участников онлайн');
+    subtitle.textContent = 'УЧАСТНИКИ ОНЛАЙН';
+
+    if (count === 0) {
+      body.innerHTML = '<div class="oum-empty">никого нет онлайн</div>';
+      return;
+    }
+
+    body.innerHTML = '<div class="oum-nick-grid">' +
+      _oumNicks.map(nick =>
+        `<div class="oum-nick-item"><div class="oum-nick-dot"></div><div class="oum-nick-name">${nick}</div></div>`
+      ).join('') +
+      '</div>';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeOnlineUsersModal();
+  });
+})();
+</script>
+
+<div class="online-tooltip" id="onlineTooltip" style="display:none!important;"></div>
+<div style="display:none"><!-- legacy tooltip placeholder --></div>
+
+
 
 <div id="profileMenu" style="
   display: none;
