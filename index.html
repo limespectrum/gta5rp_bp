@@ -2373,16 +2373,6 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     <div class="pin-loader"></div>
     <div class="pin-sub">ЗАГРУЗКА...</div>
   </div>
-  <div class="pin-box" id="loginBox" style="display:none;">
-    <div class="pin-title">⬡ ДОСТУП ЗАКРЫТ ⬡</div>
-    <div class="pin-sub">ВХОД В СИСТЕМУ</div>
-    <div class="auth-form">
-      <input type="text" id="authEmail" class="auth-input" placeholder="НИКНЕЙМ" autocomplete="username">
-      <input type="password" id="authPass" class="auth-input" placeholder="КОД ДОСТУПА" autocomplete="current-password">
-    </div>
-    <div class="pin-error" id="pinError"></div>
-    <button class="pin-key auth-submit" id="authSubmit">ВОЙТИ</button>
-  </div>
 </div>
 
 <style>
@@ -2470,77 +2460,6 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
   -webkit-user-select: none;
   cursor: default;
   text-align: center;
-}
-.auth-form {
-  display: flex; flex-direction: column; gap: 14px;
-  width: 100%; margin: 8px 0 4px;
-}
-.auth-input {
-  width: 100%;
-  box-sizing: border-box;
-  height: 56px;
-  padding: 0 18px;
-  font-size: 1rem; font-weight: 700; font-family: monospace;
-  letter-spacing: 1px;
-  border-radius: 12px;
-  background: rgba(0,20,45,0.85);
-  border: 2px solid rgba(0,255,255,0.2);
-  color: #00eeff;
-  text-shadow: 0 0 8px rgba(0,220,255,0.5);
-  box-shadow: inset 0 0 12px rgba(0,255,255,0.06);
-  transition: all 0.15s ease;
-  outline: none;
-}
-.auth-input::placeholder {
-  color: rgba(150,210,255,0.35);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-.auth-input:focus {
-  border-color: rgba(0,255,255,0.55);
-  color: #fff;
-  text-shadow: 0 0 14px rgba(0,220,255,0.9);
-  box-shadow: inset 0 0 16px rgba(0,255,255,0.12), 0 0 12px rgba(0,200,255,0.25);
-}
-.auth-input.error {
-  border-color: rgba(255,60,60,0.8) !important;
-  animation: shake 0.4s ease;
-}
-.auth-submit {
-  width: 100%;
-  height: 56px;
-  border-radius: 14px;
-  border: 1.5px solid rgba(0,255,255,0.3);
-  background: linear-gradient(135deg, rgba(0,238,255,0.18), rgba(204,68,255,0.18));
-  color: #fff;
-  font-size: 1rem; font-weight: 900; font-family: monospace;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.12s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-}
-.auth-submit:hover {
-  background: linear-gradient(135deg, rgba(0,238,255,0.3), rgba(204,68,255,0.3));
-  border-color: rgba(0,255,255,0.6);
-  box-shadow: 0 0 14px rgba(0,255,255,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
-  transform: translateY(-2px);
-}
-.auth-submit:active {
-  transform: scale(0.97);
-}
-.auth-submit:disabled {
-  opacity: 0.5;
-  cursor: default;
-  transform: none;
-}
-@keyframes shake {
-  0%,100%{ transform: translateX(0); }
-  20%    { transform: translateX(-8px); }
-  40%    { transform: translateX(8px); }
-  60%    { transform: translateX(-6px); }
-  80%    { transform: translateX(6px); }
 }
 </style>
 
@@ -2757,11 +2676,13 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
 
   const overlay = document.getElementById('pinOverlay');
   const loadingBox = document.getElementById('loadingBox');
-  const loginBox = document.getElementById('loginBox');
-  const emailInput = document.getElementById('authEmail');
-  const passInput = document.getElementById('authPass');
-  const errEl = document.getElementById('pinError');
-  const submitBtn = document.getElementById('authSubmit');
+
+  // Адрес отдельной страницы авторизации
+  const LOGIN_URL = 'https://limespectrum.github.io/gta5rp_bp/login';
+
+  function goToLogin() {
+    window.location.replace(LOGIN_URL);
+  }
 
   document.body.style.overflow = 'hidden';
 
@@ -2771,15 +2692,11 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
     return local;
   }
 
-  // Фоллбек: если Firebase не ответил за 5 секунд — показываем форму входа
+  // Фоллбек: если Firebase не ответил за 5 секунд — уходим на страницу входа
   let authResolved = false;
   const authFallbackTimer = setTimeout(() => {
     if (!authResolved) {
-      loadingBox.style.display = 'none';
-      loginBox.style.display = 'flex';
-      overlay.style.animation = '';
-      overlay.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+      goToLogin();
     }
   }, 5000);
 
@@ -2867,65 +2784,18 @@ body.char2-active .filter-btn.active[data-col="col-fraction"]:hover {
       // Скрываем оверлей — всегда, даже если что-то пошло не так
       hideOverlay();
     } else {
-      loadingBox.style.display = 'none';
-      loginBox.style.display = 'flex';
-      overlay.style.animation = '';
-      overlay.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-      const nameEl = document.getElementById('userNameDisplay');
-      if (nameEl) nameEl.textContent = '';
+      authResolved = true;
+      clearTimeout(authFallbackTimer);
       currentUid = null;
+      goToLogin();
     }
   });
 
   // Logout button — используем делегирование т.к. элемент в конце DOM
   document.addEventListener('click', function(e) {
     if (e.target && e.target.closest('#logoutBtn')) {
-      signOut(auth);
+      signOut(auth).then(goToLogin);
     }
-  });
-
-  function clearError() {
-    errEl.textContent = '';
-    emailInput.classList.remove('error');
-    passInput.classList.remove('error');
-  }
-
-  function showError(msg) {
-    errEl.textContent = msg;
-    emailInput.classList.add('error');
-    passInput.classList.add('error');
-    setTimeout(() => {
-      emailInput.classList.remove('error');
-      passInput.classList.remove('error');
-    }, 400);
-  }
-
-  function tryLogin() {
-    let email = emailInput.value.trim();
-    const pass = passInput.value;
-    clearError();
-    if (!email || !pass) {
-      showError('✕ ЗАПОЛНИТЕ ВСЕ ПОЛЯ');
-      return;
-    }
-    if (!email.includes('@')) email = email + '@lime.ru';
-    submitBtn.disabled = true;
-    signInWithEmailAndPassword(auth, email, pass)
-      .catch(() => {
-        showError('✕ НЕВЕРНЫЙ ЛОГИН ИЛИ КОД ДОСТУПА');
-      })
-      .finally(() => {
-        submitBtn.disabled = false;
-      });
-  }
-
-  submitBtn.addEventListener('click', tryLogin);
-  [emailInput, passInput].forEach(el => {
-    el.addEventListener('input', clearError);
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') tryLogin();
-    });
   });
 </script>
 <style>
