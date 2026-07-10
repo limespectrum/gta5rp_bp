@@ -175,14 +175,14 @@
       </svg>
     </a>
 
-    <p class="countdown" id="countdownText">Автоматический переход через <b id="countdownNum">8</b> сек.</p>
+    <p class="countdown" id="countdownText">Автоматический переход через <b id="countdownNum">15</b> сек.</p>
   </div>
 </div>
 
 <script>
-  // Автоматический редирект через 8 секунд — но не мешаем, если человек
+  // Автоматический редирект через 15 сек  — но не мешаем, если человек
   // уже сам нажал кнопку или ушёл со страницы.
-  let n = 8;
+  let n = 15;
   const numEl = document.getElementById('countdownNum');
   const textEl = document.getElementById('countdownText');
   const timer = setInterval(() => {
